@@ -210,7 +210,7 @@ while True:
                 locking = False
                 check_and_clear_lines(board)
 
-        screen.fill(gray)
+        screen.fill(blue)
         draw_board(board, board_surface)
         draw_Tetrimino(active_Tetrimino.x, active_Tetrimino.y, peices[active_Tetrimino.type][active_Tetrimino.rotation],
         board_surface)
