@@ -2,17 +2,16 @@ def fibonacci():
 
     numnum = int(input('How long do you want? '))
     numprinted = 0
-    tempnumddd = 0
+    tempnum = 0
     num = 1
 
-
-    while int(numnum) > numprinted:
+    while numnum > numprinted:
         print(num)
         numprinted += 1
-
-
-
-        tempnumddd = numnum
-        numnum += tempnumddd
+        print(f"Num Printed: {numprinted}")
+        tempnum = num
+        print(f"TempNum: {tempnum}")
+        num += tempnum
+        print(f"Num: {num}")
 
 fibonacci()
