@@ -1,5 +1,5 @@
-height = input("Enter your height(meters): ")
-weight = input("Enter your weight(kg): ")
+height = int(input("Enter your height(meters): "))
+weight = int(input("Enter your weight(kg): "))
 
 square_height = height * height
 bmi = square_height/weight
