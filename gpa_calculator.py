@@ -5,11 +5,11 @@ gpa = 0.0
 
 
 def find_grade(grade, type, add, gpa):
-    if type == 's':
+    if type.upper() == 'S':
         pass
-    elif type == 'h':
+    elif type.upper() == 'H':
         add = 0.5
-    elif type == 'AP':
+    elif type.upper() == 'AP':
         add = 1.0
     else:
         print('Invalid')
@@ -43,7 +43,7 @@ def find_grade(grade, type, add, gpa):
 
 thisorthat = input(
     'Do you want to [a]verage 4-scale GPA or [c]alculate GPA from a letter grade? ')
-if thisorthat == "a":
+if thisorthat.lower() == "a":
     grades = input(
         'Enter your GPAs(4.0, 3.7, 2.3)(seperated by comma and space): ')
     grades = grades.split(",")
@@ -58,7 +58,7 @@ if thisorthat == "a":
     totalnums = len(nums)
     print(f"Your GPA is: {totalforavg/totalnums}")
 
-elif thisorthat == "c":
+elif thisorthat.lower() == "c":
     lettergrade = input("What is your letter grade(A+, A, ..., D+, D, E, F)? ")
     type = input('Are you in a [s]tandard, [h]onors, or [AP] class? ')
     grade = find_grade(lettergrade, type, add, gpa)
