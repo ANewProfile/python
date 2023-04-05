@@ -113,31 +113,70 @@ def loc_to_position(loc):
     return ord(loc[0])-ord('a'), int(loc[1])-1
 
 
-def get_color(loc, board):
-    color = None
-    if (n := board.piece_at(loc)) in [p for p in pieces if p[0].islower()]:
-        color = False
-    elif n in [p for p in pieces if p[0].isupper()]:
-        color = True
-
-    return color
-
-
-pieces = ['p1', 'P1', 'p2', 'P2', 'p3', 'P3', 'p4', 'P4', 'p5', 'P5', 'p6', 'P6', 'p7', 'P7', 'p8',
-          'P8', 'q', 'Q', 'k', 'K', 'b1', 'B1', 'b2', 'B2', 'k1', 'K1', 'k2', 'K2', 'r1', 'R1', 'r2', 'R2']
+def position_to_loc(pos):
+    return "".join([chr(ord('a') + pos[0]), str(pos[1]+1)])
 
 
 class Board(object):
     def __init__(self):
         self.positions = [[None for i in range(8)] for j in range(8)]
+        # set board
+
+        # white first rank
+        self.positions[0][0] = 'r1'
+        self.positions[1][0] = 'k1'
+        self.positions[2][0] = 'b1'
+        self.positions[3][0] = 'q'
+        self.positions[4][0] = 'k'
+        self.positions[5][0] = 'b2'
+        self.positions[6][0] = 'k2'
+        self.positions[7][0] = 'r2'
+
+        # white second rank
+        self.positions[0][1] = 'p1'
+        self.positions[1][1] = 'p2'
+        self.positions[2][1] = 'p3'
+        self.positions[3][1] = 'p4'
+        self.positions[4][1] = 'p5'
+        self.positions[5][1] = 'p6'
+        self.positions[6][1] = 'p7'
+        self.positions[7][1] = 'p8'
+
+        # black first rank
+        self.positions[0][0] = 'R1'
+        self.positions[1][0] = 'K1'
+        self.positions[2][0] = 'B1'
+        self.positions[3][0] = 'Q'
+        self.positions[4][0] = 'K'
+        self.positions[5][0] = 'B2'
+        self.positions[6][0] = 'K2'
+        self.positions[7][0] = 'R2'
+
+        # black second rank
+        self.positions[0][1] = 'P1'
+        self.positions[1][1] = 'P2'
+        self.positions[2][1] = 'P3'
+        self.positions[3][1] = 'P4'
+        self.positions[4][1] = 'P5'
+        self.positions[5][1] = 'P6'
+        self.positions[6][1] = 'P7'
+        self.positions[7][1] = 'P8'
+
+    def is_white(self, loc):
+        n = self.piece_at(loc)
+        if n is None:
+            return None
+        return n[0].islower()
 
     def piece_at(self, loc):
         pos = loc_to_position(loc)
         return self.positions[pos[0]][pos[1]]
 
-    def move(self, piece, cur_pos):
-
+    def move(self, loc):
+        piece = self.piece_at(loc)
+        cur_pos = loc_to_position(loc)
         new_positions = []
+        print(f'Piece is {piece} and is located at {position_to_loc(cur_pos)}')
 
 # bishop
         if piece in ('b1', 'b2', 'B1', 'B2'):
@@ -151,10 +190,10 @@ class Board(object):
 # pawn
         if piece in ("p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "P1", 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8'):
             new_positions.append([cur_pos[0], cur_pos[1]+1])
-            if cur_pos[1] == 2 or cur_pos[1] == 7:
+            if cur_pos[1] == 1 or cur_pos[1] == 6:
                 new_positions.append([cur_pos[0], cur_pos[1]+2])
-            if (n := get_color([cur_pos[0]+1, cur_pos[1]+1], self)):
-                if (y := get_color(cur_pos, self)):
+            if (n := self.is_white(position_to_loc([cur_pos[0]+1, cur_pos[1]+1]))):
+                if (y := self.is_white(loc)):
                     pass
                 else:
                     new_positions.append([cur_pos[0]+1, cur_pos[1]+1])
@@ -166,8 +205,8 @@ class Board(object):
             else:
                 pass
 
-            if (n := get_color([cur_pos[0]-1, cur_pos[1]+1], self)):
-                if (y := get_color(cur_pos, self)):
+            if (n := self.is_white(position_to_loc([cur_pos[0]-1, cur_pos[1]+1]))):
+                if (y := self.is_white(loc, self)):
                     pass
                 else:
                     new_positions.append([cur_pos[0]-1, cur_pos[1]+1])
@@ -226,12 +265,13 @@ class Board(object):
             new_positions.append([cur_pos[0]-2, cur_pos[1]+1])
             new_positions.append([cur_pos[0]-1, cur_pos[1]+2])
 
-        new_positions = [p for p in new_positions if p[0]
-                         > 0 and p[1] > 0 and p[0] < 9 and p[1] < 9]
+        new_positions = [position_to_loc(p) for p in new_positions
+                         if p[0] >= 0 and p[1] >= 0 and p[0] < 8 and p[1] < 8]
 
         return new_positions
 
 
 board = Board()
-new_locations = board.move('p1', 'a2')
+new_locations = board.move(
+    input("What square would you like to check moves for? "))
 print(new_locations)
