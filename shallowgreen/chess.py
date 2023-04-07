@@ -143,42 +143,41 @@ class Board(object):
         self.positions[7][1] = 'p8'
 
         # black first rank
-        self.positions[0][0] = 'R1'
-        self.positions[1][0] = 'K1'
-        self.positions[2][0] = 'B1'
-        self.positions[3][0] = 'Q'
-        self.positions[4][0] = 'K'
-        self.positions[5][0] = 'B2'
-        self.positions[6][0] = 'K2'
-        self.positions[7][0] = 'R2'
+        self.positions[7][7] = 'R1'
+        self.positions[6][7] = 'K1'
+        self.positions[5][7] = 'B1'
+        self.positions[4][7] = 'Q'
+        self.positions[3][7] = 'K'
+        self.positions[2][7] = 'B2'
+        self.positions[1][7] = 'K2'
+        self.positions[0][7] = 'R2'
 
         # black second rank
-        self.positions[0][1] = 'P1'
-        self.positions[1][1] = 'P2'
-        self.positions[2][1] = 'P3'
-        self.positions[3][1] = 'P4'
-        self.positions[4][1] = 'P5'
-        self.positions[5][1] = 'P6'
-        self.positions[6][1] = 'P7'
-        self.positions[7][1] = 'P8'
+        self.positions[7][6] = 'P1'
+        self.positions[6][6] = 'P2'
+        self.positions[5][6] = 'P3'
+        self.positions[4][6] = 'P4'
+        self.positions[3][6] = 'P5'
+        self.positions[2][6] = 'P6'
+        self.positions[1][6] = 'P7'
+        self.positions[0][6] = 'P8'
 
     def is_white(self, loc):
         n = self.piece_at(loc)
-        if n is None:
-            return None
-        return n[0].islower()
+        return n[0].islower() if n is not None else None
 
     def piece_at(self, loc):
         pos = loc_to_position(loc)
         return self.positions[pos[0]][pos[1]]
 
-    def move(self, loc):
+    def possible_moves(self, loc):
         piece = self.piece_at(loc)
         cur_pos = loc_to_position(loc)
         new_positions = []
+        boards = []
         print(f'Piece is {piece} and is located at {position_to_loc(cur_pos)}')
 
-# bishop
+        # bishop
         if piece in ('b1', 'b2', 'B1', 'B2'):
 
             for i in range(1, 8):
@@ -187,7 +186,7 @@ class Board(object):
                 new_positions.append([cur_pos[0]+i, cur_pos[1]-i])
                 new_positions.append([cur_pos[0]+i, cur_pos[1]+i])
 
-# pawn
+        # pawn
         if piece in ("p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "P1", 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8'):
             new_positions.append([cur_pos[0], cur_pos[1]+1])
             if cur_pos[1] == 1 or cur_pos[1] == 6:
@@ -218,7 +217,7 @@ class Board(object):
             else:
                 pass
 
-# queen
+        # queen
         if piece in ('q', 'Q'):
 
             for i in range(1, 8):
@@ -231,7 +230,7 @@ class Board(object):
                 new_positions.append([cur_pos[0]+i, cur_pos[1]])
                 new_positions.append([cur_pos[0]-i, cur_pos[1]])
 
-# king
+        # king
         if piece in ('k', 'K'):
 
             for i in range(1, 8):
@@ -244,7 +243,7 @@ class Board(object):
                 new_positions.append([cur_pos[0]+1, cur_pos[1]])
                 new_positions.append([cur_pos[0]-1, cur_pos[1]])
 
-# rook
+        # rook
         if piece in ('q', 'Q'):
 
             for i in range(1, 8):
@@ -253,7 +252,7 @@ class Board(object):
                 new_positions.append([cur_pos[0]+i, cur_pos[1]])
                 new_positions.append([cur_pos[0]-i, cur_pos[1]])
 
-# knight
+        # knight
         if piece in ('k1', 'K1', 'k2', 'K2'):
 
             new_positions.append([cur_pos[0]+2, cur_pos[1]+1])
@@ -265,13 +264,23 @@ class Board(object):
             new_positions.append([cur_pos[0]-2, cur_pos[1]+1])
             new_positions.append([cur_pos[0]-1, cur_pos[1]+2])
 
-        new_positions = [position_to_loc(p) for p in new_positions
+        new_positions = [p for p in new_positions
                          if p[0] >= 0 and p[1] >= 0 and p[0] < 8 and p[1] < 8]
+        new_locs = [position_to_loc(p) for p in new_positions]
 
-        return new_positions
+        # print("check for if new loc is same color as current loc", new_locs)
+        # for new_loc in list(new_locs):
+        #     print("piece at new loc:", new_loc, self.piece_at(new_loc))
+        #     if self.piece_at(new_loc) is not None:
+        #         if self.is_white(new_loc) == self.is_white(loc):
+        #             new_locs.remove(new_loc)
+
+        new_locs = [new_loc for new_loc in new_locs if
+                    self.piece_at(new_loc) is None or self.is_white(new_loc) != self.is_white(loc)]
+
+        print("returning", new_locs)
+        return new_locs
 
 
 board = Board()
-new_locations = board.move(
-    input("What square would you like to check moves for? "))
-print(new_locations)
+print(board.possible_moves('c1'))
