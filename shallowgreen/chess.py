@@ -277,8 +277,6 @@ class Board(object):
 
         new_locs = [new_loc for new_loc in new_locs if
                     self.piece_at(new_loc) is None or self.is_white(new_loc) != self.is_white(loc)]
-
-        print("returning", new_locs)
         return new_locs
 
 
