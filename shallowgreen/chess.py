@@ -118,57 +118,64 @@ def position_to_loc(pos):
 
 
 class Board(object):
+    def piece_at(self, loc):
+        pos = loc_to_position(loc)
+        return self.positions[pos[0]][pos[1]]
+
+    def set_piece_at(self, piece, loc):
+        pos = loc_to_position(loc)
+        self.positions[pos[0]][pos[1]] = piece
+
+    def move_piece(self, old_loc, new_loc):
+        piece = piece_at(old_loc)
+        new_board = Board()
+        new_board.positions = self.positions.copy()
+        new_board.set_piece_at(piece, new_loc)
+        new_board.set_piece_at(None, old_loc)
+        return new_board
+
     def __init__(self):
         self.positions = [[None for i in range(8)] for j in range(8)]
-        # set board
 
-        # white first rank
-        self.positions[0][0] = 'r1'
-        self.positions[1][0] = 'k1'
-        self.positions[2][0] = 'b1'
-        self.positions[3][0] = 'q'
-        self.positions[4][0] = 'k'
-        self.positions[5][0] = 'b2'
-        self.positions[6][0] = 'k2'
-        self.positions[7][0] = 'r2'
+        # set board, initial position for white pieces
+        self.set_piece_at("r1", "a1")
+        self.set_piece_at("k1", "b1")
+        self.set_piece_at("b1", "c1")
+        self.set_piece_at("q",  "d1")
+        self.set_piece_at("k",  "e1")
+        self.set_piece_at("b2", "f1")
+        self.set_piece_at("k2", "g1")
+        self.set_piece_at("r2", "h1")
+        self.set_piece_at("p1", "a2")
+        self.set_piece_at("p2", "b2")
+        self.set_piece_at("p3", "c2")
+        self.set_piece_at("p4", "d2")
+        self.set_piece_at("p5", "e2")
+        self.set_piece_at("p6", "f2")
+        self.set_piece_at("p7", "g2")
+        self.set_piece_at("p8", "h2")
 
-        # white second rank
-        self.positions[0][1] = 'p1'
-        self.positions[1][1] = 'p2'
-        self.positions[2][1] = 'p3'
-        self.positions[3][1] = 'p4'
-        self.positions[4][1] = 'p5'
-        self.positions[5][1] = 'p6'
-        self.positions[6][1] = 'p7'
-        self.positions[7][1] = 'p8'
-
-        # black first rank
-        self.positions[7][7] = 'R1'
-        self.positions[6][7] = 'K1'
-        self.positions[5][7] = 'B1'
-        self.positions[4][7] = 'Q'
-        self.positions[3][7] = 'K'
-        self.positions[2][7] = 'B2'
-        self.positions[1][7] = 'K2'
-        self.positions[0][7] = 'R2'
-
-        # black second rank
-        self.positions[7][6] = 'P1'
-        self.positions[6][6] = 'P2'
-        self.positions[5][6] = 'P3'
-        self.positions[4][6] = 'P4'
-        self.positions[3][6] = 'P5'
-        self.positions[2][6] = 'P6'
-        self.positions[1][6] = 'P7'
-        self.positions[0][6] = 'P8'
+        # set board, initial position for black pieces
+        self.set_piece_at("R1", "a8")
+        self.set_piece_at("K1", "b8")
+        self.set_piece_at("B1", "c8")
+        self.set_piece_at("Q",  "d8")
+        self.set_piece_at("K",  "e8")
+        self.set_piece_at("B2", "f8")
+        self.set_piece_at("K2", "g8")
+        self.set_piece_at("R2", "h8")
+        self.set_piece_at("P1", "a7")
+        self.set_piece_at("P2", "b7")
+        self.set_piece_at("P3", "c7")
+        self.set_piece_at("P4", "d7")
+        self.set_piece_at("P5", "e7")
+        self.set_piece_at("P6", "f7")
+        self.set_piece_at("P7", "g7")
+        self.set_piece_at("P8", "h7")
 
     def is_white(self, loc):
         n = self.piece_at(loc)
         return n[0].islower() if n is not None else None
-
-    def piece_at(self, loc):
-        pos = loc_to_position(loc)
-        return self.positions[pos[0]][pos[1]]
 
     def possible_moves(self, loc):
         piece = self.piece_at(loc)
@@ -279,6 +286,22 @@ class Board(object):
                     self.piece_at(new_loc) is None or self.is_white(new_loc) != self.is_white(loc)]
         return new_locs
 
+    def _set_piece_at(self, old_loc, new_loc):
+        # set the piece at the old loc to a new loc
+        old_pos = loc_to_position(old_loc)
+        new_pos = loc_to_position(new_loc)
+        real_old_pos = old_pos[::-1]
+        real_new_pos = new_pos[::-1]
+        self.positions[...][...]
+
+
+        
+    
+    def move_piece(self, old_loc, new_loc):
+        # creates a new board with the piece from the old loc to a new loc
+        new_board = Board()
+        new_board.positions = self.positions.copy()
+        new_board._set_piece_at(old_loc, new_loc)
 
 board = Board()
 print(board.possible_moves('c1'))
