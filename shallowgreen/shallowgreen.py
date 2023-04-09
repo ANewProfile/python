@@ -13,17 +13,26 @@ while True:
 
     print(board)
     q = [input("Which piece would you like to move? "), input("Where would you like to move it? ")]
+ 
     if true_move == 'white':
         # white move
-        if board.is_white(q[0]) is False:
+        if piece_is_white(board.piece_at(q[0])) is False:
             print("Invalid.")
         else:
-            board = board.move_piece(q[0], q[1])
-            move += 1
+            try:
+                board = board.move_piece(q[0], q[1])
+                move += 1
+            except Exception as e:
+                print(e)
+ 
     else:
         # black move
-        if board.is_white(q[0]) is True:
+        if piece_is_white(board.piece_at(q[0])) is True:
             print("Invalid.")
         else:
-            board = board.move_piece(q[0], q[1])
-            move += 1
+            try:
+                board = board.move_piece(q[0], q[1])
+                move += 1
+            except Exception as e:
+                print(e)
+ 

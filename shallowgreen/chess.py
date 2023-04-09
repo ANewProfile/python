@@ -25,12 +25,6 @@ class LocationHelper(object):
             return [None, None]
 
 
-class Piece(object):
-
-    def __init__(self, piece):
-        self.piece = piece
-
-
 def piece_is_white(piece):
     return piece[0].islower()
 
@@ -56,6 +50,10 @@ class Board(object):
 
     def __init__(self):
         self.positions = [[None for i in range(8)] for j in range(8)]
+        self.white_can_castle_right = True
+        self.black_can_castle_right = True
+        self.white_can_castle_left = True
+        self.black_can_castle_left = True
 
         # set board, initial position for white pieces
         self.set_piece_at("r1", "a1")
@@ -254,6 +252,36 @@ class Board(object):
         new_locs = [new_loc for new_loc in new_locs if
                     self.piece_at(new_loc) is None or self.is_white(new_loc) != self.is_white(loc)]
         return new_locs
+    
+    def castle(self, piece, loc):
+        col_row = loc_to_col_row(loc)
+        
+        i = [0, 0, 0, 0]
+        if self.white_can_castle_left:
+            i[1] = -2
+        if self.white_can_castle_right:
+            i[0] = 2
+        if self.black_can_castle_left:
+            i[3] = -2
+        if self.black_can_castle_right:
+            i[2] = 2
+        
+        if piece_is_white(piece) is True:
+            i[3] = 0
+            i[2] = 0
+        else:
+            i[1] = 0
+            i[0] = 0
+
+        new_positions = []
+        for n in i:
+            if n != 0:
+                new_positions.append([col_row[0]+n, col_row[1]])
+
+        new_locs = [col_row_to_loc(p) for p in new_positions]
+        new_locs = [new_loc for new_loc in new_locs if
+                    self.piece_at(new_loc) is None or self.is_white(new_loc) != self.is_white(loc)]
+        return new_locs
 
     def possible_moves(self, loc):
         piece = self.piece_at(loc)
@@ -276,6 +304,7 @@ class Board(object):
         if piece in ('k', 'K'):
             new_locations.extend(self.diagonal_moves(piece, loc, 2))
             new_locations.extend(self.cross_moves(piece, loc, 2))
+            new_locations.extend(self.castle(piece, loc))
 
         # rook
         if piece in ('r1', 'r2', 'R1', 'R2'):
@@ -288,14 +317,61 @@ class Board(object):
         return new_locations
 
     def move_piece(self, old_loc, new_loc):
-
         # creates a new board with the piece from the old loc to a new loc
         new_board = Board()
         new_board.positions = self.positions
-
+        difference = 0
+        difflist = []
+        piece = self.piece_at(old_loc)
+        col_row_old = loc_to_col_row(old_loc)
+        col_row_new = loc_to_col_row(new_loc)
+        rook = ''
+        rook_new = ''
+        rook_old = ''
         if new_loc in self.possible_moves(old_loc):
             new_board.set_piece_at(self.piece_at(old_loc), new_loc)
             new_board.set_piece_at(None, old_loc)
+            if piece == "r1":
+                self.white_can_castle_left = False
+            elif piece == "r2":
+                self.white_can_castle_right = False
+            if piece == "R1":
+                self.black_can_castle_left = False
+            if piece == "R2":
+                self.black_can_castle_right = False
+
+            if piece in ['k', 'K']:
+                if piece == "k":
+                    self.white_can_castle_left = False
+                    self.white_can_castle_right = False
+                if piece == "K":
+                    self.black_can_castle_left = False
+                    self.black_can_castle_right = False
+
+                cols_moved = col_row_new[0]-col_row_old[0]
+                if cols_moved == 2:
+                    if piece.islower():
+                        rook = 'r2'
+                        rook_old = 'h1'
+                        rook_new = 'f1'
+                    else:
+                        rook = 'R2'
+                        rook_old = 'h8'
+                        rook_new = 'f8'
+
+                elif cols_moved == -2:
+                    if piece.islower():
+                        rook = 'r1'
+                        rook_old = 'a1'
+                        rook_new = 'd1'
+                    else:
+                        rook = 'R1'
+                        rook_old = 'a8'
+                        rook_new = 'd8'
+                    
+                if abs(cols_moved) > 1:
+                    self.set_piece_at(rook, rook_new)
+                    self.set_piece_at(None, rook_old)
             return new_board
         else:
-            return "Invalid"
+            raise Exception("Invalid")
