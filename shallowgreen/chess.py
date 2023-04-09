@@ -30,11 +30,13 @@ class Piece(object):
     def __init__(self, piece):
         self.piece = piece
 
-    def is_white(self):
-        return self.piece[0].islower()
 
-    def color(self):
-        return "white" if self.is_white() else "black"
+def piece_is_white(piece):
+    return piece[0].islower()
+
+
+def piece_color(piece):
+    return "white" if piece_is_white(piece) else "black"
 
 
 class Board(object):
@@ -49,51 +51,51 @@ class Board(object):
 
     def __str__(self):
         return "\n".join(
-            [" | ".join(["  " if p is None else "%2s" % (p.piece) for p in sub_array]) for sub_array in self.positions]
+            [" | ".join(["  " if p is None else "%2s" % (p) for p in sub_array]) for sub_array in self.positions]
         )
 
     def __init__(self):
         self.positions = [[None for i in range(8)] for j in range(8)]
 
         # set board, initial position for white pieces
-        self.set_piece_at(Piece("r1"), "a1")
-        self.set_piece_at(Piece("k1"), "b1")
-        self.set_piece_at(Piece("b1"), "c1")
-        self.set_piece_at(Piece("q"),  "d1")
-        self.set_piece_at(Piece("k"),  "e1")
-        self.set_piece_at(Piece("b2"), "f1")
-        self.set_piece_at(Piece("k2"), "g1")
-        self.set_piece_at(Piece("r2"), "h1")
-        self.set_piece_at(Piece("p1"), "a2")
-        self.set_piece_at(Piece("p2"), "b2")
-        self.set_piece_at(Piece("p3"), "c2")
-        self.set_piece_at(Piece("p4"), "d2")
-        self.set_piece_at(Piece("p5"), "e2")
-        self.set_piece_at(Piece("p6"), "f2")
-        self.set_piece_at(Piece("p7"), "g2")
-        self.set_piece_at(Piece("p8"), "h2")
+        self.set_piece_at("r1", "a1")
+        self.set_piece_at("k1", "b1")
+        self.set_piece_at("b1", "c1")
+        self.set_piece_at("q",  "d1")
+        self.set_piece_at("k",  "e1")
+        self.set_piece_at("b2", "f1")
+        self.set_piece_at("k2", "g1")
+        self.set_piece_at("r2", "h1")
+        self.set_piece_at("p1", "a2")
+        self.set_piece_at("p2", "b2")
+        self.set_piece_at("p3", "c2")
+        self.set_piece_at("p4", "d2")
+        self.set_piece_at("p5", "e2")
+        self.set_piece_at("p6", "f2")
+        self.set_piece_at("p7", "g2")
+        self.set_piece_at("p8", "h2")
 
         # set board, initial position for black pieces
-        self.set_piece_at(Piece("R1"), "a8")
-        self.set_piece_at(Piece("K1"), "b8")
-        self.set_piece_at(Piece("B1"), "c8")
-        self.set_piece_at(Piece("Q"),  "d8")
-        self.set_piece_at(Piece("K"),  "e8")
-        self.set_piece_at(Piece("B2"), "f8")
-        self.set_piece_at(Piece("K2"), "g8")
-        self.set_piece_at(Piece("R2"), "h8")
-        self.set_piece_at(Piece("P1"), "a7")
-        self.set_piece_at(Piece("P2"), "b7")
-        self.set_piece_at(Piece("P3"), "c7")
-        self.set_piece_at(Piece("P4"), "d7")
-        self.set_piece_at(Piece("P5"), "e7")
-        self.set_piece_at(Piece("P6"), "f7")
-        self.set_piece_at(Piece("P7"), "g7")
-        self.set_piece_at(Piece("P8"), "h7")
+        self.set_piece_at("R1", "a8")
+        self.set_piece_at("K1", "b8")
+        self.set_piece_at("B1", "c8")
+        self.set_piece_at("Q",  "d8")
+        self.set_piece_at("K",  "e8")
+        self.set_piece_at("B2", "f8")
+        self.set_piece_at("K2", "g8")
+        self.set_piece_at("R2", "h8")
+        self.set_piece_at("P1", "a7")
+        self.set_piece_at("P2", "b7")
+        self.set_piece_at("P3", "c7")
+        self.set_piece_at("P4", "d7")
+        self.set_piece_at("P5", "e7")
+        self.set_piece_at("P6", "f7")
+        self.set_piece_at("P7", "g7")
+        self.set_piece_at("P8", "h7")
 
     def is_white(self, loc):
         n = self.piece_at(loc)
-        return n.is_white() if n is not None else None
+        return piece_is_white(n) if n is not None else None
 
     def diagonal_moves(self, piece, loc, total_range):
 
@@ -105,7 +107,7 @@ class Board(object):
             if cont[0] is True:
                 new_loc, new_loc_piece = loc_helper.at(-i, -i, self)
                 if new_loc:  # location is valid
-                    if new_loc_piece is None or new_loc_piece.color() != piece.color():  # if empty or opponent
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):  # if empty or opponent
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         cont[0] = False
@@ -113,7 +115,7 @@ class Board(object):
             if cont[1] is True:
                 new_loc, new_loc_piece = loc_helper.at(-i, +i, self)
                 if new_loc:  # location is valid
-                    if new_loc_piece is None or new_loc_piece.color() != piece.color():  # if empty or opponent
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):  # if empty or opponent
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         cont[1] = False
@@ -121,7 +123,7 @@ class Board(object):
             if cont[2] is True:
                 new_loc, new_loc_piece = loc_helper.at(+i, -i, self)
                 if new_loc:  # location is valid
-                    if new_loc_piece is None or new_loc_piece.color() != piece.color():  # if empty or opponent
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):  # if empty or opponent
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         cont[2] = False
@@ -129,7 +131,7 @@ class Board(object):
             if cont[3] is True:
                 new_loc, new_loc_piece = loc_helper.at(+i, +i, self)
                 if new_loc:  # location is valid
-                    if new_loc_piece is None or new_loc_piece.color() != piece.color():  # if empty or opponent
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):  # if empty or opponent
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         cont[3] = False
@@ -146,7 +148,7 @@ class Board(object):
             if cont[0] is True:
                 new_loc, new_loc_piece = loc_helper.at(0, -i, self)
                 if new_loc:  # location is valid
-                    if new_loc_piece is None or new_loc_piece.color() != piece.color():  # if empty or opponent
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):  # if empty or opponent
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         cont[0] = False
@@ -154,7 +156,7 @@ class Board(object):
             if cont[1] is True:
                 new_loc, new_loc_piece = loc_helper.at(0, +i, self)
                 if new_loc:  # location is valid
-                    if new_loc_piece is None or new_loc_piece.color() != piece.color():  # if empty or opponent
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):  # if empty or opponent
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         cont[1] = False
@@ -162,7 +164,7 @@ class Board(object):
             if cont[2] is True:
                 new_loc, new_loc_piece = loc_helper.at(+i, 0, self)
                 if new_loc:  # location is valid
-                    if new_loc_piece is None or new_loc_piece.color() != piece.color():  # if empty or opponent
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):  # if empty or opponent
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         cont[2] = False
@@ -170,7 +172,7 @@ class Board(object):
             if cont[3] is True:
                 new_loc, new_loc_piece = loc_helper.at(-i, 0, self)
                 if new_loc:  # location is valid
-                    if new_loc_piece is None or new_loc_piece.color() != piece.color():  # if empty or opponent
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):  # if empty or opponent
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         cont[3] = False
@@ -258,29 +260,29 @@ class Board(object):
         new_locations = []
 
         # bishop
-        if piece.piece in ('b1', 'b2', 'B1', 'B2'):
+        if piece in ('b1', 'b2', 'B1', 'B2'):
             new_locations.extend(self.diagonal_moves(piece, loc, 8))
 
         # pawn
-        if piece.piece in ("p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "P1", 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8'):
+        if piece in ("p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "P1", 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8'):
             new_locations.extend(self.pawn_moves(piece, loc))
 
         # queen
-        if piece.piece in ('q', 'Q'):
+        if piece in ('q', 'Q'):
             new_locations.extend(self.diagonal_moves(piece, loc, 8))
             new_locations.extend(self.cross_moves(piece, loc, 8))
 
         # king
-        if piece.piece in ('k', 'K'):
+        if piece in ('k', 'K'):
             new_locations.extend(self.diagonal_moves(piece, loc, 2))
             new_locations.extend(self.cross_moves(piece, loc, 2))
 
         # rook
-        if piece.piece in ('r1', 'r2', 'R1', 'R2'):
+        if piece in ('r1', 'r2', 'R1', 'R2'):
             new_locations.extend(self.cross_moves(piece, loc, 8))
 
         # knight
-        if piece.piece in ('k1', 'K1', 'k2', 'K2'):
+        if piece in ('k1', 'K1', 'k2', 'K2'):
             new_locations.extend(self.knight_moves(piece, loc))
 
         return new_locations
