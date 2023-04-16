@@ -78,12 +78,11 @@ class Board(object):
         self.piece_locations = None
 
     def controlling_side(self, loc):
-        piece = self.piece_at(loc)
         pieces_guarding = 0
         iswhite = piece_is_white(loc)
-        for pos in self.pieces():
-            if loc in self.possible_moves(self.location_of(pos)):
-                if piece_is_white(pos) is not iswhite:
+        for piece in self.pieces():
+            if loc in self.possible_moves(self.location_of(piece)):
+                if piece_is_white(piece) is not iswhite:
                     pieces_guarding -= 1
                 else:
                     pieces_guarding += 1
@@ -203,6 +202,7 @@ class Board(object):
         """
         Returns amount of controlling space and risk for each color, positive for white, negative for black
         """
+
         space = 0
         risked = 0
         for piece in self.pieces():
@@ -212,17 +212,21 @@ class Board(object):
                 if controlling:
                     if piece_is_white(piece_loc) is False:
                         risked -= material(piece)
-                else:
+                elif controlling is False:
                     if piece_is_white(piece):
                         risked += material(piece)
             else:
                 if controlling:
                     space += 1
-                else:
+                elif controlling is False:
                     space -= 1
         return space, risked
 
     def specific_space(self, locs):
+        """
+        Returns same thing as get_space(), but instead of entire board, only calculates the space of specific locations
+        """
+
         space = 0
         risked = 0
         for square in locs:
@@ -232,18 +236,23 @@ class Board(object):
                 if controlling:
                     if piece_is_white(square) is False:
                         risked -= material(piece)
-                else:
+                elif controlling is False:
                     if piece_is_white(square):
                         risked += material(piece)
             else:
                 if controlling:
                     space += 1
-                else:
+                elif controlling is False:
                     space -= 1
         return space, risked
 
     def compute_score(self, material, safety, space, risk):
         score = 0.0
+        print(self)
+        print('material is', material)
+        print('safety is', safety)
+        print('space is', space)
+        print('risk is', risk)
         score += material * 0.8
         score += safety
         score += space * 0.95
