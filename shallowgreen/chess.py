@@ -6,14 +6,23 @@ def col_row_to_loc(pos):
     return "".join([chr(ord('a') + pos[0]), str(pos[1]+1)])
 
 
+pawns = ('p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8',
+         'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8')
+rooks = ('r1', 'r2', 'R1', 'R2')
+bishops = ('b1', 'b2', 'B1', 'B2')
+knights = ('k1', 'k2', 'K1', 'K2')
+queens = ('q', 'Q')
+kings = ('k', 'K')
+
+
 def material(piece):
-    if piece in ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8']:
+    if piece in pawns:
         return 1
-    elif piece in ['r1', 'r2', 'R1', 'R2']:
+    elif piece in rooks:
         return 5
-    elif piece in ['k1', 'k2', 'K1', 'K2', 'b1', 'b2', 'B1', 'B2']:
+    elif piece in (bishops or knights):
         return 3
-    elif piece in ['q', 'Q']:
+    elif piece in queens:
         return 9
     else:
         return 0
@@ -50,8 +59,8 @@ class Board(object):
 
     def find_locations(self):
         self.piece_locations = {}
-        for i, prow in enumerate(self.positions):
-            for j, piece in enumerate(prow):
+        for i, row in enumerate(self.positions):
+            for j, piece in enumerate(row):
                 if piece is not None:
                     row = 7 - i
                     col = j
@@ -96,8 +105,8 @@ class Board(object):
 
     def __str__(self):
         return "\n".join(
-            [" | ".join(["  " if p is None else "%2s" % (p)
-                        for p in sub_array]) for sub_array in self.positions]
+            [" | ".join(["  " if piece is None else "%2s" % (piece)
+                        for piece in sub_array]) for sub_array in self.positions]
         )
 
     def __init__(self):
@@ -145,8 +154,8 @@ class Board(object):
         self.set_piece_at("P8", "h7")
 
     def is_white(self, loc):
-        n = self.piece_at(loc)
-        return piece_is_white(n) if n is not None else None
+        piece = self.piece_at(loc)
+        return piece_is_white(piece) if piece is not None else None
 
     def get_material(self):
         cur_material = 0
@@ -179,11 +188,11 @@ class Board(object):
                                                                           black_king_pos[1]], [black_king_pos[0], black_king_pos[1]+1],
                              [black_king_pos[0]-1, black_king_pos[1]], [black_king_pos[0], black_king_pos[1]-1]]
 
-        locs_around_king_white = [col_row_to_loc(p) for p in around_king_white
-                                  if p[0] < 8 and p[0] > -1 and p[1] < 8 and p[1] >= 0]
+        locs_around_king_white = [col_row_to_loc(col_row) for col_row in around_king_white
+                                  if col_row[0] < 8 and col_row[0] > -1 and col_row[1] < 8 and col_row[1] >= 0]
 
-        locs_around_king_black = [col_row_to_loc(p) for p in around_king_black
-                                  if p[0] < 8 and p[0] >= 0 and p[1] < 8 and p[1] >= 0]
+        locs_around_king_black = [col_row_to_loc(col_row) for col_row in around_king_black
+                                  if col_row[0] < 8 and col_row[0] >= 0 and col_row[1] < 8 and col_row[1] >= 0]
 
         space_white = self.specific_space(locs_around_king_white)
         space_black = self.specific_space(locs_around_king_black)
@@ -271,7 +280,7 @@ class Board(object):
         best_score = None
         best_move = ''
         best_old_loc = ''
-        y = 0
+        cur_score = 0
         pieces = self.pieces()
 
         for piece in pieces:
@@ -279,11 +288,12 @@ class Board(object):
             if piece_is_white(piece) is is_white:
                 for move in self.possible_moves(old_location):
                     new_board = self.move_piece(old_location, move)
-                    y = new_board.score()
-                    print("scoring", old_location, "to", move, "score is", y)
-                    if (is_white is True and (best_score is None or y > best_score)) or \
-                            (is_white is False and (best_score is None or y < best_score)):
-                        best_score = y
+                    cur_score = new_board.score()
+                    print("scoring", old_location, "to",
+                          move, "score is", cur_score)
+                    if (is_white is True and (best_score is None or cur_score > best_score)) or \
+                            (is_white is False and (best_score is None or cur_score < best_score)):
+                        best_score = cur_score
                         best_old_loc = old_location
                         best_move = move
 
@@ -449,29 +459,29 @@ class Board(object):
     def castle(self, piece, loc):
         col_row = loc_to_col_row(loc)
 
-        i = [0, 0, 0, 0]
+        castle_vals = [0, 0, 0, 0]
         if self.white_can_castle_left:
-            i[1] = -2
+            castle_vals[1] = -2
         if self.white_can_castle_right:
-            i[0] = 2
+            castle_vals[0] = 2
         if self.black_can_castle_left:
-            i[3] = -2
+            castle_vals[3] = -2
         if self.black_can_castle_right:
-            i[2] = 2
+            castle_vals[2] = 2
 
         if piece_is_white(piece) is True:
-            i[3] = 0
-            i[2] = 0
+            castle_vals[3] = 0
+            castle_vals[2] = 0
         else:
-            i[1] = 0
-            i[0] = 0
+            castle_vals[1] = 0
+            castle_vals[0] = 0
 
         new_positions = []
-        for n in i:
+        for n in castle_vals:
             if n != 0:
                 new_positions.append([col_row[0]+n, col_row[1]])
 
-        new_locs = [col_row_to_loc(p) for p in new_positions]
+        new_locs = [col_row_to_loc(col_row) for col_row in new_positions]
         new_locs = [new_loc for new_loc in new_locs if
                     self.piece_at(new_loc) is None or self.is_white(new_loc) != self.is_white(loc)]
         return new_locs
@@ -481,30 +491,30 @@ class Board(object):
         new_locations = []
 
         # bishop
-        if piece in ('b1', 'b2', 'B1', 'B2'):
+        if piece in bishops:
             new_locations.extend(self.diagonal_moves(piece, loc, 8))
 
         # pawn
-        if piece in ("p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "P1", 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8'):
+        if piece in pawns:
             new_locations.extend(self.pawn_moves(piece, loc))
 
         # queen
-        if piece in ('q', 'Q'):
+        if piece in queens:
             new_locations.extend(self.diagonal_moves(piece, loc, 8))
             new_locations.extend(self.cross_moves(piece, loc, 8))
 
         # king
-        if piece in ('k', 'K'):
+        if piece in kings:
             new_locations.extend(self.diagonal_moves(piece, loc, 2))
             new_locations.extend(self.cross_moves(piece, loc, 2))
             new_locations.extend(self.castle(piece, loc))
 
         # rook
-        if piece in ('r1', 'r2', 'R1', 'R2'):
+        if piece in rooks:
             new_locations.extend(self.cross_moves(piece, loc, 8))
 
         # knight
-        if piece in ('k1', 'K1', 'k2', 'K2'):
+        if piece in knights:
             new_locations.extend(self.knight_moves(piece, loc))
 
         return new_locations
@@ -512,7 +522,8 @@ class Board(object):
     def move_piece(self, old_loc, new_loc):
         # creates a new board with the piece from the old loc to a new loc
         new_board = Board()
-        new_board.positions = [[y for y in x] for x in self.positions]
+        new_board.positions = [[piece for piece in sub_array]
+                               for sub_array in self.positions]
         piece = self.piece_at(old_loc)
         col_row_old = loc_to_col_row(old_loc)
         col_row_new = loc_to_col_row(new_loc)
