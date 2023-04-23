@@ -59,8 +59,8 @@ class Board(object):
 
     def find_locations(self):
         self.piece_locations = {}
-        for i, row in enumerate(self.positions):
-            for j, piece in enumerate(row):
+        for i, array in enumerate(self.positions):
+            for j, piece in enumerate(array):
                 if piece is not None:
                     row = 7 - i
                     col = j
@@ -172,8 +172,15 @@ class Board(object):
     def get_safety(self):
         safety = 0
 
-        white_king_loc = self.location_of('k')
-        black_king_loc = self.location_of('K')
+        try:
+            white_king_loc = self.location_of('k')
+        except Exception as e:
+            print(e)
+
+        try:
+            black_king_loc = self.location_of('K')
+        except Exception as e:
+            print(e)
 
         white_king_pos = loc_to_col_row(white_king_loc)
         black_king_pos = loc_to_col_row(black_king_loc)
@@ -455,6 +462,26 @@ class Board(object):
                 new_locations.append(new_loc)
 
         return new_locations
+
+    def in_check(self, is_white):
+        king_piece = "k" if is_white else "K"
+        king_loc = self.location_of(king_piece)
+        for piece in self.pieces():
+            if piece_is_white(piece) != is_white:
+                if king_loc in self.possible_moves(self.location_of(piece)):
+                    print("Check!")
+                    return True
+        return False
+
+    def check_mate(self, is_white):
+        for piece in self.pieces():
+            if piece_is_white(piece) == is_white:
+                piece_location = self.location_of(piece)
+                for new_location in self.possible_moves(piece_location):
+                    new_board = self.move_piece(piece_location, new_location)
+                    if not new_board.in_check(is_white):
+                        return False
+        return True
 
     def castle(self, piece, loc):
         col_row = loc_to_col_row(loc)
