@@ -47,15 +47,21 @@ class LocationHelper(object):
             return [None, None]
 
 
-def piece_is_white(piece):
-    return piece[0].islower()
-
-
 def piece_color(piece):
-    return "white" if piece_is_white(piece) else "black"
+    if piece == "" or piece is None:
+        return None
+    return Board.WHITE if piece.islower() else Board.BLACK
+
+def white_color_of(piece):
+    return piece.lower()
+
+def black_color_of(piece):
+    return piece.upper()
 
 
 class Board(object):
+    WHITE = "white"
+    BLACK = "black"
 
     def find_locations(self):
         self.piece_locations = {}
@@ -88,18 +94,16 @@ class Board(object):
 
     def controlling_side(self, loc):
         pieces_guarding = 0
-        iswhite = piece_is_white(loc)
         for piece in self.pieces():
             if loc in self.possible_moves(self.location_of(piece)):
-                if piece_is_white(piece) is not iswhite:
+                if piece_color(piece) == Board.BLACK:
                     pieces_guarding -= 1
                 else:
                     pieces_guarding += 1
-
         if pieces_guarding > 0:
-            return iswhite
+            return Board.WHITE
         elif pieces_guarding < 0:
-            return not iswhite
+            return Board.BLACK
         else:
             return None
 
@@ -153,35 +157,24 @@ class Board(object):
         self.set_piece_at("P7", "g7")
         self.set_piece_at("P8", "h7")
 
-    def is_white(self, loc):
+    def loc_piece_color(self, loc):
         piece = self.piece_at(loc)
-        return piece_is_white(piece) if piece is not None else None
+        return piece_color(piece)
 
     def get_material(self):
         cur_material = 0
-        for sub_array in self.positions:
-            for piece in sub_array:
-                if piece != None:
-                    if piece_is_white(piece):
-                        cur_material += material(piece)
-                    else:
-                        cur_material -= material(piece)
-
+        for piece in self.pieces():
+            if piece_color(piece) == Board.WHITE:
+                cur_material += material(piece)
+            else:
+                cur_material -= material(piece)
         return cur_material
 
     def get_safety(self):
         safety = 0
 
-        try:
-            white_king_loc = self.location_of('k')
-        except Exception as e:
-            print(e)
-
-        try:
-            black_king_loc = self.location_of('K')
-        except Exception as e:
-            print(e)
-
+        white_king_loc = self.location_of('k')
+        black_king_loc = self.location_of('K')
         white_king_pos = loc_to_col_row(white_king_loc)
         black_king_pos = loc_to_col_row(black_king_loc)
 
@@ -223,42 +216,41 @@ class Board(object):
         risked = 0
         for piece in self.pieces():
             piece_loc = self.location_of(piece)
+            piece_clr = piece_color(piece)
             controlling = self.controlling_side(piece_loc)
             if piece is not None:
-                if controlling:
-                    if piece_is_white(piece_loc) is False:
-                        risked -= material(piece)
-                elif controlling is False:
-                    if piece_is_white(piece):
-                        risked += material(piece)
+                if controlling == Board.WHITE and piece_clr == Board.BLACK:
+                    risked -= material(piece)
+                elif controlling == Board.BLACK and piece_clr == Board.WHITE:
+                    risked += material(piece)
             else:
-                if controlling:
+                if controlling == Board.WHITE:
                     space += 1
-                elif controlling is False:
+                elif controlling == Board.BLACK:
                     space -= 1
         return space, risked
 
     def specific_space(self, locs):
         """
-        Returns same thing as get_space(), but instead of entire board, only calculates the space of specific locations
+	Returns same thing as get_space(), but instead of entire board, only
+        calculates the space of specific locations
         """
 
         space = 0
         risked = 0
         for square in locs:
             piece = self.piece_at(square)
+            piece_clr = piece_color(piece)
             controlling = self.controlling_side(square)
             if piece is not None:
-                if controlling:
-                    if piece_is_white(square) is False:
-                        risked -= material(piece)
-                elif controlling is False:
-                    if piece_is_white(square):
-                        risked += material(piece)
+                if controlling == Board.WHITE and piece_clr == Board.BLACK:
+                    risked -= material(piece)
+                elif controlling == Board.BLACK and piece_clr == Board.WHITE:
+                    risked += material(piece)
             else:
-                if controlling:
+                if controlling == Board.WHITE:
                     space += 1
-                elif controlling is False:
+                elif controlling == Board.BLACK:
                     space -= 1
         return space, risked
 
@@ -283,7 +275,7 @@ class Board(object):
             self.get_space()[1]
         )
 
-    def computer_turn(self, is_white=False):
+    def computer_turn(self, color=False):
         best_score = None
         best_move = ''
         best_old_loc = ''
@@ -291,15 +283,16 @@ class Board(object):
         pieces = self.pieces()
 
         for piece in pieces:
+            piece_clr = piece_color(piece)
             old_location = self.location_of(piece)
-            if piece_is_white(piece) is is_white:
+            if piece_clr == color:
                 for move in self.possible_moves(old_location):
                     new_board = self.move_piece(old_location, move)
                     cur_score = new_board.score()
                     print("scoring", old_location, "to",
                           move, "score is", cur_score)
-                    if (is_white is True and (best_score is None or cur_score > best_score)) or \
-                            (is_white is False and (best_score is None or cur_score < best_score)):
+                    if (color == Board.WHITE and (best_score is None or cur_score > best_score)) or \
+                            (color == Board.BLACK and (best_score is None or cur_score < best_score)):
                         best_score = cur_score
                         best_old_loc = old_location
                         best_move = move
@@ -400,9 +393,9 @@ class Board(object):
         loc_helper = LocationHelper(loc)
         cur_col, cur_row = loc_to_col_row(loc)
         new_locations = []
-        is_white = self.is_white(loc)
+        piece_clr = self.loc_piece_color(loc)
 
-        if is_white:  # white moves
+        if piece_clr == Board.WHITE:  # white moves
             new_loc, new_loc_piece = loc_helper.at(0, 1, self)
             if new_loc is not None and new_loc_piece is None:
                 new_locations.append(new_loc)
@@ -412,11 +405,11 @@ class Board(object):
                     new_locations.append(new_loc)
             # take right!
             new_loc, new_loc_piece = loc_helper.at(+1, +1, self)
-            if new_loc is not None and new_loc_piece is not None and piece_is_white(new_loc_piece) is False:
+            if new_loc is not None and new_loc_piece is not None and piece_color(new_loc_piece) == Board.BLACK:
                 new_locations.append(new_loc)
             # take left!
             new_loc, new_loc_piece = loc_helper.at(-1, +1, self)
-            if new_loc is not None and new_loc_piece is not None and piece_is_white(new_loc_piece) is False:
+            if new_loc is not None and new_loc_piece is not None and piece_color(new_loc_piece) == Board.BLACK:
                 new_locations.append(new_loc)
 
         else:  # black moves
@@ -429,11 +422,11 @@ class Board(object):
                     new_locations.append(new_loc)
             # take right!
             new_loc, new_loc_piece = loc_helper.at(+1, -1, self)
-            if new_loc is not None and new_loc_piece is not None and piece_is_white(new_loc_piece):
+            if new_loc is not None and new_loc_piece is not None and piece_color(new_loc_piece) == Board.WHITE:
                 new_locations.append(new_loc)
             # take left!
             new_loc, new_loc_piece = loc_helper.at(-1, -1, self)
-            if new_loc is not None and new_loc_piece is not None and piece_is_white(new_loc_piece):
+            if new_loc is not None and new_loc_piece is not None and piece_color(new_loc_piece) == Board.WHITE:
                 new_locations.append(new_loc)
 
         return new_locations
@@ -463,23 +456,23 @@ class Board(object):
 
         return new_locations
 
-    def in_check(self, is_white):
-        king_piece = "k" if is_white else "K"
+    def in_check(self, color):
+        king_piece = white_color_of("k") if color == Board.WHITE else black_color_of("k")
         king_loc = self.location_of(king_piece)
         for piece in self.pieces():
-            if piece_is_white(piece) != is_white:
+            if piece_color(piece) != color:
                 if king_loc in self.possible_moves(self.location_of(piece)):
-                    print("Check!")
+                    # print("Check!")
                     return True
         return False
 
-    def check_mate(self, is_white):
+    def check_mate(self, color):
         for piece in self.pieces():
-            if piece_is_white(piece) == is_white:
+            if piece_color(piece) == color:
                 piece_location = self.location_of(piece)
                 for new_location in self.possible_moves(piece_location):
                     new_board = self.move_piece(piece_location, new_location)
-                    if not new_board.in_check(is_white):
+                    if not new_board.in_check(color):
                         return False
         return True
 
@@ -496,7 +489,7 @@ class Board(object):
         if self.black_can_castle_right:
             castle_vals[2] = 2
 
-        if piece_is_white(piece) is True:
+        if piece_color(piece) == Board.WHITE:
             castle_vals[3] = 0
             castle_vals[2] = 0
         else:
@@ -510,7 +503,7 @@ class Board(object):
 
         new_locs = [col_row_to_loc(col_row) for col_row in new_positions]
         new_locs = [new_loc for new_loc in new_locs if
-                    self.piece_at(new_loc) is None or self.is_white(new_loc) != self.is_white(loc)]
+                    self.piece_at(new_loc) is None or self.loc_piece_color(new_loc) != self.loc_piece_color(loc)]
         return new_locs
 
     def possible_moves(self, loc):
