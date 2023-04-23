@@ -52,8 +52,10 @@ def piece_color(piece):
         return None
     return Board.WHITE if piece.islower() else Board.BLACK
 
+
 def white_color_of(piece):
     return piece.lower()
+
 
 def black_color_of(piece):
     return piece.upper()
@@ -212,33 +214,20 @@ class Board(object):
         Returns amount of controlling space and risk for each color, positive for white, negative for black
         """
 
-        space = 0
-        risked = 0
-        for piece in self.pieces():
-            piece_loc = self.location_of(piece)
-            piece_clr = piece_color(piece)
-            controlling = self.controlling_side(piece_loc)
-            if piece is not None:
-                if controlling == Board.WHITE and piece_clr == Board.BLACK:
-                    risked -= material(piece)
-                elif controlling == Board.BLACK and piece_clr == Board.WHITE:
-                    risked += material(piece)
-            else:
-                if controlling == Board.WHITE:
-                    space += 1
-                elif controlling == Board.BLACK:
-                    space -= 1
-        return space, risked
+        all_spaces = [col_row_to_loc([c, r])
+                      for c in range(8) for r in range(8)]
+
+        return self.specific_space(all_spaces)
 
     def specific_space(self, locs):
         """
-	Returns same thing as get_space(), but instead of entire board, only
-        calculates the space of specific locations
+            Returns a value as the amount of space
         """
 
         space = 0
         risked = 0
         for square in locs:
+            square_col_row = loc_to_col_row(square)
             piece = self.piece_at(square)
             piece_clr = piece_color(piece)
             controlling = self.controlling_side(square)
@@ -249,9 +238,19 @@ class Board(object):
                     risked += material(piece)
             else:
                 if controlling == Board.WHITE:
-                    space += 1
+                    if square[0] in ('d', 'e'):
+                        space += 3
+                    elif square[0] in ('c', 'f'):
+                        space += 2
+                    else:
+                        space += 1
                 elif controlling == Board.BLACK:
-                    space -= 1
+                    if square[0] in ('d', 'e'):
+                        space -= 3
+                    elif square[0] in ('c', 'f'):
+                        space -= 2
+                    else:
+                        space -= 1
         return space, risked
 
     def compute_score(self, material, safety, space, risk):
@@ -275,7 +274,7 @@ class Board(object):
             self.get_space()[1]
         )
 
-    def computer_turn(self, color=False):
+    def computer_turn(self, color):
         best_score = None
         best_move = ''
         best_old_loc = ''
@@ -287,7 +286,12 @@ class Board(object):
             old_location = self.location_of(piece)
             if piece_clr == color:
                 for move in self.possible_moves(old_location):
-                    new_board = self.move_piece(old_location, move)
+                    print("computer wants to move", (old_location, move))
+                    try:
+                        new_board = self.move_piece(old_location, move)
+                    except Exception as e:
+                        print("  disallowed (%s)" % str(e))
+                        continue
                     cur_score = new_board.score()
                     # print("scoring", old_location, "to", move, "score is", cur_score)
                     if (color == Board.WHITE and (best_score is None or cur_score > best_score)) or \
@@ -456,7 +460,8 @@ class Board(object):
         return new_locations
 
     def in_check(self, color):
-        king_piece = white_color_of("k") if color == Board.WHITE else black_color_of("k")
+        king_piece = white_color_of(
+            "k") if color == Board.WHITE else black_color_of("k")
         king_loc = self.location_of(king_piece)
         for piece in self.pieces():
             if piece_color(piece) != color:
@@ -489,29 +494,29 @@ class Board(object):
         castle_vals = [0, 0, 0, 0]
 
         if piece_color(piece) == Board.WHITE:
-          if self.white_can_castle_left:
-              if self.piece_at("a1") == white_color_of("r1") and \
-                 self.piece_at("b1") is None and \
-                 self.piece_at("c1") is None and \
-                 self.piece_at("d1") is None:
-                  castle_vals[1] = -2
-          if self.white_can_castle_right:
-              if self.piece_at("h1") == white_color_of("r2") and \
-                 self.piece_at("g1") is None and \
-                 self.piece_at("f1") is None:
-                  castle_vals[0] = 2
+            if self.white_can_castle_left:
+                if self.piece_at("a1") == white_color_of("r1") and \
+                   self.piece_at("b1") is None and \
+                   self.piece_at("c1") is None and \
+                   self.piece_at("d1") is None:
+                    castle_vals[1] = -2
+            if self.white_can_castle_right:
+                if self.piece_at("h1") == white_color_of("r2") and \
+                   self.piece_at("g1") is None and \
+                   self.piece_at("f1") is None:
+                    castle_vals[0] = 2
         else:
-          if self.black_can_castle_left:
-              if self.piece_at("a8") == black_color_of("r1") and \
-                 self.piece_at("b8") is None and \
-                 self.piece_at("c8") is None and \
-                 self.piece_at("d8") is None:
-                  castle_vals[3] = -2
-          if self.black_can_castle_right:
-              if self.piece_at("h8") == black_color_of("r2") and \
-                 self.piece_at("g8") is None and \
-                 self.piece_at("f8") is None:
-                  castle_vals[2] = 2
+            if self.black_can_castle_left:
+                if self.piece_at("a8") == black_color_of("r1") and \
+                   self.piece_at("b8") is None and \
+                   self.piece_at("c8") is None and \
+                   self.piece_at("d8") is None:
+                    castle_vals[3] = -2
+            if self.black_can_castle_right:
+                if self.piece_at("h8") == black_color_of("r2") and \
+                   self.piece_at("g8") is None and \
+                   self.piece_at("f8") is None:
+                    castle_vals[2] = 2
 
         new_positions = []
         for n in castle_vals:
@@ -524,6 +529,7 @@ class Board(object):
     def possible_moves(self, loc):
         piece = self.piece_at(loc)
         new_locations = []
+        piece_clr = piece_color(self.piece_at(loc))
 
         # bishop
         if piece in bishops:
@@ -555,7 +561,7 @@ class Board(object):
         return new_locations
 
     def duplicate(self):
-        new_board = Board() 
+        new_board = Board()
         new_board.positions = [[piece for piece in sub_array]
                                for sub_array in self.positions]
         new_board.piece_locations = None
@@ -576,6 +582,7 @@ class Board(object):
         rook_old = ''
 
         possible_new_locs = self.possible_moves(old_loc)
+        piece_clr = piece_color(old_loc)
 
         if new_loc in possible_new_locs:
             new_board.set_piece_at(self.piece_at(old_loc), new_loc)
@@ -622,6 +629,9 @@ class Board(object):
                 if abs(cols_moved) > 1:
                     new_board.set_piece_at(rook, rook_new)
                     new_board.set_piece_at(None, rook_old)
+
+            if new_board.in_check(piece_clr):
+                raise Exception("Invalid - cannot move into check")
 
             return new_board
 

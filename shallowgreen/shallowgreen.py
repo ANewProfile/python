@@ -11,7 +11,7 @@ while True:
         q = [input("Which piece would you like to move? "),
              input("Where would you like to move it? ")]
         if piece_color(board.piece_at(q[0])) != Board.WHITE:
-            print("Please move a white piece")
+            print("Please move a white piece.")
         else:
             try:
                 board = board.move_piece(q[0], q[1])
@@ -21,7 +21,6 @@ while True:
 
     else:   # black move
         q = board.computer_turn(Board.BLACK)
-        print("computer wants to move", q)
         board = board.move_piece(*q)
         print("computer move:", *q)
         move += 1

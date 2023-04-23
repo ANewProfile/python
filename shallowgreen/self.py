@@ -1,4 +1,5 @@
 from chess import *
+import time
 
 board = Board()
 move = 0
@@ -14,6 +15,8 @@ while True:
         board = board.move_piece(*q)
         move += 1
 
+        time.sleep(0.5)
+
     else:   # black move
         print(board)
         q = board.computer_turn(Board.BLACK)
@@ -21,3 +24,5 @@ while True:
         print("")
         board = board.move_piece(*q)
         move += 1
+
+        time.sleep(0.5)
