@@ -595,7 +595,6 @@ class Board(object):
                     new_board.white_can_castle_left = False
                     new_board.white_can_castle_right = False
                 if piece == "K":
-                    print("moved K")
                     new_board.black_can_castle_left = False
                     new_board.black_can_castle_right = False
 
