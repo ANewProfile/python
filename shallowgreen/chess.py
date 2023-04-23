@@ -219,6 +219,18 @@ class Board(object):
 
         return self.specific_space(all_spaces)
 
+    def get_piece_risked(self, just_moved_color):
+        risked = 0
+        for piece in self.pieces():
+            if piece_color(piece) == just_moved_color:
+                controlling = self.controlling_side(self.location_of(piece))
+                if controlling is not None and controlling != just_moved_color:
+                    if just_moved_color == Board.WHITE:
+                        risked -= material(piece)
+                    else:
+                        risked += material(piece)
+        return risked
+
     def specific_space(self, locs):
         """
         Returns amount of controlling space and risk for each color, positive for white, negative for black
@@ -255,22 +267,22 @@ class Board(object):
 
     def compute_score(self, material, safety, space, risk):
         score = 0.0
-        # material and risk (which is material in future) are equal weight
+        # material and risk (which is material in immediate danger) are equal weight
         score += material
         score += risk
         score += safety
         # space is less
-        score += 0*space/2
+        score += space/2
         return score
 
-    def score(self):
-        space, risk = self.get_space()
-        # print(self)
-        # print("material", self.get_material(), "safety", self.get_safety(), "space", space, "risk", risk)
+    def score(self, just_moved_color):
+        space, captures = self.get_space()
+        risk = self.get_piece_risked(just_moved_color)
+        # print("material", self.get_material(), "safety", self.get_safety(), "sp", space, "cap", captures, "risk", risk)
         return self.compute_score(
             self.get_material(),
             self.get_safety(),
-            space, risk)
+            space+captures, risk)
 
     def computer_turn(self, color):
         best_score = None
@@ -290,7 +302,7 @@ class Board(object):
                     except Exception as e:
                         # print("  disallowed (%s)" % str(e))
                         continue
-                    cur_score = new_board.score()
+                    cur_score = new_board.score(color)
                     # print("scoring", old_location, "to", move, "score is", cur_score)
                     if (color == Board.WHITE and (best_score is None or cur_score > best_score)) or \
                             (color == Board.BLACK and (best_score is None or cur_score < best_score)):
