@@ -256,11 +256,11 @@ class Board(object):
 
     def compute_score(self, material, safety, space, risk):
         score = 0.0
-        print(self)
-        print('material is', material)
-        print('safety is', safety)
-        print('space is', space)
-        print('risk is', risk)
+        # print(self)
+        # print('material is', material)
+        # print('safety is', safety)
+        # print('space is', space)
+        # print('risk is', risk)
         score += material * 0.8
         score += safety
         score += space * 0.95
@@ -289,8 +289,7 @@ class Board(object):
                 for move in self.possible_moves(old_location):
                     new_board = self.move_piece(old_location, move)
                     cur_score = new_board.score()
-                    print("scoring", old_location, "to",
-                          move, "score is", cur_score)
+                    # print("scoring", old_location, "to", move, "score is", cur_score)
                     if (color == Board.WHITE and (best_score is None or cur_score > best_score)) or \
                             (color == Board.BLACK and (best_score is None or cur_score < best_score)):
                         best_score = cur_score

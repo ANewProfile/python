@@ -22,6 +22,6 @@ while True:
     else:   # black move
         q = board.computer_turn(Board.BLACK)
         print("computer wants to move", q)
-        board = board.move_piece(q[0], q[1])
-        print("computer move:", q[0], q[1])
+        board = board.move_piece(*q)
+        print("computer move:", *q)
         move += 1
