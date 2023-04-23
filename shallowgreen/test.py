@@ -1,14 +1,13 @@
 from chess import *
 
-board = Board()
-board = board.move_piece('e2', 'e4')
-board = board.move_piece('a7', 'a6')
-board = board.move_piece('d1', 'f3')
-board = board.move_piece('a6', 'a5')
-board = board.move_piece('f3', 'f7')
-print("in check?")
-print(board.in_check(Board.BLACK))
-print("checkmate?")
-print(board.check_mate(Board.BLACK))
-
-print(board)
+# does not blunder queen
+b = Board()
+b = b.move_piece('d2', 'd4')
+b = b.move_piece('g8', 'f6')
+b = b.move_piece('e2', 'e4')
+b = b.move_piece('b8', 'c6')
+print(b)
+# moving d1h5 would make queen vulnerable to a knight
+move = b.computer_turn(Board.WHITE)
+assert move[0] != "d1" or move[1] != "h5"
+print("next move", move)

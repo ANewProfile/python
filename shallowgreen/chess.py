@@ -221,7 +221,7 @@ class Board(object):
 
     def specific_space(self, locs):
         """
-            Returns a value as the amount of space
+        Returns amount of controlling space and risk for each color, positive for white, negative for black
         """
 
         space = 0
@@ -233,9 +233,9 @@ class Board(object):
             controlling = self.controlling_side(square)
             if piece is not None:
                 if controlling == Board.WHITE and piece_clr == Board.BLACK:
-                    risked -= material(piece)
+                    risked += material(piece)  # black piece controlled by white, good for white
                 elif controlling == Board.BLACK and piece_clr == Board.WHITE:
-                    risked += material(piece)
+                    risked -= material(piece)  # white piece controlled by black, good for black
             else:
                 if controlling == Board.WHITE:
                     if square[0] in ('d', 'e'):
@@ -255,29 +255,25 @@ class Board(object):
 
     def compute_score(self, material, safety, space, risk):
         score = 0.0
-        # print(self)
-        # print('material is', material)
-        # print('safety is', safety)
-        # print('space is', space)
-        # print('risk is', risk)
-        score += material * 0.8
-        score += safety
-        score += space * 0.95
-        score += risk * 0.5
+        score += material
+        score += space
+        score += risk * 3
+        score += safety * 3
         return score
 
     def score(self):
+        space, risk = self.get_space()
+        # print(self)
+        # print("material", self.get_material(), "safety", self.get_safety(), "space", space, "risk", risk)
         return self.compute_score(
             self.get_material(),
             self.get_safety(),
-            self.get_space()[0],
-            self.get_space()[1]
-        )
+            space, risk)
 
     def computer_turn(self, color):
         best_score = None
-        best_move = ''
-        best_old_loc = ''
+        best_move = None
+        best_old_loc = None
         cur_score = 0
         pieces = self.pieces()
 
@@ -286,11 +282,11 @@ class Board(object):
             old_location = self.location_of(piece)
             if piece_clr == color:
                 for move in self.possible_moves(old_location):
-                    print("computer wants to move", (old_location, move))
+                    # print("computer wants to move", (old_location, move))
                     try:
                         new_board = self.move_piece(old_location, move)
                     except Exception as e:
-                        print("  disallowed (%s)" % str(e))
+                        # print("  disallowed (%s)" % str(e))
                         continue
                     cur_score = new_board.score()
                     # print("scoring", old_location, "to", move, "score is", cur_score)
@@ -300,6 +296,11 @@ class Board(object):
                         best_old_loc = old_location
                         best_move = move
 
+        if best_move is None:  # cannot make a move
+            if self.check_mate(color):
+                raise Exception("Checkmate, %s lost" % color)
+            else:
+                raise Exception("Draw")
         return best_old_loc, best_move
 
     def diagonal_moves(self, piece, loc, total_range):
@@ -460,12 +461,12 @@ class Board(object):
         return new_locations
 
     def in_check(self, color):
-        king_piece = white_color_of(
-            "k") if color == Board.WHITE else black_color_of("k")
+        king_piece = white_color_of("k") if color == Board.WHITE else black_color_of("k")
         king_loc = self.location_of(king_piece)
         for piece in self.pieces():
+            piece_loc = self.location_of(piece)
             if piece_color(piece) != color:
-                if king_loc in self.possible_moves(self.location_of(piece)):
+                if king_loc in self.possible_moves(piece_loc):
                     # print("Check!")
                     return True
         return False
@@ -475,8 +476,13 @@ class Board(object):
             if piece_color(piece) == color:
                 piece_location = self.location_of(piece)
                 for new_location in self.possible_moves(piece_location):
-                    new_board = self.move_piece(piece_location, new_location)
-                    if not new_board.in_check(color):
+                    try:
+                        new_board = self.move_piece(piece_location, new_location)
+                    except:
+                        # cannot move because in check
+                        pass
+                    else:
+                        # move is allowed and no longer in check
                         return False
         return True
 
@@ -582,7 +588,7 @@ class Board(object):
         rook_old = ''
 
         possible_new_locs = self.possible_moves(old_loc)
-        piece_clr = piece_color(old_loc)
+        piece_clr = piece_color(piece)
 
         if new_loc in possible_new_locs:
             new_board.set_piece_at(self.piece_at(old_loc), new_loc)

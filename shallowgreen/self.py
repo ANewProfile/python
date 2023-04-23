@@ -15,7 +15,7 @@ while True:
         board = board.move_piece(*q)
         move += 1
 
-        time.sleep(0.5)
+        # time.sleep(0.5)
 
     else:   # black move
         print(board)
@@ -25,4 +25,4 @@ while True:
         board = board.move_piece(*q)
         move += 1
 
-        time.sleep(0.5)
+        # time.sleep(0.5)
