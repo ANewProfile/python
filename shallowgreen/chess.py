@@ -476,24 +476,42 @@ class Board(object):
         return True
 
     def castle(self, piece, loc):
-        col_row = loc_to_col_row(loc)
+        if piece_color(piece) == Board.WHITE and (self.white_can_castle_left or self.white_can_castle_right):
+            pass
+        elif piece_color(piece) == Board.BLACK and (self.black_can_castle_left or self.black_can_castle_right):
+            pass
+        else:
+            return []
 
+        col_row = loc_to_col_row(loc)
+        assert col_row[1] in (0, 7)
+        assert col_row[0] == 4
         castle_vals = [0, 0, 0, 0]
-        if self.white_can_castle_left:
-            castle_vals[1] = -2
-        if self.white_can_castle_right:
-            castle_vals[0] = 2
-        if self.black_can_castle_left:
-            castle_vals[3] = -2
-        if self.black_can_castle_right:
-            castle_vals[2] = 2
 
         if piece_color(piece) == Board.WHITE:
-            castle_vals[3] = 0
-            castle_vals[2] = 0
+          if self.white_can_castle_left:
+              if self.piece_at("a1") == white_color_of("r1") and \
+                 self.piece_at("b1") is None and \
+                 self.piece_at("c1") is None and \
+                 self.piece_at("d1") is None:
+                  castle_vals[1] = -2
+          if self.white_can_castle_right:
+              if self.piece_at("h1") == white_color_of("r2") and \
+                 self.piece_at("g1") is None and \
+                 self.piece_at("f1") is None:
+                  castle_vals[0] = 2
         else:
-            castle_vals[1] = 0
-            castle_vals[0] = 0
+          if self.black_can_castle_left:
+              if self.piece_at("a8") == black_color_of("r1") and \
+                 self.piece_at("b8") is None and \
+                 self.piece_at("c8") is None and \
+                 self.piece_at("d8") is None:
+                  castle_vals[3] = -2
+          if self.black_can_castle_right:
+              if self.piece_at("h8") == black_color_of("r2") and \
+                 self.piece_at("g8") is None and \
+                 self.piece_at("f8") is None:
+                  castle_vals[2] = 2
 
         new_positions = []
         for n in castle_vals:
@@ -501,8 +519,6 @@ class Board(object):
                 new_positions.append([col_row[0]+n, col_row[1]])
 
         new_locs = [col_row_to_loc(col_row) for col_row in new_positions]
-        new_locs = [new_loc for new_loc in new_locs if
-                    self.piece_at(new_loc) is None or self.loc_piece_color(new_loc) != self.loc_piece_color(loc)]
         return new_locs
 
     def possible_moves(self, loc):
@@ -538,11 +554,20 @@ class Board(object):
 
         return new_locations
 
-    def move_piece(self, old_loc, new_loc):
-        # creates a new board with the piece from the old loc to a new loc
-        new_board = Board()
+    def duplicate(self):
+        new_board = Board() 
         new_board.positions = [[piece for piece in sub_array]
                                for sub_array in self.positions]
+        new_board.piece_locations = None
+        new_board.white_can_castle_right = self.white_can_castle_right
+        new_board.black_can_castle_right = self.black_can_castle_right
+        new_board.white_can_castle_left = self.white_can_castle_left
+        new_board.black_can_castle_left = self.black_can_castle_left
+        return new_board
+
+    def move_piece(self, old_loc, new_loc):
+        # creates a new board with the piece from the old loc to a new loc
+        new_board = self.duplicate()
         piece = self.piece_at(old_loc)
         col_row_old = loc_to_col_row(old_loc)
         col_row_new = loc_to_col_row(new_loc)
@@ -551,25 +576,28 @@ class Board(object):
         rook_old = ''
 
         possible_new_locs = self.possible_moves(old_loc)
+
         if new_loc in possible_new_locs:
             new_board.set_piece_at(self.piece_at(old_loc), new_loc)
             new_board.set_piece_at(None, old_loc)
+
             if piece == "r1":
-                self.white_can_castle_left = False
+                new_board.white_can_castle_left = False
             elif piece == "r2":
-                self.white_can_castle_right = False
+                new_board.white_can_castle_right = False
             if piece == "R1":
-                self.black_can_castle_left = False
+                new_board.black_can_castle_left = False
             if piece == "R2":
-                self.black_can_castle_right = False
+                new_board.black_can_castle_right = False
 
             if piece in ['k', 'K']:
                 if piece == "k":
-                    self.white_can_castle_left = False
-                    self.white_can_castle_right = False
+                    new_board.white_can_castle_left = False
+                    new_board.white_can_castle_right = False
                 if piece == "K":
-                    self.black_can_castle_left = False
-                    self.black_can_castle_right = False
+                    print("moved K")
+                    new_board.black_can_castle_left = False
+                    new_board.black_can_castle_right = False
 
                 cols_moved = col_row_new[0]-col_row_old[0]
                 if cols_moved == 2:
@@ -593,8 +621,10 @@ class Board(object):
                         rook_new = 'd8'
 
                 if abs(cols_moved) > 1:
-                    self.set_piece_at(rook, rook_new)
-                    self.set_piece_at(None, rook_old)
+                    new_board.set_piece_at(rook, rook_new)
+                    new_board.set_piece_at(None, rook_old)
+
             return new_board
+
         else:
             raise Exception("Invalid")
