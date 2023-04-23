@@ -20,7 +20,7 @@ def material(piece):
         return 1
     elif piece in rooks:
         return 5
-    elif piece in (bishops or knights):
+    elif piece in bishops or piece in knights:
         return 3
     elif piece in queens:
         return 9
@@ -255,10 +255,12 @@ class Board(object):
 
     def compute_score(self, material, safety, space, risk):
         score = 0.0
+        # material and risk (which is material in future) are equal weight
         score += material
-        score += space
-        score += risk * 3
-        score += safety * 3
+        score += risk
+        score += safety
+        # space is less
+        score += 0*space/2
         return score
 
     def score(self):

@@ -1,5 +1,12 @@
 from chess import *
 
+# material
+assert material('r1') == 5
+assert material('p1') == 1
+assert material('b1') == 3
+assert material('k1') == 3
+assert material('q') == 9
+
 # pawn movements
 b = Board()
 nb = b.move_piece('e2', 'e4')

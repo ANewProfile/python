@@ -10,7 +10,7 @@ while True:
     if turn == Board.WHITE:  # white move
         print(board)
         q = board.computer_turn(Board.WHITE)
-        print("WHITE wants to move", q)
+        print("WHITE board.move_piece('%s','%s')" % (q[0],q[1]))
         print("")
         board = board.move_piece(*q)
         move += 1
@@ -20,7 +20,7 @@ while True:
     else:   # black move
         print(board)
         q = board.computer_turn(Board.BLACK)
-        print("BLACK wants to move", q)
+        print("BLACK board.move_piece('%s','%s')" % (q[0],q[1]))
         print("")
         board = board.move_piece(*q)
         move += 1
