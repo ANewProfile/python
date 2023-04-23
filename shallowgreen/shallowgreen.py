@@ -4,17 +4,14 @@ board = Board()
 move = 0
 
 while True:
-    if move % 2 == 0:
-        true_move = Board.WHITE
-    else:
-        true_move = Board.BLACK
+    turn = Board.WHITE if (move % 2 == 0) else Board.BLACK
 
-    if true_move == Board.WHITE:  # white move
+    if turn == Board.WHITE:  # white move
         print(board)
         q = [input("Which piece would you like to move? "),
              input("Where would you like to move it? ")]
-        if piece_is_white(board.piece_at(q[0])) is False:
-            print("Invalid.")
+        if piece_color(board.piece_at(q[0])) != Board.WHITE:
+            print("Please move a white piece")
         else:
             try:
                 board = board.move_piece(q[0], q[1])
