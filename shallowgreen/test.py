@@ -1,13 +1,14 @@
 from chess import *
 
 board = Board()
-
-board = board.move_piece('a2','a3')
-board = board.move_piece('b8','a6')
-board = board.move_piece('e2','e3')
-board = board.move_piece('a6','b8')
-board = board.move_piece('d1','f3')
-board = board.move_piece('g8','h6')
+board = board.move_piece('d2','d4')
+board = board.move_piece('b8','c6')
+board = board.move_piece('c1','g5')
+board = board.move_piece('d7','d6')
+board = board.move_piece('d4','d5')
+board = board.move_piece('c6','b4')
+board = board.move_piece('d1','d4')
+board = board.move_piece('b4','c2')
 
 print(board)
 move = board.computer_turn(Board.WHITE)

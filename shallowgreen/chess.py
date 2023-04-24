@@ -199,25 +199,12 @@ class Board(object):
         space_white = self.specific_space(locs_around_king_white)
         space_black = self.specific_space(locs_around_king_black)
 
-        if space_white[0] < 0:
-            safety += space_white[0] * 0.95
-            safety += space_white[1] * 0.5
-
-        if space_black[0] < 0:
-            safety -= space_black[0] * 0.95
-            safety -= space_black[1] * 0.5
+        if space_white < 0:
+            safety -= space_white
+        if space_black > 0:
+            safety += space_black
 
         return safety
-
-    def get_space(self):
-        """
-        Returns amount of controlling space and risk for each color, positive for white, negative for black
-        """
-
-        all_spaces = [col_row_to_loc([c, r])
-                      for c in range(8) for r in range(8)]
-
-        return self.specific_space(all_spaces)
 
     def get_piece_risked(self, just_moved_color):
         risked = 0
@@ -231,41 +218,39 @@ class Board(object):
                         risked += material(piece)
         return risked
 
+    def get_space(self):
+        """
+        Returns amount of controlling space, positive favoring white, negative favoring black
+        """
+
+        all_spaces = [col_row_to_loc([c, r])
+                      for c in range(8) for r in range(8)]
+
+        return self.specific_space(all_spaces)
+
     def specific_space(self, locs):
         """
-        Returns amount of controlling space and risk for each color, positive for white, negative for black
+        Returns amount of controlling space, positive favoring white, negative favoring black
         """
 
         space = 0
-        risked = 0
         for square in locs:
-            square_col_row = loc_to_col_row(square)
-            piece = self.piece_at(square)
-            piece_clr = piece_color(piece)
             controlling = self.controlling_side(square)
-            if piece is not None:
-                if controlling == Board.WHITE and piece_clr == Board.BLACK:
-                    # black piece controlled by white, good for white
-                    risked += material(piece)
-                elif controlling == Board.BLACK and piece_clr == Board.WHITE:
-                    # white piece controlled by black, good for black
-                    risked -= material(piece)
-            else:
-                if controlling == Board.WHITE:
-                    if square[0] in ('d', 'e'):
-                        space += 3
-                    elif square[0] in ('c', 'f'):
-                        space += 2
-                    else:
-                        space += 1
-                elif controlling == Board.BLACK:
-                    if square[0] in ('d', 'e'):
-                        space -= 3
-                    elif square[0] in ('c', 'f'):
-                        space -= 2
-                    else:
-                        space -= 1
-        return space, risked
+            if controlling == Board.WHITE:
+                if square[0] in ('d', 'e'):
+                    space += 3
+                elif square[0] in ('c', 'f'):
+                    space += 2
+                else:
+                    space += 1
+            elif controlling == Board.BLACK:
+                if square[0] in ('d', 'e'):
+                    space -= 3
+                elif square[0] in ('c', 'f'):
+                    space -= 2
+                else:
+                    space -= 1
+        return space
 
     def compute_score(self, material, safety, space, risk):
         score = 0.0
@@ -274,17 +259,17 @@ class Board(object):
         score += risk
         score += safety
         # space is less
-        score += space/2
+        score += space/3
         return score
 
     def score(self, just_moved_color):
-        space, captures = self.get_space()
-        risk = self.get_piece_risked(just_moved_color)
-        # print("material", self.get_material(), "safety", self.get_safety(), "sp", space, "cap", captures, "risk", risk)
+        space = self.get_space()
+        risked = self.get_piece_risked(just_moved_color)
+        # print("material", self.get_material(), "safety", self.get_safety(), "sp", space, "risked", risked)
         return self.compute_score(
             self.get_material(),
             self.get_safety(),
-            space+captures, risk)
+            space, risked)
 
     def computer_turn(self, color):
         best_score = None
