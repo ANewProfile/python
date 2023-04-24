@@ -301,7 +301,7 @@ class Board(object):
                     # print("computer wants to move", (old_location, move))
                     try:
                         new_board = self.move_piece(old_location, move)
-                    except Exception as e:
+                    except:
                         # print("  disallowed (%s)" % str(e))
                         continue
                     cur_score = new_board.score(color)
@@ -317,6 +317,7 @@ class Board(object):
                 raise Exception("Checkmate, %s lost" % color)
             else:
                 raise Exception("Draw")
+
         return best_old_loc, best_move
 
     def diagonal_moves(self, piece, loc, total_range):
