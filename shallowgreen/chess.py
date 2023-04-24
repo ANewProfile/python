@@ -6,23 +6,23 @@ def col_row_to_loc(pos):
     return "".join([chr(ord('a') + pos[0]), str(pos[1]+1)])
 
 
-pawns = ('p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8',
+PAWNS = ('p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8',
          'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8')
-rooks = ('r1', 'r2', 'R1', 'R2')
-bishops = ('b1', 'b2', 'B1', 'B2')
-knights = ('k1', 'k2', 'K1', 'K2')
-queens = ('q', 'Q')
-kings = ('k', 'K')
+ROOKS = ('r1', 'r2', 'R1', 'R2')
+BISHOPS = ('b1', 'b2', 'B1', 'B2')
+KNIGHTS = ('k1', 'k2', 'K1', 'K2')
+QUEENS = ('q', 'Q')
+KINGS = ('k', 'K')
 
 
 def material(piece):
-    if piece in pawns:
+    if piece in PAWNS:
         return 1
-    elif piece in rooks:
+    elif piece in ROOKS:
         return 5
-    elif piece in bishops or piece in knights:
+    elif piece in BISHOPS or piece in KNIGHTS:
         return 3
-    elif piece in queens:
+    elif piece in QUEENS:
         return 9
     else:
         return 0
@@ -277,6 +277,7 @@ class Board(object):
         best_old_loc = None
         cur_score = 0
         pieces = self.pieces()
+        pawns = [piece for piece in self.pieces() if piece in PAWNS]
 
         while True:
             for pawn in pawns:
@@ -639,30 +640,30 @@ class Board(object):
         piece_clr = piece_color(self.piece_at(loc))
 
         # bishop
-        if piece in bishops:
+        if piece in BISHOPS:
             new_locations.extend(self.diagonal_moves(piece, loc, 8))
 
         # pawn
-        if piece in pawns:
+        if piece in PAWNS:
             new_locations.extend(self.pawn_moves(loc))
 
         # queen
-        if piece in queens:
+        if piece in QUEENS:
             new_locations.extend(self.diagonal_moves(piece, loc, 8))
             new_locations.extend(self.cross_moves(piece, loc, 8))
 
         # king
-        if piece in kings:
+        if piece in KINGS:
             new_locations.extend(self.diagonal_moves(piece, loc, 2))
             new_locations.extend(self.cross_moves(piece, loc, 2))
             new_locations.extend(self.castle(piece, loc))
 
         # rook
-        if piece in rooks:
+        if piece in ROOKS:
             new_locations.extend(self.cross_moves(piece, loc, 8))
 
         # knight
-        if piece in knights:
+        if piece in KNIGHTS:
             new_locations.extend(self.knight_moves(piece, loc))
 
         return new_locations
