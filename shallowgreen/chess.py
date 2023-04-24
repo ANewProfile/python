@@ -690,12 +690,10 @@ class Board(object):
 
         possible_new_locs = self.possible_moves(old_loc)
         piece_clr = piece_color(piece)
-
-        color = piece_color(old_loc)
-        _, cur_row = col_row_to_loc(old_loc)[0]
-        if cur_row == 7 and color == Board.WHITE:
+        cur_row = col_row_old[1]
+        if cur_row == 8 and piece_clr == Board.WHITE:
             self.player_promotion(Board.WHITE, old_loc)
-        elif cur_row == 0 and color == Board.BLACK:
+        elif cur_row == 1 and piece_clr == Board.BLACK:
             self.player_promotion(Board.BLACK, old_loc)
 
         if new_loc in possible_new_locs:
