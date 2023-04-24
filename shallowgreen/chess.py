@@ -644,7 +644,7 @@ class Board(object):
 
         # pawn
         if piece in pawns:
-            new_locations.extend(self.pawn_moves(piece, loc))
+            new_locations.extend(self.pawn_moves(loc))
 
         # queen
         if piece in queens:
