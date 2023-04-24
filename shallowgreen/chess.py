@@ -278,53 +278,7 @@ class Board(object):
         cur_score = 0
         pieces = self.pieces()
         pawns = [piece for piece in self.pieces() if piece in PAWNS]
-
-        while True:
-            for pawn in pawns:
-                loc = self.location_of(pawn)
-                if pawn[0].islower():
-                    if color == Board.WHITE and loc[1] == 8:  # for white
-                        promote_to = 'q'
-                        if promote_to == 'k':
-                            self.set_piece_at(loc, None)
-                            self.set_piece_at(loc, 'k3')
-                            break
-                        elif promote_to == 'b':
-                            self.set_piece_at(loc, None)
-                            self.set_piece_at(loc, 'b3')
-                            break
-                        elif promote_to == 'r':
-                            self.set_piece_at(loc, None)
-                            self.set_piece_at(loc, 'r3')
-                            break
-                        elif promote_to == 'q':
-                            self.set_piece_at(loc, None)
-                            self.set_piece_at(loc, 'q2')
-                            break
-                        else:
-                            print('Invalid.')
-                    else:
-                        # for black
-                        if color == Board.BLACK and self.location_of(pawn)[1] == 1:
-                            if promote_to == 'k':
-                                self.set_piece_at(loc, None)
-                                self.set_piece_at(loc, 'K3')
-                                break
-                            elif promote_to == 'b':
-                                self.set_piece_at(loc, None)
-                                self.set_piece_at(loc, 'B3')
-                                break
-                            elif promote_to == 'r':
-                                self.set_piece_at(loc, None)
-                                self.set_piece_at(loc, 'R3')
-                                break
-                            elif promote_to == 'q':
-                                self.set_piece_at(loc, None)
-                                self.set_piece_at(loc, 'Q2')
-                                break
-                            else:
-                                print("Invalid")
-            break
+        promote_to = 'q'
 
         for piece in pieces:
             piece_clr = piece_color(piece)
@@ -334,7 +288,8 @@ class Board(object):
                 for move in self.possible_moves(old_location):
                     # print("computer wants to move", (old_location, move))
                     try:
-                        new_board = self.move_piece(old_location, move)
+                        new_board = self.move_piece(
+                            old_location, move, promotion=promote_to)
                         if self.check_mate(opp_color):
                             return old_location, move
                     except:
@@ -590,50 +545,6 @@ class Board(object):
 
         return new_locs
 
-    def player_promotion(self, color, loc):
-        while True:
-            promote_to = input(
-                'Would you like to promote to a [k]night, [b]ishop, [r]ook, [q]ueen? ')
-            if color == Board.WHITE:  # for white
-                if promote_to.lower() == 'k':
-                    self.set_piece_at(loc, None)
-                    self.set_piece_at(loc, 'k3')
-                    break
-                elif promote_to.lower() == 'b':
-                    self.set_piece_at(loc, None)
-                    self.set_piece_at(loc, 'b3')
-                    break
-                elif promote_to.lower() == 'r':
-                    self.set_piece_at(loc, None)
-                    self.set_piece_at(loc, 'r3')
-                    break
-                elif promote_to.lower() == 'q':
-                    self.set_piece_at(loc, None)
-                    self.set_piece_at(loc, 'q2')
-                    break
-                else:
-                    print('Invalid.')
-
-            if color == Board.BLACK:  # for black
-                if promote_to.lower() == 'k':
-                    self.set_piece_at(loc, None)
-                    self.set_piece_at(loc, 'K3')
-                    break
-                elif promote_to.lower() == 'b':
-                    self.set_piece_at(loc, None)
-                    self.set_piece_at(loc, 'B3')
-                    break
-                elif promote_to.lower() == 'r':
-                    self.set_piece_at(loc, None)
-                    self.set_piece_at(loc, 'R3')
-                    break
-                elif promote_to.lower() == 'q':
-                    self.set_piece_at(loc, None)
-                    self.set_piece_at(loc, 'Q2')
-                    break
-                else:
-                    print("Invalid")
-
     def possible_moves(self, loc):
         piece = self.piece_at(loc)
         new_locations = []
@@ -679,7 +590,7 @@ class Board(object):
         new_board.black_can_castle_left = self.black_can_castle_left
         return new_board
 
-    def move_piece(self, old_loc, new_loc):
+    def move_piece(self, old_loc, new_loc, promotion=None):
         # creates a new board with the piece from the old loc to a new loc
         new_board = self.duplicate()
         piece = self.piece_at(old_loc)
@@ -691,11 +602,6 @@ class Board(object):
 
         possible_new_locs = self.possible_moves(old_loc)
         piece_clr = piece_color(piece)
-        cur_row = col_row_old[1]
-        if cur_row == 8 and piece_clr == Board.WHITE:
-            self.player_promotion(Board.WHITE, old_loc)
-        elif cur_row == 1 and piece_clr == Board.BLACK:
-            self.player_promotion(Board.BLACK, old_loc)
 
         if new_loc in possible_new_locs:
             new_board.set_piece_at(self.piece_at(old_loc), new_loc)
@@ -745,6 +651,10 @@ class Board(object):
 
             if new_board.in_check(piece_clr):
                 raise Exception("Invalid - cannot move into check")
+
+            if piece in PAWNS and new_loc[1] in (1, 8) and promotion is not None:
+                new_board.set_piece_at(promotion, new_loc)
+                new_board.set_piece_at(None, old_loc)
 
             return new_board
 

@@ -62,11 +62,11 @@ b = b.move_piece('e2', 'e4')
 b = b.move_piece('d1', 'f3')
 b = b.move_piece('f3', 'h5')
 try:
-  b = b.move_piece('f7', 'f6')  # moves K into checked position
+    b = b.move_piece('f7', 'f6')  # moves K into checked position
 except:
-  pass
+    pass
 else:
-  raise Exception("illegal move")
+    raise Exception("illegal move")
 
 # does not blunder queen
 b = Board()
@@ -77,5 +77,19 @@ b = b.move_piece('b8', 'c6')
 # moving d1h5 would make queen vulnerable to a knight
 move = b.computer_turn(Board.WHITE)
 assert move[0] != "d1" or move[1] != "h5"
+
+# promotions
+b = Board()
+b = b.move_piece('e2', 'e4')
+b = b.move_piece('a7', 'a6')
+b = b.move_piece('e4', 'e5')
+b = b.move_piece('a6', 'a5')
+b = b.move_piece('h2', 'h3')
+b = b.move_piece('f7', 'f6')
+b = b.move_piece('e5', 'f6')
+b = b.move_piece('a5', 'a4')
+b = b.move_piece('f6', 'g7')
+b = b.move_piece('a4', 'a3')
+b = b.move_piece('g7', 'h8')
 
 print("success!")
