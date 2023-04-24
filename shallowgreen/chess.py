@@ -245,9 +245,11 @@ class Board(object):
             controlling = self.controlling_side(square)
             if piece is not None:
                 if controlling == Board.WHITE and piece_clr == Board.BLACK:
-                    risked += material(piece)  # black piece controlled by white, good for white
+                    # black piece controlled by white, good for white
+                    risked += material(piece)
                 elif controlling == Board.BLACK and piece_clr == Board.WHITE:
-                    risked -= material(piece)  # white piece controlled by black, good for black
+                    # white piece controlled by black, good for black
+                    risked -= material(piece)
             else:
                 if controlling == Board.WHITE:
                     if square[0] in ('d', 'e'):
@@ -475,7 +477,8 @@ class Board(object):
         return new_locations
 
     def in_check(self, color):
-        king_piece = white_color_of("k") if color == Board.WHITE else black_color_of("k")
+        king_piece = white_color_of(
+            "k") if color == Board.WHITE else black_color_of("k")
         king_loc = self.location_of(king_piece)
         for piece in self.pieces():
             piece_loc = self.location_of(piece)
@@ -491,7 +494,8 @@ class Board(object):
                 piece_location = self.location_of(piece)
                 for new_location in self.possible_moves(piece_location):
                     try:
-                        new_board = self.move_piece(piece_location, new_location)
+                        new_board = self.move_piece(
+                            piece_location, new_location)
                     except:
                         # cannot move because in check
                         pass
