@@ -281,7 +281,7 @@ class Board(object):
         for piece in pieces:
             piece_clr = piece_color(piece)
             old_location = self.location_of(piece)
-            opp_color = 'white' if color == 'black' else 'black'
+            opp_color = Board.WHITE if color == Board.BLACK else Board.BLACK
             if piece_clr == color:
                 for move in self.possible_moves(old_location):
                     # print("computer wants to move", (old_location, move))
