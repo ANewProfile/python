@@ -281,11 +281,14 @@ class Board(object):
         for piece in pieces:
             piece_clr = piece_color(piece)
             old_location = self.location_of(piece)
+            opp_color = 'white' if color == 'black' else 'black'
             if piece_clr == color:
                 for move in self.possible_moves(old_location):
                     # print("computer wants to move", (old_location, move))
                     try:
                         new_board = self.move_piece(old_location, move)
+                        if self.check_mate(opp_color):
+                            return old_location, move
                     except:
                         # print("  disallowed (%s)" % str(e))
                         continue
@@ -299,7 +302,7 @@ class Board(object):
 
         if best_move is None:  # cannot make a move
             if self.check_mate(color):
-                raise Exception("Checkmate, %s lost" % color)
+                raise Exception(f"Checkmate, {color} lost")
             else:
                 raise Exception("Draw")
 
