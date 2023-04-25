@@ -71,33 +71,34 @@ class Board(object):
     BLACK = "black"
 
     def find_locations(self):
-        self.piece_locations = {}
+        self.__piece_locations = {}
         for i, array in enumerate(self.positions):
             for j, piece in enumerate(array):
                 if piece is not None:
                     row = 7 - i
                     col = j
                     loc = col_row_to_loc([col, row])
-                    self.piece_locations[piece] = loc
+                    self.__piece_locations[piece] = loc
 
     def location_of(self, piece):
-        if self.piece_locations is None:
+        if self.__piece_locations is None:
             self.find_locations()
-        return self.piece_locations[piece]
+        return self.__piece_locations[piece]
 
     def pieces(self):
-        if self.piece_locations is None:
+        if self.__piece_locations is None:
             self.find_locations()
-        return self.piece_locations.keys()
+        return self.__piece_locations.keys()
 
     def piece_at(self, loc):
         pos = loc_to_col_row(loc)
         return self.positions[7-pos[1]][pos[0]]
 
     def set_piece_at(self, piece, loc):
+        assert self.__allow_set_piece is True
         pos = loc_to_col_row(loc)
         self.positions[7-pos[1]][pos[0]] = piece
-        self.piece_locations = None
+        self.__piece_locations = None
 
     def controlling_side(self, loc):
         pieces_guarding = 0
@@ -128,15 +129,26 @@ class Board(object):
                         for piece in sub_array]) for sub_array in self.positions]
         )
 
+    def duplicate(self):
+        new_board = Board()
+        new_board.positions = [[piece for piece in sub_array] for sub_array in self.positions]
+        new_board.white_can_castle_right = self.white_can_castle_right
+        new_board.black_can_castle_right = self.black_can_castle_right
+        new_board.white_can_castle_left = self.white_can_castle_left
+        new_board.black_can_castle_left = self.black_can_castle_left
+        return new_board
+
     def __init__(self):
         self.positions = [[None for i in range(8)] for j in range(8)]
-        self.piece_locations = None
+        self.__piece_locations = None
+        self.__location_moves = {}
+
         self.white_can_castle_right = True
         self.black_can_castle_right = True
         self.white_can_castle_left = True
         self.black_can_castle_left = True
 
-        # set board, initial position for white pieces
+        self.__allow_set_piece = True
         self.set_piece_at("r1", "a1")
         self.set_piece_at("k1", "b1")
         self.set_piece_at("b1", "c1")
@@ -153,8 +165,6 @@ class Board(object):
         self.set_piece_at("p6", "f2")
         self.set_piece_at("p7", "g2")
         self.set_piece_at("p8", "h2")
-
-        # set board, initial position for black pieces
         self.set_piece_at("R1", "a8")
         self.set_piece_at("K1", "b8")
         self.set_piece_at("B1", "c8")
@@ -171,6 +181,7 @@ class Board(object):
         self.set_piece_at("P6", "f7")
         self.set_piece_at("P7", "g7")
         self.set_piece_at("P8", "h7")
+        self.__allow_set_piece = False
 
     def loc_piece_color(self, loc):
         piece = self.piece_at(loc)
@@ -585,6 +596,10 @@ class Board(object):
         return new_locs
 
     def possible_moves(self, loc, include_castle=True):
+        cache_key = (loc, include_castle)
+        if cache_key in self.__location_moves:
+            return self.__location_moves[cache_key]
+
         piece = self.piece_at(loc)
         new_locations = []
         piece_clr = piece_color(self.piece_at(loc))
@@ -617,22 +632,15 @@ class Board(object):
         if piece in KNIGHTS:
             new_locations.extend(self.knight_moves(piece, loc))
 
+        self.__location_moves[cache_key] = new_locations
         return new_locations
 
-    def duplicate(self):
-        new_board = Board()
-        new_board.positions = [[piece for piece in sub_array]
-                               for sub_array in self.positions]
-        new_board.piece_locations = None
-        new_board.white_can_castle_right = self.white_can_castle_right
-        new_board.black_can_castle_right = self.black_can_castle_right
-        new_board.white_can_castle_left = self.white_can_castle_left
-        new_board.black_can_castle_left = self.black_can_castle_left
-        return new_board
-
     def move_piece(self, old_loc, new_loc, promotion=None):
+
         # creates a new board with the piece from the old loc to a new loc
         new_board = self.duplicate()
+        new_board.__allow_set_piece = True
+
         piece = self.piece_at(old_loc)
         col_row_old = loc_to_col_row(old_loc)
         col_row_new = loc_to_col_row(new_loc)
@@ -699,4 +707,5 @@ class Board(object):
             new_board.set_piece_at(promotion, new_loc)
             new_board.set_piece_at(None, old_loc)
 
+        new_board.__allow_set_piece = False
         return new_board
