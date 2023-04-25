@@ -109,6 +109,14 @@ class Board(object):
         else:
             return None
 
+    def controlled_by(self, loc, color, include_castle=True):
+        for piece in self.pieces():
+            if piece_color(piece) == color:
+                if loc in self.possible_moves(self.location_of(piece), include_castle=include_castle):
+                    return True
+
+        return False
+
     def __str__(self):
         return "\n".join(
             [" | ".join(["  " if piece is None else "%2s" % (piece)
@@ -471,15 +479,12 @@ class Board(object):
         return new_locations
 
     def in_check(self, color):
-        king_piece = white_color_of(
-            "k") if color == Board.WHITE else black_color_of("k")
+        opp_color = Board.WHITE if color == Board.BLACK else Board.BLACK
+        king_piece = 'k' if color == Board.WHITE else 'K'
         king_loc = self.location_of(king_piece)
-        for piece in self.pieces():
-            piece_loc = self.location_of(piece)
-            if piece_color(piece) != color:
-                if king_loc in self.possible_moves(piece_loc):
-                    # print("Check!")
-                    return True
+        if self.controlled_by(king_loc, opp_color):
+            return True
+
         return False
 
     def check_mate(self, color):
@@ -506,34 +511,66 @@ class Board(object):
         else:
             return []
 
+        blocking_white_left = False
+        blocking_white_right = False
+        blocking_black_left = False
+        blocking_black_right = False
         col_row = loc_to_col_row(loc)
         assert col_row[1] in (0, 7)
         assert col_row[0] == 4
         castle_vals = [0, 0, 0, 0]
+
+        # can't castle through or from check - white
+        if self.controlled_by('d1', Board.BLACK, include_castle=False) or \
+                self.controlled_by('c1', Board.BLACK, include_castle=False) or \
+                self.controlled_by('b1', Board.BLACK, include_castle=False) or \
+                self.controlled_by('e1', Board.BLACK, include_castle=False):
+            blocking_white_left = True
+
+        if self.controlled_by('f1', Board.BLACK, include_castle=False) or \
+                self.controlled_by('g1', Board.BLACK, include_castle=False) or \
+                self.controlled_by('e1', Board.BLACK, include_castle=False):
+            blocking_white_right = True
+
+        # can't castle through or from check - black
+        if self.controlled_by('d8', Board.WHITE, include_castle=False) or \
+                self.controlled_by('c8', Board.WHITE, include_castle=False) or \
+                self.controlled_by('b8', Board.WHITE, include_castle=False) or \
+                self.controlled_by('e8', Board.WHITE, include_castle=False):
+            blocking_black_left = True
+
+        if self.controlled_by('f8', Board.WHITE, include_castle=False) or \
+                self.controlled_by('g8', Board.WHITE, include_castle=False) or \
+                self.controlled_by('e8', Board.WHITE, include_castle=False):
+            blocking_black_right = True
 
         if piece_color(piece) == Board.WHITE:
             if self.white_can_castle_left:
                 if self.piece_at("a1") == white_color_of("r1") and \
                    self.piece_at("b1") is None and \
                    self.piece_at("c1") is None and \
-                   self.piece_at("d1") is None:
+                   self.piece_at("d1") is None and \
+                        blocking_white_left is False:
                     castle_vals[1] = -2
             if self.white_can_castle_right:
                 if self.piece_at("h1") == white_color_of("r2") and \
                    self.piece_at("g1") is None and \
-                   self.piece_at("f1") is None:
+                   self.piece_at("f1") is None and \
+                        blocking_white_right is False:
                     castle_vals[0] = 2
         else:
             if self.black_can_castle_left:
                 if self.piece_at("a8") == black_color_of("r1") and \
                    self.piece_at("b8") is None and \
                    self.piece_at("c8") is None and \
-                   self.piece_at("d8") is None:
+                   self.piece_at("d8") is None and \
+                        blocking_black_left is False:
                     castle_vals[3] = -2
             if self.black_can_castle_right:
                 if self.piece_at("h8") == black_color_of("r2") and \
                    self.piece_at("g8") is None and \
-                   self.piece_at("f8") is None:
+                   self.piece_at("f8") is None and \
+                        blocking_black_right is False:
                     castle_vals[2] = 2
 
         new_positions = []
@@ -545,7 +582,7 @@ class Board(object):
 
         return new_locs
 
-    def possible_moves(self, loc):
+    def possible_moves(self, loc, include_castle=True):
         piece = self.piece_at(loc)
         new_locations = []
         piece_clr = piece_color(self.piece_at(loc))
@@ -567,7 +604,9 @@ class Board(object):
         if piece in KINGS:
             new_locations.extend(self.diagonal_moves(piece, loc, 2))
             new_locations.extend(self.cross_moves(piece, loc, 2))
-            new_locations.extend(self.castle(piece, loc))
+
+            if include_castle:
+                new_locations.extend(self.castle(piece, loc))
 
         # rook
         if piece in ROOKS:
