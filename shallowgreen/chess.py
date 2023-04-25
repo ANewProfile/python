@@ -16,6 +16,13 @@ QUEENS = ('q', 'Q')
 KINGS = ('k', 'K')
 
 
+class GameOverException(Exception):
+    pass
+
+class InvalidMoveException(Exception):
+    pass
+
+
 def material(piece):
     if piece in PAWNS:
         return 1
@@ -129,27 +136,7 @@ class Board(object):
                         for piece in sub_array]) for sub_array in self.positions]
         )
 
-    def duplicate(self):
-        new_board = Board()
-        new_board.positions = [[piece for piece in sub_array]
-                               for sub_array in self.positions]
-        new_board.white_can_castle_right = self.white_can_castle_right
-        new_board.black_can_castle_right = self.black_can_castle_right
-        new_board.white_can_castle_left = self.white_can_castle_left
-        new_board.black_can_castle_left = self.black_can_castle_left
-        return new_board
-
-    def __init__(self):
-        self.positions = [[None for i in range(8)] for j in range(8)]
-        self.__piece_locations = None
-        self.__location_moves = {}
-
-        self.white_can_castle_right = True
-        self.black_can_castle_right = True
-        self.white_can_castle_left = True
-        self.black_can_castle_left = True
-
-        self.__allow_set_piece = True
+    def __set_initial_positions(self):
         self.set_piece_at("r1", "a1")
         self.set_piece_at("k1", "b1")
         self.set_piece_at("b1", "c1")
@@ -182,7 +169,40 @@ class Board(object):
         self.set_piece_at("P6", "f7")
         self.set_piece_at("P7", "g7")
         self.set_piece_at("P8", "h7")
+
+    def duplicate(self):
+        new_board = Board(empty=True)
+        new_board.positions = [[piece for piece in sub_array] for sub_array in self.positions]
+        new_board.white_can_castle_right = self.white_can_castle_right
+        new_board.black_can_castle_right = self.black_can_castle_right
+        new_board.white_can_castle_left = self.white_can_castle_left
+        new_board.black_can_castle_left = self.black_can_castle_left
+        return new_board
+
+    def __init__(self, empty=False):
+        self.positions = [[None for i in range(8)] for j in range(8)]
         self.__allow_set_piece = False
+        self.__piece_locations = None
+        self.__location_moves = {}
+
+        self.white_can_castle_right = True
+        self.black_can_castle_right = True
+        self.white_can_castle_left = True
+        self.black_can_castle_left = True
+
+        if empty is False:
+            self.__allow_set_piece = True
+            self.__set_initial_positions()
+            self.__allow_set_piece = False
+
+    @staticmethod
+    def custom_board(piece_locations):
+        board = Board(empty=True)
+        board.__allow_set_piece = True
+        for piece, location in piece_locations.items():
+            board.set_piece_at(piece, location)
+        board.__allow_set_piece = False
+        return board
 
     def loc_piece_color(self, loc):
         piece = self.piece_at(loc)
@@ -301,39 +321,35 @@ class Board(object):
         best_move = None
         best_old_loc = None
         cur_score = 0
-        pieces = self.pieces()
+        my_pieces = [piece for piece in self.pieces() if piece_color(piece) == color]
         promote_to = get_piece('q', color)
 
-        for piece in pieces:
-            piece_clr = piece_color(piece)
+        for piece in my_pieces:
             old_location = self.location_of(piece)
             opp_color = Board.WHITE if color == Board.BLACK else Board.BLACK
-            if piece_clr == color:
-                for move in self.possible_moves(old_location):
-                    # print("computer wants to move", (old_location, move))
-                    try:
-                        new_board = self.move_piece(
-                            old_location, move, promotion=promote_to)
-                        if self.check_mate(opp_color):
-                            return old_location, move
-                    except:
-                        # print("  disallowed (%s)" % str(e))
-                        continue
-                    cur_score = new_board.score(color)
-                    # print("scoring", old_location, "to", move, "score is", cur_score)
-                    if (color == Board.WHITE and (best_score is None or cur_score > best_score)) or \
-                            (color == Board.BLACK and (best_score is None or cur_score < best_score)):
-                        best_score = cur_score
-                        best_old_loc = old_location
-                        best_move = move
+            for move in self.possible_moves(old_location):
+                # print("computer wants to move", (old_location, move))
+                try:
+                    new_board = self.move_piece(
+                        old_location, move, promotion=promote_to)
+                    if self.check_mate(opp_color):
+                        return old_location, move
+                except:
+                    # print("  disallowed (%s)" % str(e))
+                    continue
+                cur_score = new_board.score(color)
+                # print("scoring", old_location, "to", move, "score is", cur_score)
+                if (color == Board.WHITE and (best_score is None or cur_score > best_score)) or \
+                        (color == Board.BLACK and (best_score is None or cur_score < best_score)):
+                    best_score = cur_score
+                    best_old_loc = old_location
+                    best_move = move
 
         if best_move is None:  # cannot make a move
             if self.check_mate(color):
-                print(f"Checkmate, {color} lost.")
-                exit()
+                raise GameOverException(f"Checkmate, {color} lost.")
             else:
-                print("Draw by stalemate.")
-                exit()
+                raise GameOverException("Draw by stalemate.")
 
         return best_old_loc, best_move
 
@@ -508,9 +524,8 @@ class Board(object):
                 piece_location = self.location_of(piece)
                 for new_location in self.possible_moves(piece_location):
                     try:
-                        new_board = self.move_piece(
-                            piece_location, new_location)
-                    except:
+                        new_board = self.move_piece(piece_location, new_location)
+                    except InvalidMoveException as e:
                         # cannot move because in check
                         pass
                     else:
@@ -519,6 +534,8 @@ class Board(object):
         return True
 
     def castle(self, piece, loc):
+        if piece not in KINGS or loc not in ["e1", "e8"]:
+            return []
         if piece_color(piece) == Board.WHITE and (self.white_can_castle_left or self.white_can_castle_right):
             pass
         elif piece_color(piece) == Board.BLACK and (self.black_can_castle_left or self.black_can_castle_right):
@@ -652,7 +669,7 @@ class Board(object):
         piece_clr = piece_color(piece)
 
         if new_loc not in possible_new_locs:
-            raise Exception("Invalid move")
+            raise InvalidMoveException("Invalid move")
 
         new_board.set_piece_at(self.piece_at(old_loc), new_loc)
         new_board.set_piece_at(None, old_loc)
@@ -700,9 +717,9 @@ class Board(object):
                 new_board.set_piece_at(None, rook_old)
 
         if new_board.in_check(piece_clr):
-            raise Exception("Invalid - cannot move into check")
+            raise InvalidMoveException("Invalid - cannot move into check")
 
-        if piece in PAWNS and new_loc[1] in (1, 8) and promotion is not None:
+        if piece in PAWNS and col_row_new[1] in (0, 7) and promotion is not None:
             assert piece_color(piece) == piece_color(promotion)
             new_board.set_piece_at(promotion, new_loc)
             new_board.set_piece_at(None, old_loc)

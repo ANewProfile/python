@@ -78,18 +78,22 @@ b = b.move_piece('b8', 'c6')
 move = b.computer_turn(Board.WHITE)
 assert move[0] != "d1" or move[1] != "h5"
 
-# promotions
-b = Board()
-b = b.move_piece('e2', 'e4')
-b = b.move_piece('a7', 'a6')
-b = b.move_piece('e4', 'e5')
-b = b.move_piece('a6', 'a5')
-b = b.move_piece('h2', 'h3')
-b = b.move_piece('f7', 'f6')
-b = b.move_piece('e5', 'f6')
-b = b.move_piece('a5', 'a4')
-b = b.move_piece('f6', 'g7')
-b = b.move_piece('a4', 'a3')
-b = b.move_piece('g7', 'h8')
+# promotion on pawn moving up
+b = Board.custom_board({'p1': 'e7', 'k': 'e1', 'K': 'a8'})
+b = b.move_piece("e7", "e8", promotion='q')
+assert b.location_of("q") == "e8"
+assert len(b.pieces()) == 3
+assert "q" in b.pieces()
+assert "k" in b.pieces()
+assert "K" in b.pieces()
+
+# promotion on pawn take
+b = Board.custom_board({'p1': 'e7', 'R1': 'd8', 'k': 'e1', 'K': 'a8'})
+b = b.move_piece("e7", "d8", promotion='q')
+assert b.location_of("q") == "d8"
+assert len(b.pieces()) == 3
+assert "q" in b.pieces()
+assert "k" in b.pieces()
+assert "K" in b.pieces()
 
 print("success!")
