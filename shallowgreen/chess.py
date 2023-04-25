@@ -1,4 +1,5 @@
 def loc_to_col_row(loc):
+    loc = loc.lower()
     return ord(loc[0])-ord('a'), int(loc[1])-1
 
 
@@ -53,12 +54,16 @@ def piece_color(piece):
     return Board.WHITE if piece.islower() else Board.BLACK
 
 
-def white_color_of(piece):
+def white_piece(piece):
     return piece.lower()
 
 
-def black_color_of(piece):
+def black_piece(piece):
     return piece.upper()
+
+
+def get_piece(name, color):
+    return white_piece(name) if color == Board.WHITE else black_piece(name)
 
 
 class Board(object):
@@ -286,7 +291,7 @@ class Board(object):
         cur_score = 0
         pieces = self.pieces()
         pawns = [piece for piece in self.pieces() if piece in PAWNS]
-        promote_to = 'q'
+        promote_to = get_piece('q', color)
 
         for piece in pieces:
             piece_clr = piece_color(piece)
@@ -479,7 +484,7 @@ class Board(object):
 
     def in_check(self, color):
         opp_color = Board.WHITE if color == Board.BLACK else Board.BLACK
-        king_piece = 'k' if color == Board.WHITE else 'K'
+        king_piece = get_piece('k', color)
         king_loc = self.location_of(king_piece)
         if self.controlled_by(king_loc, opp_color):
             return True
@@ -519,66 +524,64 @@ class Board(object):
         assert col_row[0] == 4
         castle_vals = [0, 0, 0, 0]
 
-        # can't castle through or from check - white
-        if self.controlled_by('d1', Board.BLACK, include_castle=False) or \
-                self.controlled_by('c1', Board.BLACK, include_castle=False) or \
-                self.controlled_by('b1', Board.BLACK, include_castle=False) or \
-                self.controlled_by('e1', Board.BLACK, include_castle=False):
-            blocking_white_left = True
-
-        if self.controlled_by('f1', Board.BLACK, include_castle=False) or \
-                self.controlled_by('g1', Board.BLACK, include_castle=False) or \
-                self.controlled_by('e1', Board.BLACK, include_castle=False):
-            blocking_white_right = True
-
-        # can't castle through or from check - black
-        if self.controlled_by('d8', Board.WHITE, include_castle=False) or \
-                self.controlled_by('c8', Board.WHITE, include_castle=False) or \
-                self.controlled_by('b8', Board.WHITE, include_castle=False) or \
-                self.controlled_by('e8', Board.WHITE, include_castle=False):
-            blocking_black_left = True
-
-        if self.controlled_by('f8', Board.WHITE, include_castle=False) or \
-                self.controlled_by('g8', Board.WHITE, include_castle=False) or \
-                self.controlled_by('e8', Board.WHITE, include_castle=False):
-            blocking_black_right = True
-
         if piece_color(piece) == Board.WHITE:
-            if self.white_can_castle_left:
-                if self.piece_at("a1") == white_color_of("r1") and \
+
+            # can't castle through or from check - white
+            if self.controlled_by('d1', Board.BLACK, include_castle=False) or \
+               self.controlled_by('c1', Board.BLACK, include_castle=False) or \
+               self.controlled_by('b1', Board.BLACK, include_castle=False) or \
+               self.controlled_by('e1', Board.BLACK, include_castle=False):
+                blocking_white_left = True
+
+            if self.controlled_by('f1', Board.BLACK, include_castle=False) or \
+               self.controlled_by('g1', Board.BLACK, include_castle=False) or \
+               self.controlled_by('e1', Board.BLACK, include_castle=False):
+                blocking_white_right = True
+
+            if self.white_can_castle_left and blocking_white_left is False:
+                if self.piece_at("a1") == white_piece("r1") and \
                    self.piece_at("b1") is None and \
                    self.piece_at("c1") is None and \
-                   self.piece_at("d1") is None and \
-                        blocking_white_left is False:
+                   self.piece_at("d1") is None:
                     castle_vals[1] = -2
-            if self.white_can_castle_right:
-                if self.piece_at("h1") == white_color_of("r2") and \
+
+            if self.white_can_castle_right and blocking_white_right is False:
+                if self.piece_at("h1") == white_piece("r2") and \
                    self.piece_at("g1") is None and \
-                   self.piece_at("f1") is None and \
-                        blocking_white_right is False:
+                   self.piece_at("f1") is None:
                     castle_vals[0] = 2
-        else:
-            if self.black_can_castle_left:
-                if self.piece_at("a8") == black_color_of("r1") and \
+
+        else:  # black castle
+
+            # can't castle through or from check - black
+            if self.controlled_by('d8', Board.WHITE, include_castle=False) or \
+               self.controlled_by('c8', Board.WHITE, include_castle=False) or \
+               self.controlled_by('b8', Board.WHITE, include_castle=False) or \
+               self.controlled_by('e8', Board.WHITE, include_castle=False):
+                blocking_black_left = True
+
+            if self.controlled_by('f8', Board.WHITE, include_castle=False) or \
+               self.controlled_by('g8', Board.WHITE, include_castle=False) or \
+               self.controlled_by('e8', Board.WHITE, include_castle=False):
+                blocking_black_right = True
+
+            if self.black_can_castle_left and blocking_black_left is False:
+                if self.piece_at("a8") == black_piece("r1") and \
                    self.piece_at("b8") is None and \
                    self.piece_at("c8") is None and \
-                   self.piece_at("d8") is None and \
-                        blocking_black_left is False:
+                   self.piece_at("d8") is None:
                     castle_vals[3] = -2
-            if self.black_can_castle_right:
-                if self.piece_at("h8") == black_color_of("r2") and \
+            if self.black_can_castle_right and blocking_black_right is False:
+                if self.piece_at("h8") == black_piece("r2") and \
                    self.piece_at("g8") is None and \
-                   self.piece_at("f8") is None and \
-                        blocking_black_right is False:
+                   self.piece_at("f8") is None:
                     castle_vals[2] = 2
 
         new_positions = []
         for n in castle_vals:
             if n != 0:
                 new_positions.append([col_row[0]+n, col_row[1]])
-
         new_locs = [col_row_to_loc(col_row) for col_row in new_positions]
-
         return new_locs
 
     def possible_moves(self, loc, include_castle=True):
@@ -603,7 +606,6 @@ class Board(object):
         if piece in KINGS:
             new_locations.extend(self.diagonal_moves(piece, loc, 2))
             new_locations.extend(self.cross_moves(piece, loc, 2))
-
             if include_castle:
                 new_locations.extend(self.castle(piece, loc))
 
@@ -641,60 +643,60 @@ class Board(object):
         possible_new_locs = self.possible_moves(old_loc)
         piece_clr = piece_color(piece)
 
-        if new_loc in possible_new_locs:
-            new_board.set_piece_at(self.piece_at(old_loc), new_loc)
-            new_board.set_piece_at(None, old_loc)
+        if new_loc not in possible_new_locs:
+            raise Exception("Invalid move")
 
-            if piece == "r1":
+        new_board.set_piece_at(self.piece_at(old_loc), new_loc)
+        new_board.set_piece_at(None, old_loc)
+
+        if piece == white_piece('r1'):
+            new_board.white_can_castle_left = False
+        elif piece == white_piece('r2'):
+            new_board.white_can_castle_right = False
+        if piece == black_piece('R1'):
+            new_board.black_can_castle_left = False
+        if piece == black_piece('R2'):
+            new_board.black_can_castle_right = False
+
+        if piece in KINGS:
+            if piece == white_piece('k'):
                 new_board.white_can_castle_left = False
-            elif piece == "r2":
                 new_board.white_can_castle_right = False
-            if piece == "R1":
+            if piece == black_piece('K'):
                 new_board.black_can_castle_left = False
-            if piece == "R2":
                 new_board.black_can_castle_right = False
 
-            if piece in ['k', 'K']:
-                if piece == "k":
-                    new_board.white_can_castle_left = False
-                    new_board.white_can_castle_right = False
-                if piece == "K":
-                    new_board.black_can_castle_left = False
-                    new_board.black_can_castle_right = False
+            cols_moved = col_row_new[0]-col_row_old[0]
+            if cols_moved == 2:
+                if piece.islower():
+                    rook = white_piece('r2')
+                    rook_old = 'h1'
+                    rook_new = 'f1'
+                else:
+                    rook = black_piece('R2')
+                    rook_old = 'h8'
+                    rook_new = 'f8'
 
-                cols_moved = col_row_new[0]-col_row_old[0]
-                if cols_moved == 2:
-                    if piece.islower():
-                        rook = 'r2'
-                        rook_old = 'h1'
-                        rook_new = 'f1'
-                    else:
-                        rook = 'R2'
-                        rook_old = 'h8'
-                        rook_new = 'f8'
+            elif cols_moved == -2:
+                if piece.islower():
+                    rook = white_piece('r1')
+                    rook_old = 'a1'
+                    rook_new = 'd1'
+                else:
+                    rook = black_piece('R1')
+                    rook_old = 'a8'
+                    rook_new = 'd8'
 
-                elif cols_moved == -2:
-                    if piece.islower():
-                        rook = 'r1'
-                        rook_old = 'a1'
-                        rook_new = 'd1'
-                    else:
-                        rook = 'R1'
-                        rook_old = 'a8'
-                        rook_new = 'd8'
+            if abs(cols_moved) > 1:
+                new_board.set_piece_at(rook, rook_new)
+                new_board.set_piece_at(None, rook_old)
 
-                if abs(cols_moved) > 1:
-                    new_board.set_piece_at(rook, rook_new)
-                    new_board.set_piece_at(None, rook_old)
+        if new_board.in_check(piece_clr):
+            raise Exception("Invalid - cannot move into check")
 
-            if new_board.in_check(piece_clr):
-                raise Exception("Invalid - cannot move into check")
+        if piece in PAWNS and new_loc[1] in (1, 8) and promotion is not None:
+            assert piece_color(piece) == piece_color(promotion)
+            new_board.set_piece_at(promotion, new_loc)
+            new_board.set_piece_at(None, old_loc)
 
-            if piece in PAWNS and new_loc[1] in (1, 8) and promotion is not None:
-                new_board.set_piece_at(promotion, new_loc)
-                new_board.set_piece_at(None, old_loc)
-
-            return new_board
-
-        else:
-            raise Exception("Invalid")
+        return new_board
