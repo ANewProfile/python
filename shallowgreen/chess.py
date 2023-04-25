@@ -475,7 +475,6 @@ class Board(object):
             # if empty or opponent
             if new_loc is not None and (new_loc_piece is None or piece_color(new_loc_piece) != my_color):
                 new_locations.append(new_loc)
-
         return new_locations
 
     def in_check(self, color):
