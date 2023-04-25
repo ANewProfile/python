@@ -131,7 +131,8 @@ class Board(object):
 
     def duplicate(self):
         new_board = Board()
-        new_board.positions = [[piece for piece in sub_array] for sub_array in self.positions]
+        new_board.positions = [[piece for piece in sub_array]
+                               for sub_array in self.positions]
         new_board.white_can_castle_right = self.white_can_castle_right
         new_board.black_can_castle_right = self.black_can_castle_right
         new_board.white_can_castle_left = self.white_can_castle_left
@@ -295,13 +296,12 @@ class Board(object):
             self.get_safety(),
             space, risked)
 
-    def computer_turn(self, color):
+    def computer_turn(self, color, depth=2):
         best_score = None
         best_move = None
         best_old_loc = None
         cur_score = 0
         pieces = self.pieces()
-        pawns = [piece for piece in self.pieces() if piece in PAWNS]
         promote_to = get_piece('q', color)
 
         for piece in pieces:
