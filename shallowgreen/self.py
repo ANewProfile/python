@@ -9,7 +9,11 @@ while True:
 
     if turn == Board.WHITE:  # white move
         print(board)
-        q = board.computer_turn(Board.WHITE)
+        try:
+            q = board.computer_turn(Board.WHITE)
+        except GameOverException as e:
+            print(str(e))
+            exit()
         print("WHITE board.move_piece('%s','%s')" % (q[0],q[1]))
         print("")
         board = board.move_piece(*q)
@@ -19,7 +23,11 @@ while True:
 
     else:   # black move
         print(board)
-        q = board.computer_turn(Board.BLACK)
+        try:
+            q = board.computer_turn(Board.BLACK)
+        except GameOverException as e:
+            print(str(e))
+            exit()
         print("BLACK board.move_piece('%s','%s')" % (q[0],q[1]))
         print("")
         board = board.move_piece(*q)

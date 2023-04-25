@@ -16,11 +16,15 @@ while True:
             try:
                 board = board.move_piece(q[0], q[1])
                 move += 1
-            except Exception as e:
+            except InvalidMoveException as e:
                 print(e)
 
     else:   # black move
-        q = board.computer_turn(Board.BLACK)
+        try:
+            q = board.computer_turn(Board.BLACK)
+        except GameOverException as e:
+            print(str(e))
+            exit()
         board = board.move_piece(*q)
         print("computer move:", *q)
         move += 1
