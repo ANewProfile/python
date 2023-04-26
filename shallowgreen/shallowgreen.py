@@ -1,6 +1,7 @@
 from chess import *
 
 board = Board()
+player = LookAheadPlayer(TheoBoardAnalyzer, depth=1)
 move = 0
 
 while True:
@@ -21,10 +22,10 @@ while True:
 
     else:   # black move
         try:
-            q = board.computer_turn(Board.BLACK)
+            q = player.computer_turn(board, Board.BLACK)
         except GameOverException as e:
             print(str(e))
             exit()
         board = board.move_piece(*q)
-        print("computer move:", *q)
+        print("COMPUTER MOVE:", *q)
         move += 1

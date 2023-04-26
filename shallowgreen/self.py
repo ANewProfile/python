@@ -2,7 +2,7 @@ from chess import *
 import time
 
 board = Board()
-player = LookAheadPlayer(TheoBoardAnalyzer, depth=1)
+player = LookAheadPlayer(TheoBoardAnalyzer, depth=2)
 move = 0
 
 while True:

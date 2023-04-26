@@ -690,7 +690,9 @@ class TheoBoardAnalyzer(BoardAnalyzer):
                     space -= 1
         return space
 
-    def compute_score(self, material, safety, space, risk):
+    def compute_score(self, material, safety, space, risk, board):
+        """
+        Calculates and returns a board evaluation"""
         score = 0.0
         # material and risk (which is material in immediate danger) are equal weight
         score += material
@@ -698,16 +700,30 @@ class TheoBoardAnalyzer(BoardAnalyzer):
         score += safety
         # space is less
         score += space/3
+
+        # doesn't blunder mate
+        for color in (Board.WHITE, Board.BLACK):
+            if color == Board.WHITE:
+                if board.check_mate(Board.WHITE):
+                    score = -1000000000000000
+
+            else:
+                if board.check_mate(Board.BLACK):
+                    score = 10000000000000000
+
         return score
 
-    def score(self, just_moved_color):
+    def score(self, just_moved_color, board):
+        """
+        Returns a numeric score bassed off of the compute_score() func
+        """
         space = self.get_space()
         risked = self.get_piece_risked(just_moved_color)
         # print("material", self.get_material(), "safety", self.get_safety(), "sp", space, "risked", risked)
         return self.compute_score(
             self.get_material(),
             self.get_safety(),
-            space, risked)
+            space, risked, board)
 
 
 class Move(object):
@@ -734,7 +750,7 @@ class LookAheadPlayer(object):
 
     def get_possible_next_move(self, board, color):
         """
-	Given a board and a color, returns list of possible next moves by that
+        Given a board and a color, returns list of possible next moves by that
         color. Each move is a (old_location, new_location) tuple.
         """
 
@@ -783,22 +799,22 @@ class LookAheadPlayer(object):
         next_moves = self.get_next_moves(board, color)
 
         if depth == 1:
-           return [[m] for m in next_moves]
+            return [[m] for m in next_moves]
 
         else:
-           all_moves = []
+            all_moves = []
 
-           for last_move in next_moves:
-               if last_move.new_board.check_mate(last_move.next_move_color):
-                   all_moves.append([last_move])
+            for last_move in next_moves:
+                if last_move.new_board.check_mate(last_move.next_move_color):
+                    all_moves.append([last_move])
 
-               else:
-                   future_moves = self.get_future_moves(last_move.new_board, last_move.next_move_color, depth-1)
-                   for move_sequence in future_moves:
-                       move_sequence = [last_move] + move_sequence
-                       all_moves.append(move_sequence)
+                else:
+                    future_moves = self.get_future_moves(last_move.new_board, last_move.next_move_color, depth-1)
+                    for move_sequence in future_moves:
+                        move_sequence = [last_move] + move_sequence
+                        all_moves.append(move_sequence)
 
-           return all_moves
+            return all_moves
 
     def computer_turn(self, board, color):
         best_move = None
@@ -817,7 +833,7 @@ class LookAheadPlayer(object):
                 return first_move
 
             analyzer = self.analyzer_class(ending_board)
-            cur_score = analyzer.score(color)
+            cur_score = analyzer.score(color, board)
             # print("scoring", first_move[0], "to", first_move[1], "score is", cur_score)
             if (color == Board.WHITE and (best_score is None or cur_score > best_score)) or \
                     (color == Board.BLACK and (best_score is None or cur_score < best_score)):
