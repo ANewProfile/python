@@ -19,6 +19,7 @@ KINGS = ('k', 'K')
 class GameOverException(Exception):
     pass
 
+
 class InvalidMoveException(Exception):
     pass
 
@@ -172,7 +173,8 @@ class Board(object):
 
     def duplicate(self):
         new_board = Board(empty=True)
-        new_board.positions = [[piece for piece in sub_array] for sub_array in self.positions]
+        new_board.positions = [[piece for piece in sub_array]
+                               for sub_array in self.positions]
         new_board.white_can_castle_right = self.white_can_castle_right
         new_board.black_can_castle_right = self.black_can_castle_right
         new_board.white_can_castle_left = self.white_can_castle_left
@@ -207,151 +209,6 @@ class Board(object):
     def loc_piece_color(self, loc):
         piece = self.piece_at(loc)
         return piece_color(piece)
-
-    def get_material(self):
-        cur_material = 0
-        for piece in self.pieces():
-            if piece_color(piece) == Board.WHITE:
-                cur_material += material(piece)
-            else:
-                cur_material -= material(piece)
-        return cur_material
-
-    def get_safety(self):
-        safety = 0
-
-        white_king_loc = self.location_of('k')
-        black_king_loc = self.location_of('K')
-        white_king_pos = loc_to_col_row(white_king_loc)
-        black_king_pos = loc_to_col_row(black_king_loc)
-
-        around_king_white = [[white_king_pos[0]+1, white_king_pos[1]+1], [white_king_pos[0]+1, white_king_pos[1]-1], [white_king_pos[0]-1, white_king_pos[1]+1],
-                             [white_king_pos[0]-1, white_king_pos[1]-1], [white_king_pos[0]+1,
-                                                                          white_king_pos[1]], [white_king_pos[0], white_king_pos[1]+1],
-                             [white_king_pos[0]-1, white_king_pos[1]], [white_king_pos[0], white_king_pos[1]-1]]
-
-        around_king_black = [[black_king_pos[0]+1, black_king_pos[1]+1], [black_king_pos[0]+1, black_king_pos[1]-1], [black_king_pos[0]-1, black_king_pos[1]+1],
-                             [black_king_pos[0]-1, black_king_pos[1]-1], [black_king_pos[0]+1,
-                                                                          black_king_pos[1]], [black_king_pos[0], black_king_pos[1]+1],
-                             [black_king_pos[0]-1, black_king_pos[1]], [black_king_pos[0], black_king_pos[1]-1]]
-
-        locs_around_king_white = [col_row_to_loc(col_row) for col_row in around_king_white
-                                  if col_row[0] < 8 and col_row[0] > -1 and col_row[1] < 8 and col_row[1] >= 0]
-
-        locs_around_king_black = [col_row_to_loc(col_row) for col_row in around_king_black
-                                  if col_row[0] < 8 and col_row[0] >= 0 and col_row[1] < 8 and col_row[1] >= 0]
-
-        space_white = self.specific_space(locs_around_king_white)
-        space_black = self.specific_space(locs_around_king_black)
-
-        if space_white < 0:
-            safety -= space_white
-        if space_black > 0:
-            safety += space_black
-
-        return safety
-
-    def get_piece_risked(self, just_moved_color):
-        risked = 0
-        for piece in self.pieces():
-            if piece_color(piece) == just_moved_color:
-                controlling = self.controlling_side(self.location_of(piece))
-                if controlling is not None and controlling != just_moved_color:
-                    if just_moved_color == Board.WHITE:
-                        risked -= material(piece)
-                    else:
-                        risked += material(piece)
-        return risked
-
-    def get_space(self):
-        """
-        Returns amount of controlling space, positive favoring white, negative favoring black
-        """
-
-        all_spaces = [col_row_to_loc([c, r])
-                      for c in range(8) for r in range(8)]
-
-        return self.specific_space(all_spaces)
-
-    def specific_space(self, locs):
-        """
-        Returns amount of controlling space, positive favoring white, negative favoring black
-        """
-
-        space = 0
-        for square in locs:
-            controlling = self.controlling_side(square)
-            if controlling == Board.WHITE:
-                if square[0] in ('d', 'e'):
-                    space += 3
-                elif square[0] in ('c', 'f'):
-                    space += 2
-                else:
-                    space += 1
-            elif controlling == Board.BLACK:
-                if square[0] in ('d', 'e'):
-                    space -= 3
-                elif square[0] in ('c', 'f'):
-                    space -= 2
-                else:
-                    space -= 1
-        return space
-
-    def compute_score(self, material, safety, space, risk):
-        score = 0.0
-        # material and risk (which is material in immediate danger) are equal weight
-        score += material
-        score += risk
-        score += safety
-        # space is less
-        score += space/3
-        return score
-
-    def score(self, just_moved_color):
-        space = self.get_space()
-        risked = self.get_piece_risked(just_moved_color)
-        # print("material", self.get_material(), "safety", self.get_safety(), "sp", space, "risked", risked)
-        return self.compute_score(
-            self.get_material(),
-            self.get_safety(),
-            space, risked)
-
-    def computer_turn(self, color, depth=2):
-        best_score = None
-        best_move = None
-        best_old_loc = None
-        cur_score = 0
-        my_pieces = [piece for piece in self.pieces() if piece_color(piece) == color]
-        promote_to = get_piece('q', color)
-
-        for piece in my_pieces:
-            old_location = self.location_of(piece)
-            opp_color = Board.WHITE if color == Board.BLACK else Board.BLACK
-            for move in self.possible_moves(old_location):
-                # print("computer wants to move", (old_location, move))
-                try:
-                    new_board = self.move_piece(
-                        old_location, move, promotion=promote_to)
-                    if self.check_mate(opp_color):
-                        return old_location, move
-                except:
-                    # print("  disallowed (%s)" % str(e))
-                    continue
-                cur_score = new_board.score(color)
-                # print("scoring", old_location, "to", move, "score is", cur_score)
-                if (color == Board.WHITE and (best_score is None or cur_score > best_score)) or \
-                        (color == Board.BLACK and (best_score is None or cur_score < best_score)):
-                    best_score = cur_score
-                    best_old_loc = old_location
-                    best_move = move
-
-        if best_move is None:  # cannot make a move
-            if self.check_mate(color):
-                raise GameOverException(f"Checkmate, {color} lost.")
-            else:
-                raise GameOverException("Draw by stalemate.")
-
-        return best_old_loc, best_move
 
     def diagonal_moves(self, piece, loc, total_range):
 
@@ -524,7 +381,8 @@ class Board(object):
                 piece_location = self.location_of(piece)
                 for new_location in self.possible_moves(piece_location):
                     try:
-                        new_board = self.move_piece(piece_location, new_location)
+                        new_board = self.move_piece(
+                            piece_location, new_location)
                     except InvalidMoveException as e:
                         # cannot move because in check
                         pass
@@ -726,3 +584,194 @@ class Board(object):
 
         new_board.__allow_set_piece = False
         return new_board
+
+
+class BoardAnalyzer(object):
+
+    def __init__(self, board):
+        self.board = board
+
+    def score(self, just_moved_color):
+        """
+        Return a numeric score
+        """
+        raise Exception("Implement me")
+
+
+class TheoBoardAnalyzer(BoardAnalyzer):
+
+    def get_material(self):
+        cur_material = 0
+        for piece in self.board.pieces():
+            if piece_color(piece) == Board.WHITE:
+                cur_material += material(piece)
+            else:
+                cur_material -= material(piece)
+        return cur_material
+
+    def get_safety(self):
+        safety = 0
+
+        white_king_loc = self.board.location_of('k')
+        black_king_loc = self.board.location_of('K')
+        white_king_pos = loc_to_col_row(white_king_loc)
+        black_king_pos = loc_to_col_row(black_king_loc)
+
+        around_king_white = [[white_king_pos[0]+1, white_king_pos[1]+1], [white_king_pos[0]+1, white_king_pos[1]-1], [white_king_pos[0]-1, white_king_pos[1]+1],
+                             [white_king_pos[0]-1, white_king_pos[1]-1], [white_king_pos[0]+1,
+                                                                          white_king_pos[1]], [white_king_pos[0], white_king_pos[1]+1],
+                             [white_king_pos[0]-1, white_king_pos[1]], [white_king_pos[0], white_king_pos[1]-1]]
+
+        around_king_black = [[black_king_pos[0]+1, black_king_pos[1]+1], [black_king_pos[0]+1, black_king_pos[1]-1], [black_king_pos[0]-1, black_king_pos[1]+1],
+                             [black_king_pos[0]-1, black_king_pos[1]-1], [black_king_pos[0]+1,
+                                                                          black_king_pos[1]], [black_king_pos[0], black_king_pos[1]+1],
+                             [black_king_pos[0]-1, black_king_pos[1]], [black_king_pos[0], black_king_pos[1]-1]]
+
+        locs_around_king_white = [col_row_to_loc(col_row) for col_row in around_king_white
+                                  if col_row[0] < 8 and col_row[0] > -1 and col_row[1] < 8 and col_row[1] >= 0]
+
+        locs_around_king_black = [col_row_to_loc(col_row) for col_row in around_king_black
+                                  if col_row[0] < 8 and col_row[0] >= 0 and col_row[1] < 8 and col_row[1] >= 0]
+
+        space_white = self.specific_space(locs_around_king_white)
+        space_black = self.specific_space(locs_around_king_black)
+
+        if space_white < 0:
+            safety -= space_white
+        if space_black > 0:
+            safety += space_black
+
+        return safety
+
+    def get_piece_risked(self, just_moved_color):
+        risked = 0
+        for piece in self.board.pieces():
+            if piece_color(piece) == just_moved_color:
+                controlling = self.board.controlling_side(
+                    self.board.location_of(piece))
+                if controlling is not None and controlling != just_moved_color:
+                    if just_moved_color == Board.WHITE:
+                        risked -= material(piece)
+                    else:
+                        risked += material(piece)
+        return risked
+
+    def get_space(self):
+        """
+        Returns amount of controlling space, positive favoring white, negative favoring black
+        """
+
+        all_spaces = [col_row_to_loc([c, r])
+                      for c in range(8) for r in range(8)]
+
+        return self.specific_space(all_spaces)
+
+    def specific_space(self, locs):
+        """
+        Returns amount of controlling space, positive favoring white, negative favoring black
+        """
+
+        space = 0
+        for square in locs:
+            controlling = self.board.controlling_side(square)
+            if controlling == Board.WHITE:
+                if square[0] in ('d', 'e'):
+                    space += 3
+                elif square[0] in ('c', 'f'):
+                    space += 2
+                else:
+                    space += 1
+            elif controlling == Board.BLACK:
+                if square[0] in ('d', 'e'):
+                    space -= 3
+                elif square[0] in ('c', 'f'):
+                    space -= 2
+                else:
+                    space -= 1
+        return space
+
+    def compute_score(self, material, safety, space, risk):
+        score = 0.0
+        # material and risk (which is material in immediate danger) are equal weight
+        score += material
+        score += risk
+        score += safety
+        # space is less
+        score += space/3
+        return score
+
+    def score(self, just_moved_color):
+        space = self.get_space()
+        risked = self.get_piece_risked(just_moved_color)
+        # print("material", self.get_material(), "safety", self.get_safety(), "sp", space, "risked", risked)
+        return self.compute_score(
+            self.get_material(),
+            self.get_safety(),
+            space, risked)
+
+
+class Player(object):
+
+    def __init__(self, analyzer_class, depth=1):
+        self.analyzer_class = analyzer_class
+        self.depth = depth
+
+    def get_possible_moves(self, board, color):
+        moves = []
+        my_pieces = [piece for piece in board.pieces()
+                     if piece_color(piece) == color]
+        for piece in my_pieces:
+            old_location = board.location_of(piece)
+            for move in board.possible_moves(old_location):
+                moves.append((old_location, move))
+        return moves
+
+    def get_possible_boards(self, board, color):
+        """
+        Returns list of possible boards after one move by specified color
+        """
+
+        promote_to = get_piece('q', color)
+        moves_and_new_boards = []
+
+        for old_location, move in self.get_possible_moves(board, color):
+            try:
+                new_board = board.move_piece(
+                    old_location, move, promotion=promote_to)
+            except InvalidMoveException as e:
+                pass
+            else:
+                moves_and_new_boards.append((old_location, move, new_board))
+
+        return moves_and_new_boards
+
+    def computer_turn(self, board, color):
+        best_score = None
+        best_move = None
+        best_old_loc = None
+        cur_score = 0
+        opp_color = Board.WHITE if color == Board.BLACK else Board.BLACK
+
+        moves_and_new_boards = self.get_possible_boards(board, color)
+        for old_location, move, new_board in moves_and_new_boards:
+            """
+            if new_board.check_mate(opp_color):
+                return old_location, move
+            """
+
+            analyzer = self.analyzer_class(new_board)
+            cur_score = analyzer.score(color)
+            # print("scoring", old_location, "to", move, "score is", cur_score)
+            if (color == Board.WHITE and (best_score is None or cur_score > best_score)) or \
+                    (color == Board.BLACK and (best_score is None or cur_score < best_score)):
+                best_score = cur_score
+                best_old_loc = old_location
+                best_move = move
+
+        if best_move is None:  # cannot make a move
+            if board.check_mate(color):
+                raise GameOverException(f"Checkmate, {color} lost.")
+            else:
+                raise GameOverException("Draw by stalemate.")
+
+        return best_old_loc, best_move
