@@ -710,63 +710,118 @@ class TheoBoardAnalyzer(BoardAnalyzer):
             space, risked)
 
 
-class Player(object):
+class LookAheadPlayer(object):
 
     def __init__(self, analyzer_class, depth=1):
         self.analyzer_class = analyzer_class
         self.depth = depth
 
     def get_possible_moves(self, board, color):
+        """
+	Given a board and a color, returns list of possible moves by that
+        color. Each move is a (old_location, new_location) tuple.
+        """
+
         moves = []
         my_pieces = [piece for piece in board.pieces()
                      if piece_color(piece) == color]
+
         for piece in my_pieces:
             old_location = board.location_of(piece)
-            for move in board.possible_moves(old_location):
-                moves.append((old_location, move))
+            for new_location in board.possible_moves(old_location):
+                moves.append((old_location, new_location))
+
         return moves
 
-    def get_possible_boards(self, board, color):
+    def get_move_and_child_boards(self, board, color):
         """
-        Returns list of possible boards after one move by specified color
+	Given a board and a color, return list of (old_location, new_location, resulting_board) tuples.
         """
 
         promote_to = get_piece('q', color)
-        moves_and_new_boards = []
+        move_and_new_boards = []
 
-        for old_location, move in self.get_possible_moves(board, color):
+        for old_location, new_location in self.get_possible_moves(board, color):
             try:
                 new_board = board.move_piece(
-                    old_location, move, promotion=promote_to)
+                    old_location, new_location, promotion=promote_to)
             except InvalidMoveException as e:
                 pass
             else:
-                moves_and_new_boards.append((old_location, move, new_board))
+                move_and_new_boards.append([(old_location, new_location), new_board])
 
-        return moves_and_new_boards
+        return move_and_new_boards
+
+    def get_child_move_and_boards(self, board, color, depth):
+        """
+	Given a starting board and a color, return a list of move sequences and
+	boards. Each member of the list is an array of moves with board
+	following the move, and each move is (old_location, new_location)
+	tuple. The number of moves in a move sequence is specified by the depth
+        argument.
+
+        For example, this method may return the following when depth is 2
+
+          [ [ (move1_old_loc, move1_new_loc), board_after_move_1,
+              (move2_old_loc, move2_new_loc), board_after_move_2 ],
+
+            [ (move1_old_loc, move1_new_loc), board_after_move_1,
+              (move2_old_loc, move2_new_loc), board_after_move_2 ],
+             
+            ...
+          ]
+
+	Not every member of the returned list have the same depth or number of
+        moves. A move sequence may terminate when there is a checkmate.
+        """
+
+        assert depth > 0
+        move_and_resulting_boards = self.get_move_and_child_boards(board, color)
+
+        if depth == 1:
+           return move_and_resulting_boards
+
+        else:
+           all_moves_and_boards = []
+           opp_color = Board.WHITE if color == Board.BLACK else Board.BLACK
+
+           for move, child_board in move_and_resulting_boards:
+               if child_board.check_mate(opp_color):
+                   all_moves_and_boards.append([move, child_board])
+
+               else:
+                   next_moves_and_resulting_boards = self.get_child_move_and_boards(child_board, opp_color, depth-1)
+
+                   for next_moves_and_board in next_moves_and_resulting_boards:
+                       all_moves_and_board = [move, child_board]
+                       all_moves_and_board.extend(next_moves_and_board)
+                       all_moves_and_boards.append(all_moves_and_board)
+
+           return all_moves_and_boards
 
     def computer_turn(self, board, color):
-        best_score = None
         best_move = None
-        best_old_loc = None
+        best_score = None
         cur_score = 0
         opp_color = Board.WHITE if color == Board.BLACK else Board.BLACK
 
-        moves_and_new_boards = self.get_possible_boards(board, color)
-        for old_location, move, new_board in moves_and_new_boards:
-            """
-            if new_board.check_mate(opp_color):
-                return old_location, move
-            """
+        all_moves_and_boards = self.get_child_move_and_boards(board, color, self.depth)
 
-            analyzer = self.analyzer_class(new_board)
+        for moves_and_board in all_moves_and_boards:
+            first_move = moves_and_board[0]
+            next_board = moves_and_board[1]
+            ending_board = moves_and_board[-1]
+
+            if next_board.check_mate(opp_color):
+                return first_move
+
+            analyzer = self.analyzer_class(ending_board)
             cur_score = analyzer.score(color)
-            # print("scoring", old_location, "to", move, "score is", cur_score)
+            # print("scoring", first_move[0], "to", first_move[1], "score is", cur_score)
             if (color == Board.WHITE and (best_score is None or cur_score > best_score)) or \
                     (color == Board.BLACK and (best_score is None or cur_score < best_score)):
                 best_score = cur_score
-                best_old_loc = old_location
-                best_move = move
+                best_move = first_move
 
         if best_move is None:  # cannot make a move
             if board.check_mate(color):
@@ -774,4 +829,4 @@ class Player(object):
             else:
                 raise GameOverException("Draw by stalemate.")
 
-        return best_old_loc, best_move
+        return best_move
