@@ -113,19 +113,24 @@ class Board(object):
         self.positions[7-pos[1]][pos[0]] = piece
         self.__piece_locations = None
 
+    def assign_controls(self):
+        self.__controlling = {}
+        for piece, piece_loc in self.piece_and_locations():
+            for loc in self.possible_moves(piece_loc):
+                if loc not in self.__controlling:
+                    self.__controlling[loc] = 0
+                if piece_color(piece) == Board.BLACK:
+                    self.__controlling[loc] -= 1
+                else:
+                    self.__controlling[loc] += 1
+
     def controlling_side(self, loc):
+        if self.__controlling is None:
+            self.assign_controls()
         if loc in self.__controlling:
             pieces_guarding = self.__controlling[loc]
-
         else:
             pieces_guarding = 0
-            for piece, piece_loc in self.piece_and_locations():
-                if loc in self.possible_moves(piece_loc):
-                    if piece_color(piece) == Board.BLACK:
-                        pieces_guarding -= 1
-                    else:
-                        pieces_guarding += 1
-            self.__controlling[loc] = pieces_guarding
 
         if pieces_guarding > 0:
             return Board.WHITE
@@ -203,7 +208,7 @@ class Board(object):
         self.__allow_set_piece = False
         self.__piece_locations = None
         self.__location_moves = {}
-        self.__controlling = {}
+        self.__controlling = None
         self.__controlled_by = {}
         self.__check_mate = {}
 
