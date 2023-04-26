@@ -197,6 +197,10 @@ class Board(object):
             self.__set_initial_positions()
             self.__allow_set_piece = False
 
+    def key(self):
+        return "".join(["".join([piece if piece is not None else "_" for piece in sub_array])
+                       for sub_array in self.positions])
+
     @staticmethod
     def custom_board(piece_locations):
         board = Board(empty=True)
@@ -747,6 +751,7 @@ class LookAheadPlayer(object):
     def __init__(self, analyzer_class, depth=1):
         self.analyzer_class = analyzer_class
         self.depth = depth
+        self.visited_boards = {}
 
     def get_possible_next_move(self, board, color):
         """
@@ -799,16 +804,25 @@ class LookAheadPlayer(object):
         next_moves = self.get_next_moves(board, color)
 
         if depth == 1:
+            for m in next_moves:
+                self.visited_boards[m.new_board.key()] = 1
             return [[m] for m in next_moves]
 
         else:
             all_moves = []
 
             for last_move in next_moves:
+                # there is a checkmate stop searching
                 if last_move.new_board.check_mate(last_move.next_move_color):
+                    self.visited_boards[last_move.new_board.key()] = 1
+                    all_moves.append([last_move])
+
+                # don't evaluate a board we've already evaluated
+                elif last_move.new_board.key() in self.visited_boards:
                     all_moves.append([last_move])
 
                 else:
+                    self.visited_boards[last_move.new_board.key()] = 1
                     future_moves = self.get_future_moves(last_move.new_board, last_move.next_move_color, depth-1)
                     for move_sequence in future_moves:
                         move_sequence = [last_move] + move_sequence
@@ -821,6 +835,7 @@ class LookAheadPlayer(object):
         best_score = None
         cur_score = 0
 
+        self.visited_boards = {}
         all_moves = self.get_future_moves(board, color, self.depth)
 
         for move_sequence in all_moves:
