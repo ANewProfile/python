@@ -716,9 +716,9 @@ class LookAheadPlayer(object):
         self.analyzer_class = analyzer_class
         self.depth = depth
 
-    def get_possible_moves(self, board, color):
+    def get_possible_next_move(self, board, color):
         """
-	Given a board and a color, returns list of possible moves by that
+	Given a board and a color, returns list of possible next moves by that
         color. Each move is a (old_location, new_location) tuple.
         """
 
@@ -733,15 +733,16 @@ class LookAheadPlayer(object):
 
         return moves
 
-    def get_move_and_child_boards(self, board, color):
+    def get_next_move_and_board(self, board, color):
         """
-	Given a board and a color, return list of (old_location, new_location, resulting_board) tuples.
+	Given a board and a color, return list of (old_location, new_location,
+        resulting_board) tuples.
         """
 
         promote_to = get_piece('q', color)
         move_and_new_boards = []
 
-        for old_location, new_location in self.get_possible_moves(board, color):
+        for old_location, new_location in self.get_possible_next_move(board, color):
             try:
                 new_board = board.move_piece(
                     old_location, new_location, promotion=promote_to)
@@ -752,7 +753,7 @@ class LookAheadPlayer(object):
 
         return move_and_new_boards
 
-    def get_child_move_and_boards(self, board, color, depth):
+    def get_future_moves_and_boards(self, board, color, depth):
         """
 	Given a starting board and a color, return a list of move sequences and
 	boards. Each member of the list is an array of moves with board
@@ -776,7 +777,7 @@ class LookAheadPlayer(object):
         """
 
         assert depth > 0
-        move_and_resulting_boards = self.get_move_and_child_boards(board, color)
+        move_and_resulting_boards = self.get_next_move_and_board(board, color)
 
         if depth == 1:
            return move_and_resulting_boards
@@ -790,7 +791,7 @@ class LookAheadPlayer(object):
                    all_moves_and_boards.append([move, child_board])
 
                else:
-                   next_moves_and_resulting_boards = self.get_child_move_and_boards(child_board, opp_color, depth-1)
+                   next_moves_and_resulting_boards = self.get_future_moves_and_boards(child_board, opp_color, depth-1)
 
                    for next_moves_and_board in next_moves_and_resulting_boards:
                        all_moves_and_board = [move, child_board]
@@ -805,7 +806,7 @@ class LookAheadPlayer(object):
         cur_score = 0
         opp_color = Board.WHITE if color == Board.BLACK else Board.BLACK
 
-        all_moves_and_boards = self.get_child_move_and_boards(board, color, self.depth)
+        all_moves_and_boards = self.get_future_moves_and_boards(board, color, self.depth)
 
         for moves_and_board in all_moves_and_boards:
             first_move = moves_and_board[0]
