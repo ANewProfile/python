@@ -709,11 +709,11 @@ class TheoBoardAnalyzer(BoardAnalyzer):
         for color in (Board.WHITE, Board.BLACK):
             if color == Board.WHITE:
                 if board.check_mate(Board.WHITE):
-                    score = -1000000000000000
+                    score = -1_000_000_000_000_000
 
             else:
                 if board.check_mate(Board.BLACK):
-                    score = 10000000000000000
+                    score = 1_000_000_000_000_000
 
         return score
 
