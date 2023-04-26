@@ -396,76 +396,77 @@ class Board(object):
         return True
 
     def castle(self, piece, loc):
+
         if piece not in KINGS or loc not in ["e1", "e8"]:
             return []
-        if piece_color(piece) == Board.WHITE and (self.white_can_castle_left or self.white_can_castle_right):
+
+        if piece_color(piece) == Board.BLACK and \
+           self.black_can_castle_left and \
+           self.piece_at("a8") == black_piece("r1") and \
+           self.piece_at("b8") is None and \
+           self.piece_at("c8") is None and \
+           self.piece_at("d8") is None:
             pass
-        elif piece_color(piece) == Board.BLACK and (self.black_can_castle_left or self.black_can_castle_right):
+
+        elif piece_color(piece) == Board.BLACK and \
+             self.black_can_castle_right and \
+             self.piece_at("h8") == black_piece("r2") and \
+             self.piece_at("g8") is None and \
+             self.piece_at("f8") is None:
             pass
+
+        elif piece_color(piece) == Board.WHITE and \
+             self.white_can_castle_left and \
+             self.piece_at("a1") == white_piece("r1") and \
+             self.piece_at("b1") is None and \
+             self.piece_at("c1") is None and \
+             self.piece_at("d1") is None:
+            pass
+
+        elif piece_color(piece) == Board.WHITE and \
+             self.white_can_castle_right and \
+             self.piece_at("h1") == white_piece("r2") and \
+             self.piece_at("g1") is None and \
+             self.piece_at("f1") is None:
+            pass
+
         else:
             return []
 
-        blocking_white_left = False
-        blocking_white_right = False
-        blocking_black_left = False
-        blocking_black_right = False
         col_row = loc_to_col_row(loc)
         assert col_row[1] in (0, 7)
         assert col_row[0] == 4
         castle_vals = [0, 0, 0, 0]
 
         if piece_color(piece) == Board.WHITE:
+            if self.white_can_castle_left and \
+               not self.controlled_by('d1', Board.BLACK, include_castle=False) and \
+               not self.controlled_by('c1', Board.BLACK, include_castle=False) and \
+               not self.controlled_by('b1', Board.BLACK, include_castle=False) and \
+               not self.controlled_by('e1', Board.BLACK, include_castle=False):
+                castle_vals[1] = -2
 
-            # can't castle through or from check - white
-            if self.controlled_by('d1', Board.BLACK, include_castle=False) or \
-               self.controlled_by('c1', Board.BLACK, include_castle=False) or \
-               self.controlled_by('b1', Board.BLACK, include_castle=False) or \
-               self.controlled_by('e1', Board.BLACK, include_castle=False):
-                blocking_white_left = True
-
-            if self.controlled_by('f1', Board.BLACK, include_castle=False) or \
-               self.controlled_by('g1', Board.BLACK, include_castle=False) or \
-               self.controlled_by('e1', Board.BLACK, include_castle=False):
-                blocking_white_right = True
-
-            if self.white_can_castle_left and blocking_white_left is False:
-                if self.piece_at("a1") == white_piece("r1") and \
-                   self.piece_at("b1") is None and \
-                   self.piece_at("c1") is None and \
-                   self.piece_at("d1") is None:
-                    castle_vals[1] = -2
-
-            if self.white_can_castle_right and blocking_white_right is False:
-                if self.piece_at("h1") == white_piece("r2") and \
-                   self.piece_at("g1") is None and \
-                   self.piece_at("f1") is None:
-                    castle_vals[0] = 2
+            if self.white_can_castle_right and \
+               not self.controlled_by('f1', Board.BLACK, include_castle=False) and \
+               not self.controlled_by('g1', Board.BLACK, include_castle=False) and \
+               not self.controlled_by('e1', Board.BLACK, include_castle=False):
+                castle_vals[0] = 2
 
         else:  # black castle
 
             # can't castle through or from check - black
-            if self.controlled_by('d8', Board.WHITE, include_castle=False) or \
-               self.controlled_by('c8', Board.WHITE, include_castle=False) or \
-               self.controlled_by('b8', Board.WHITE, include_castle=False) or \
-               self.controlled_by('e8', Board.WHITE, include_castle=False):
-                blocking_black_left = True
+            if self.black_can_castle_left and \
+               not self.controlled_by('d8', Board.WHITE, include_castle=False) and \
+               not self.controlled_by('c8', Board.WHITE, include_castle=False) and \
+               not self.controlled_by('b8', Board.WHITE, include_castle=False) and \
+               not self.controlled_by('e8', Board.WHITE, include_castle=False):
+                castle_vals[3] = -2
 
-            if self.controlled_by('f8', Board.WHITE, include_castle=False) or \
-               self.controlled_by('g8', Board.WHITE, include_castle=False) or \
-               self.controlled_by('e8', Board.WHITE, include_castle=False):
-                blocking_black_right = True
-
-            if self.black_can_castle_left and blocking_black_left is False:
-                if self.piece_at("a8") == black_piece("r1") and \
-                   self.piece_at("b8") is None and \
-                   self.piece_at("c8") is None and \
-                   self.piece_at("d8") is None:
-                    castle_vals[3] = -2
-            if self.black_can_castle_right and blocking_black_right is False:
-                if self.piece_at("h8") == black_piece("r2") and \
-                   self.piece_at("g8") is None and \
-                   self.piece_at("f8") is None:
-                    castle_vals[2] = 2
+            if self.black_can_castle_right and \
+               not self.controlled_by('f8', Board.WHITE, include_castle=False) and \
+               not self.controlled_by('g8', Board.WHITE, include_castle=False) and \
+               not self.controlled_by('e8', Board.WHITE, include_castle=False):
+                castle_vals[2] = 2
 
         new_positions = []
         for n in castle_vals:
