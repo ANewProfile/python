@@ -710,6 +710,22 @@ class TheoBoardAnalyzer(BoardAnalyzer):
             space, risked)
 
 
+class Move(object):
+    """
+    Represents a move, which is an actual move (old_location, new_location)
+    tuple, a resulting board, and the side that moved.
+    """
+
+    def __init__(self, move, new_board, just_moved_color):
+        self.move = move
+        self.new_board = new_board
+        self.just_moved_color = just_moved_color
+
+    @property
+    def next_move_color(self):
+        return Board.WHITE if self.just_moved_color == Board.BLACK else Board.BLACK
+
+
 class LookAheadPlayer(object):
 
     def __init__(self, analyzer_class, depth=1):
@@ -733,10 +749,9 @@ class LookAheadPlayer(object):
 
         return moves
 
-    def get_next_move_and_board(self, board, color):
+    def get_next_moves(self, board, color):
         """
-	Given a board and a color, return list of (old_location, new_location,
-        resulting_board) tuples.
+	Given a board and a color, return list of Move objects.
         """
 
         promote_to = get_piece('q', color)
@@ -749,71 +764,56 @@ class LookAheadPlayer(object):
             except InvalidMoveException as e:
                 pass
             else:
-                move_and_new_boards.append([(old_location, new_location), new_board])
+                move_and_new_boards.append(
+                    Move((old_location, new_location),
+                         new_board,
+                         color)
+                )
 
         return move_and_new_boards
 
-    def get_future_moves_and_boards(self, board, color, depth):
+    def get_future_moves(self, board, color, depth):
         """
-	Given a starting board and a color, return a list of move sequences and
-	boards. Each member of the list is an array of moves with board
-	following the move, and each move is (old_location, new_location)
-	tuple. The number of moves in a move sequence is specified by the depth
-        argument.
-
-        For example, this method may return the following when depth is 2
-
-          [ [ (move1_old_loc, move1_new_loc), board_after_move_1,
-              (move2_old_loc, move2_new_loc), board_after_move_2 ],
-
-            [ (move1_old_loc, move1_new_loc), board_after_move_1,
-              (move2_old_loc, move2_new_loc), board_after_move_2 ],
-             
-            ...
-          ]
-
-	Not every member of the returned list have the same depth or number of
-        moves. A move sequence may terminate when there is a checkmate.
+	Given a starting board and a color, return a list of sequences of Move
+	objects, where the number of Move objects in a sequence is no more than
+        the depth argument (it may be less because of check-mates).
         """
 
         assert depth > 0
-        move_and_resulting_boards = self.get_next_move_and_board(board, color)
+        next_moves = self.get_next_moves(board, color)
 
         if depth == 1:
-           return move_and_resulting_boards
+           return [[m] for m in next_moves]
 
         else:
-           all_moves_and_boards = []
-           opp_color = Board.WHITE if color == Board.BLACK else Board.BLACK
+           all_moves = []
 
-           for move, child_board in move_and_resulting_boards:
-               if child_board.check_mate(opp_color):
-                   all_moves_and_boards.append([move, child_board])
+           for last_move in next_moves:
+               if last_move.new_board.check_mate(last_move.next_move_color):
+                   all_moves.append([last_move])
 
                else:
-                   next_moves_and_resulting_boards = self.get_future_moves_and_boards(child_board, opp_color, depth-1)
+                   future_moves = self.get_future_moves(last_move.new_board, last_move.next_move_color, depth-1)
+                   for move_sequence in future_moves:
+                       move_sequence = [last_move] + move_sequence
+                       all_moves.append(move_sequence)
 
-                   for next_moves_and_board in next_moves_and_resulting_boards:
-                       all_moves_and_board = [move, child_board]
-                       all_moves_and_board.extend(next_moves_and_board)
-                       all_moves_and_boards.append(all_moves_and_board)
-
-           return all_moves_and_boards
+           return all_moves
 
     def computer_turn(self, board, color):
         best_move = None
         best_score = None
         cur_score = 0
-        opp_color = Board.WHITE if color == Board.BLACK else Board.BLACK
 
-        all_moves_and_boards = self.get_future_moves_and_boards(board, color, self.depth)
+        all_moves = self.get_future_moves(board, color, self.depth)
 
-        for moves_and_board in all_moves_and_boards:
-            first_move = moves_and_board[0]
-            next_board = moves_and_board[1]
-            ending_board = moves_and_board[-1]
+        for move_sequence in all_moves:
+            first_move = move_sequence[0].move
+            first_move_resulting_board = move_sequence[0].new_board
+            second_move_color = move_sequence[0].next_move_color
+            ending_board = move_sequence[-1].new_board
 
-            if next_board.check_mate(opp_color):
+            if first_move_resulting_board.check_mate(second_move_color):
                 return first_move
 
             analyzer = self.analyzer_class(ending_board)
