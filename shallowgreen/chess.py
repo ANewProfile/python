@@ -690,7 +690,9 @@ class TheoBoardAnalyzer(BoardAnalyzer):
                     space -= 1
         return space
 
-    def compute_score(self, material, safety, space, risk):
+    def compute_score(self, material, safety, space, risk, board):
+        """
+        Calculates and returns a board evaluation"""
         score = 0.0
         # material and risk (which is material in immediate danger) are equal weight
         score += material
@@ -698,16 +700,30 @@ class TheoBoardAnalyzer(BoardAnalyzer):
         score += safety
         # space is less
         score += space/3
+
+        # doesn't blunder mate
+        for color in (Board.WHITE, Board.BLACK):
+            if color == Board.WHITE:
+                if board.check_mate(Board.WHITE):
+                    score = -1000000000000000
+
+            else:
+                if board.check_mate(Board.BLACK):
+                    score = 10000000000000000
+
         return score
 
-    def score(self, just_moved_color):
+    def score(self, just_moved_color, board):
+        """
+        Returns a numeric score bassed off of the compute_score() func
+        """
         space = self.get_space()
         risked = self.get_piece_risked(just_moved_color)
         # print("material", self.get_material(), "safety", self.get_safety(), "sp", space, "risked", risked)
         return self.compute_score(
             self.get_material(),
             self.get_safety(),
-            space, risked)
+            space, risked, board)
 
 
 class LookAheadPlayer(object):
@@ -718,7 +734,7 @@ class LookAheadPlayer(object):
 
     def get_possible_next_move(self, board, color):
         """
-	Given a board and a color, returns list of possible next moves by that
+        Given a board and a color, returns list of possible next moves by that
         color. Each move is a (old_location, new_location) tuple.
         """
 
@@ -735,7 +751,7 @@ class LookAheadPlayer(object):
 
     def get_next_move_and_board(self, board, color):
         """
-	Given a board and a color, return list of (old_location, new_location,
+        Given a board and a color, return list of (old_location, new_location,
         resulting_board) tuples.
         """
 
@@ -749,16 +765,17 @@ class LookAheadPlayer(object):
             except InvalidMoveException as e:
                 pass
             else:
-                move_and_new_boards.append([(old_location, new_location), new_board])
+                move_and_new_boards.append(
+                    [(old_location, new_location), new_board])
 
         return move_and_new_boards
 
     def get_future_moves_and_boards(self, board, color, depth):
         """
-	Given a starting board and a color, return a list of move sequences and
-	boards. Each member of the list is an array of moves with board
-	following the move, and each move is (old_location, new_location)
-	tuple. The number of moves in a move sequence is specified by the depth
+        Given a starting board and a color, return a list of move sequences and
+        boards. Each member of the list is an array of moves with board
+        following the move, and each move is (old_location, new_location)
+        tuple. The number of moves in a move sequence is specified by the depth
         argument.
 
         For example, this method may return the following when depth is 2
@@ -768,11 +785,11 @@ class LookAheadPlayer(object):
 
             [ (move1_old_loc, move1_new_loc), board_after_move_1,
               (move2_old_loc, move2_new_loc), board_after_move_2 ],
-             
+
             ...
           ]
 
-	Not every member of the returned list have the same depth or number of
+        Not every member of the returned list have the same depth or number of
         moves. A move sequence may terminate when there is a checkmate.
         """
 
@@ -780,25 +797,26 @@ class LookAheadPlayer(object):
         move_and_resulting_boards = self.get_next_move_and_board(board, color)
 
         if depth == 1:
-           return move_and_resulting_boards
+            return move_and_resulting_boards
 
         else:
-           all_moves_and_boards = []
-           opp_color = Board.WHITE if color == Board.BLACK else Board.BLACK
+            all_moves_and_boards = []
+            opp_color = Board.WHITE if color == Board.BLACK else Board.BLACK
 
-           for move, child_board in move_and_resulting_boards:
-               if child_board.check_mate(opp_color):
-                   all_moves_and_boards.append([move, child_board])
+            for move, child_board in move_and_resulting_boards:
+                if child_board.check_mate(opp_color):
+                    all_moves_and_boards.append([move, child_board])
 
-               else:
-                   next_moves_and_resulting_boards = self.get_future_moves_and_boards(child_board, opp_color, depth-1)
+                else:
+                    next_moves_and_resulting_boards = self.get_future_moves_and_boards(
+                        child_board, opp_color, depth-1)
 
-                   for next_moves_and_board in next_moves_and_resulting_boards:
-                       all_moves_and_board = [move, child_board]
-                       all_moves_and_board.extend(next_moves_and_board)
-                       all_moves_and_boards.append(all_moves_and_board)
+                    for next_moves_and_board in next_moves_and_resulting_boards:
+                        all_moves_and_board = [move, child_board]
+                        all_moves_and_board.extend(next_moves_and_board)
+                        all_moves_and_boards.append(all_moves_and_board)
 
-           return all_moves_and_boards
+            return all_moves_and_boards
 
     def computer_turn(self, board, color):
         best_move = None
@@ -806,7 +824,8 @@ class LookAheadPlayer(object):
         cur_score = 0
         opp_color = Board.WHITE if color == Board.BLACK else Board.BLACK
 
-        all_moves_and_boards = self.get_future_moves_and_boards(board, color, self.depth)
+        all_moves_and_boards = self.get_future_moves_and_boards(
+            board, color, self.depth)
 
         for moves_and_board in all_moves_and_boards:
             first_move = moves_and_board[0]
@@ -817,7 +836,7 @@ class LookAheadPlayer(object):
                 return first_move
 
             analyzer = self.analyzer_class(ending_board)
-            cur_score = analyzer.score(color)
+            cur_score = analyzer.score(color, board)
             # print("scoring", first_move[0], "to", first_move[1], "score is", cur_score)
             if (color == Board.WHITE and (best_score is None or cur_score > best_score)) or \
                     (color == Board.BLACK and (best_score is None or cur_score < best_score)):
