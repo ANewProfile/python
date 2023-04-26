@@ -20,15 +20,27 @@ class TheoBoardAnalyzer(BoardAnalyzer):
         white_king_pos = loc_to_col_row(white_king_loc)
         black_king_pos = loc_to_col_row(black_king_loc)
 
-        around_king_white = [[white_king_pos[0]+1, white_king_pos[1]+1], [white_king_pos[0]+1, white_king_pos[1]-1], [white_king_pos[0]-1, white_king_pos[1]+1],
-                             [white_king_pos[0]-1, white_king_pos[1]-1], [white_king_pos[0]+1,
-                                                                          white_king_pos[1]], [white_king_pos[0], white_king_pos[1]+1],
-                             [white_king_pos[0]-1, white_king_pos[1]], [white_king_pos[0], white_king_pos[1]-1]]
+        around_king_white = [
+          [white_king_pos[0]+1, white_king_pos[1]+1],
+          [white_king_pos[0]+1, white_king_pos[1]-1],
+          [white_king_pos[0]-1, white_king_pos[1]+1],
+          [white_king_pos[0]-1, white_king_pos[1]-1],
+          [white_king_pos[0]+1, white_king_pos[1]],
+          [white_king_pos[0], white_king_pos[1]+1],
+          [white_king_pos[0]-1, white_king_pos[1]],
+          [white_king_pos[0], white_king_pos[1]-1]
+        ]
 
-        around_king_black = [[black_king_pos[0]+1, black_king_pos[1]+1], [black_king_pos[0]+1, black_king_pos[1]-1], [black_king_pos[0]-1, black_king_pos[1]+1],
-                             [black_king_pos[0]-1, black_king_pos[1]-1], [black_king_pos[0]+1,
-                                                                          black_king_pos[1]], [black_king_pos[0], black_king_pos[1]+1],
-                             [black_king_pos[0]-1, black_king_pos[1]], [black_king_pos[0], black_king_pos[1]-1]]
+        around_king_black = [
+          [black_king_pos[0]+1, black_king_pos[1]+1],
+          [black_king_pos[0]+1, black_king_pos[1]-1],
+          [black_king_pos[0]-1, black_king_pos[1]+1],
+          [black_king_pos[0]-1, black_king_pos[1]-1],
+          [black_king_pos[0]+1, black_king_pos[1]],
+          [black_king_pos[0], black_king_pos[1]+1],
+          [black_king_pos[0]-1, black_king_pos[1]],
+          [black_king_pos[0], black_king_pos[1]-1]
+        ]
 
         locs_around_king_white = [col_row_to_loc(col_row) for col_row in around_king_white
                                   if col_row[0] < 8 and col_row[0] > -1 and col_row[1] < 8 and col_row[1] >= 0]

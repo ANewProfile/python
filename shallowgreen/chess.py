@@ -98,6 +98,11 @@ class Board(object):
             self.find_locations()
         return self.__piece_locations.keys()
 
+    def piece_and_locations(self):
+        if self.__piece_locations is None:
+            self.find_locations()
+        return self.__piece_locations.items()
+
     def piece_at(self, loc):
         pos = loc_to_col_row(loc)
         return self.positions[7-pos[1]][pos[0]]
@@ -109,13 +114,19 @@ class Board(object):
         self.__piece_locations = None
 
     def controlling_side(self, loc):
-        pieces_guarding = 0
-        for piece in self.pieces():
-            if loc in self.possible_moves(self.location_of(piece)):
-                if piece_color(piece) == Board.BLACK:
-                    pieces_guarding -= 1
-                else:
-                    pieces_guarding += 1
+        if loc in self.__controlling:
+            pieces_guarding = self.__controlling[loc]
+
+        else:
+            pieces_guarding = 0
+            for piece, piece_loc in self.piece_and_locations():
+                if loc in self.possible_moves(piece_loc):
+                    if piece_color(piece) == Board.BLACK:
+                        pieces_guarding -= 1
+                    else:
+                        pieces_guarding += 1
+            self.__controlling[loc] = pieces_guarding
+
         if pieces_guarding > 0:
             return Board.WHITE
         elif pieces_guarding < 0:
@@ -124,11 +135,17 @@ class Board(object):
             return None
 
     def controlled_by(self, loc, color, include_castle=True):
-        for piece in self.pieces():
+        cache_key = (loc, color, include_castle)
+        if cache_key in self.__controlled_by:
+            return self.__controlled_by[cache_key]
+
+        for piece, piece_loc in self.piece_and_locations():
             if piece_color(piece) == color:
-                if loc in self.possible_moves(self.location_of(piece), include_castle=include_castle):
+                if loc in self.possible_moves(piece_loc, include_castle=include_castle):
+                    self.__controlled_by[cache_key] = True
                     return True
 
+        self.__controlled_by[cache_key] = False
         return False
 
     def __str__(self):
@@ -186,6 +203,9 @@ class Board(object):
         self.__allow_set_piece = False
         self.__piece_locations = None
         self.__location_moves = {}
+        self.__controlling = {}
+        self.__controlled_by = {}
+        self.__check_mate = {}
 
         self.white_can_castle_right = True
         self.black_can_castle_right = True
@@ -374,15 +394,17 @@ class Board(object):
         opp_color = Board.WHITE if color == Board.BLACK else Board.BLACK
         king_piece = get_piece('k', color)
         king_loc = self.location_of(king_piece)
+
         if self.controlled_by(king_loc, opp_color):
             return True
-
         return False
 
     def check_mate(self, color):
-        for piece in self.pieces():
+        if color in self.__check_mate:
+            return self.__check_mate[color]
+
+        for piece, piece_location in self.piece_and_locations():
             if piece_color(piece) == color:
-                piece_location = self.location_of(piece)
                 for new_location in self.possible_moves(piece_location):
                     try:
                         new_board = self.move_piece(
@@ -392,7 +414,10 @@ class Board(object):
                         pass
                     else:
                         # move is allowed and no longer in check
+                        self.__check_mate[color] = False
                         return False
+
+        self.__check_mate[color] = True
         return True
 
     def castle(self, piece, loc):
