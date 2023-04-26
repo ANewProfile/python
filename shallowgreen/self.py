@@ -1,5 +1,8 @@
 from chess import *
-import time
+from theo_board_analyzer import *
+from time import sleep
+from move import *
+from look_ahead_player import *
 
 board = Board()
 player = LookAheadPlayer(TheoBoardAnalyzer, depth=2)
@@ -20,7 +23,7 @@ while True:
         board = board.move_piece(*q)
         move += 1
 
-        # time.sleep(0.5)
+        sleep(0.25)
 
     else:   # black move
         print(board)
@@ -34,4 +37,4 @@ while True:
         board = board.move_piece(*q)
         move += 1
 
-        # time.sleep(0.5)
+        sleep(0.25)
