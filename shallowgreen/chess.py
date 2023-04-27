@@ -341,7 +341,7 @@ class Board(object):
                 new_locations.append(new_loc)
             if cur_row == 1:
                 new_loc, new_loc_piece = loc_helper.at(0, 2, self)
-                if new_loc is not None and new_loc_piece is None:
+                if new_loc is not None and loc_helper.at(0, 1, self)[0] is not None and new_loc_piece is None:
                     new_locations.append(new_loc)
             # take right!
             new_loc, new_loc_piece = loc_helper.at(+1, +1, self)
@@ -358,7 +358,7 @@ class Board(object):
                 new_locations.append(new_loc)
             elif cur_row == 6:
                 new_loc, new_loc_piece = loc_helper.at(0, -2, self)
-                if new_loc is not None and new_loc_piece is None:
+                if new_loc is not None and loc_helper.at(0, -1, self)[0] is not None and new_loc_piece is None:
                     new_locations.append(new_loc)
             # take right!
             new_loc, new_loc_piece = loc_helper.at(+1, -1, self)
