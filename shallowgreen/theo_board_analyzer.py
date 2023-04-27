@@ -127,7 +127,7 @@ class TheoBoardAnalyzer(BoardAnalyzer):
         return score
 
     @staticmethod
-    def better_score(self, color, a, b):
+    def better_score(color, a, b):
         """
         Returns better value of a or b, depends on the specified color
         """
@@ -135,7 +135,7 @@ class TheoBoardAnalyzer(BoardAnalyzer):
         return max(a, b) if color == Board.WHITE else min(a, b)
 
     @staticmethod
-    def worse_score(self, color, a, b):
+    def worse_score(color, a, b):
         """
         Returns worse value of a or b, depends on the specified color
         """
