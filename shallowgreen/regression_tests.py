@@ -1,6 +1,5 @@
 from chess import *
 from theo_board_analyzer import *
-from move import *
 from look_ahead_player import *
 
 # material

@@ -1,5 +1,4 @@
 from chess import *
-from move import *
 
 class LookAheadPlayer(object):
 

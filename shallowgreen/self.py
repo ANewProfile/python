@@ -1,7 +1,6 @@
+from time import sleep
 from chess import *
 from theo_board_analyzer import *
-from time import sleep
-from move import *
 from look_ahead_player import *
 
 board = Board()
