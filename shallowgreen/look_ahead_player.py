@@ -111,7 +111,8 @@ class LookAheadPlayer(object):
             for move in line:
                 old_loc = move[0]
                 new_board = board.duplicate()
-                new_board = new_board.move(move[0], move[1])
+                new_board = new_board.move_piece(move[0], move[1])
+                analyzer = self.analyzer_class(new_board)
                 cur_score - analyzer.score(color, new_board)
                 if (color == Board.WHITE and (worst_score is None or cur_score < worst_score)) or \
                         (color == Board.BLACK and (worst_score is None or cur_score > worst_score)):
