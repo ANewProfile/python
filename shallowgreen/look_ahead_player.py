@@ -91,16 +91,58 @@ class LookAheadPlayer(object):
         cur_score = 0
 
         self.visited_boards = {}
+        worst_future_moves = []
         all_moves = self.get_future_moves(board, color, self.depth)
+        already_lined = []
 
-        for move_sequence in all_moves:
-            first_move = move_sequence[0].move
-            first_move_resulting_board = move_sequence[0].new_board
-            second_move_color = move_sequence[0].next_move_color
-            ending_board = move_sequence[-1].new_board
+        for line in all_moves:
+            first_move = line[0].move
+            if first_move[0] not in already_lined:
+                already_lined.append([first_move])
+            else:
+                for list in already_lined:
+                    if list[0][0][0] == first_move[0]:
+                        list.append(first_move)
+        
+        for line in already_lined:
+            worst_score = None
+            worst_move = None
+            worst_old_loc = None
+            for move in line:
+                old_loc = move[0]
+                new_board = board.duplicate()
+                new_board = new_board.move(move[0], move[1])
+                cur_score - analyzer.score(color, new_board)
+                if (color == Board.WHITE and (worst_score is None or cur_score < worst_score)) or \
+                        (color == Board.BLACK and (worst_score is None or cur_score > worst_score)):
+                    worst_score = cur_score
+                    worst_old_loc = old_loc
+                    worst_move = move[1]
+            
+            worst_future_moves.append([worst_old_loc, worst_move])
+
+
+        for line in all_moves:
+            first_move = line[0].move
+            first_move_resulting_board = line[0].new_board
+            second_move_color = line[0].next_move_color
+            ending_board = line[-1].new_board
 
             if first_move_resulting_board.check_mate(second_move_color):
                 return first_move
+            elif first_move_resulting_board.check_mate(color):
+                continue
+
+        for line in worst_future_moves:
+            first_move = line[0].move
+            first_move_resulting_board = line[0].new_board
+            second_move_color = line[0].next_move_color
+            ending_board = line[-1].new_board
+
+            if first_move_resulting_board.check_mate(second_move_color):
+                return first_move
+            elif first_move_resulting_board.check_mate(color):
+                continue
 
             analyzer = self.analyzer_class(ending_board)
             cur_score = analyzer.score(color, board)
