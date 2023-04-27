@@ -18,7 +18,7 @@ while True:
         except GameOverException as e:
             print(str(e))
             exit()
-        print("WHITE board.move_piece('%s','%s')" % (q[0], q[1]))
+        print("WHITE %s, board.move_piece('%s','%s')" % (board.piece_locations(), q[0], q[1]))
         print("")
         board = board.move_piece(*q)
         move += 1
@@ -32,7 +32,7 @@ while True:
         except GameOverException as e:
             print(str(e))
             exit()
-        print("BLACK board.move_piece('%s','%s')" % (q[0], q[1]))
+        print("BLACK %s, board.move_piece('%s','%s')" % (board.piece_locations(), q[0], q[1]))
         print("")
         board = board.move_piece(*q)
         move += 1

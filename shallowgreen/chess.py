@@ -233,6 +233,11 @@ class Board(object):
         return "".join(["".join([piece if piece is not None else "_" for piece in sub_array])
                        for sub_array in self.positions])
 
+    def piece_locations(self):
+        if self.__piece_locations is None:
+            self.find_locations()
+        return {k:v for k,v in self.__piece_locations.items()}
+
     @staticmethod
     def custom_board(piece_locations):
         board = Board(empty=True)
