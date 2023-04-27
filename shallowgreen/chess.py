@@ -570,7 +570,6 @@ class Board(object):
         return new_locations
 
     def move_piece(self, old_loc, new_loc, promotion=None):
-
         # creates a new board with the piece from the old loc to a new loc
         new_board = self.duplicate()
         new_board.__allow_set_piece = True
@@ -584,6 +583,8 @@ class Board(object):
 
         possible_new_locs = self.possible_moves(old_loc)
         piece_clr = piece_color(piece)
+        if promotion is None:
+            promotion = get_piece('q', piece_clr)
 
         if new_loc not in possible_new_locs:
             raise InvalidMoveException("Invalid move")
