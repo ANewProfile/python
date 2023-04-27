@@ -20,5 +20,6 @@ def input(txt):
         python_print(c, end="", flush=True)
         time.sleep(random.randint(2, 8)/100)
 
-    python_input("")
+    go = python_input("")
     python_print
+    return go
