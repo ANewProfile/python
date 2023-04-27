@@ -4,7 +4,8 @@ from theo_board_analyzer import *
 from look_ahead_player import *
 
 board = Board()
-player = LookAheadPlayer(TheoBoardAnalyzer, depth=2)
+player1 = LookAheadPlayer(TheoBoardAnalyzer, depth=2)
+player2 = LookAheadPlayer(TheoBoardAnalyzer, depth=1)
 move = 0
 
 while True:
@@ -13,7 +14,7 @@ while True:
     if turn == Board.WHITE:  # white move
         print(board)
         try:
-            q = player.computer_turn(board, Board.WHITE)
+            q = player1.computer_turn(board, Board.WHITE)
         except GameOverException as e:
             print(str(e))
             exit()
@@ -27,7 +28,7 @@ while True:
     else:   # black move
         print(board)
         try:
-            q = player.computer_turn(board, Board.BLACK)
+            q = player2.computer_turn(board, Board.BLACK)
         except GameOverException as e:
             print(str(e))
             exit()
