@@ -126,6 +126,22 @@ class TheoBoardAnalyzer(BoardAnalyzer):
 
         return score
 
+    @staticmethod
+    def better_score(self, color, a, b):
+        """
+        Returns better value of a or b, depends on the specified color
+        """
+
+        return max(a, b) if color == Board.WHITE else min(a, b)
+
+    @staticmethod
+    def worse_score(self, color, a, b):
+        """
+        Returns worse value of a or b, depends on the specified color
+        """
+
+        return min(a, b) if color == Board.WHITE else max(a, b)
+
     def score(self, just_moved_color, board):
         """
         Returns a numeric score bassed off of the compute_score() func
