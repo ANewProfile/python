@@ -18,6 +18,46 @@ nb = b.move_piece('a7', 'a6')
 assert b.location_of("P1") == "a7"
 assert nb.location_of("P1") == "a6"
 
+# pawn cannot move two spaces over something
+b = Board()
+b = b.move_piece('b1', 'c3')
+try:
+  b = b.move_piece('c2', 'c4')
+except InvalidMoveException:
+  pass
+else:
+  assert False 
+
+# pawn can take left and right
+b = Board.custom_board({'p1': 'e2', 'R1': 'd3', 'R2': 'f3', 'B1': 'e3', 'k': 'a1', 'K': 'h8'})
+assert b.location_of("R1") is not None
+b = b.move_piece("e2", "d3")
+assert b.location_of("p1") == "d3"
+assert b.location_of("R1") is None
+b = Board.custom_board({'p1': 'e2', 'R1': 'd3', 'R2': 'f3', 'B1': 'e3', 'k': 'a1', 'K': 'h8'})
+assert b.location_of("R2") is not None
+b = b.move_piece("e2", "f3")
+assert b.location_of("p1") == "f3"
+assert b.location_of("R2") is None
+
+# pawn cannot take its own piece
+b = Board.custom_board({'p1': 'e2', 'R1': 'd3', 'r2': 'f3', 'B1': 'e3', 'k': 'a1', 'K': 'h8'})
+try:
+  b = b.move_piece("e2", "f3")
+except InvalidMoveException:
+  pass
+else:
+  assert False 
+
+# pawn cannot take straight ahead
+b = Board.custom_board({'p1': 'e2', 'R1': 'd3', 'R2': 'f3', 'B1': 'e3', 'k': 'a1', 'K': 'h8'})
+try:
+  b = b.move_piece('e2', 'e3')
+except InvalidMoveException:
+  pass
+else:
+  assert False 
+
 # rook movements
 b = Board()
 b = b.move_piece('a2', 'a4')
@@ -65,10 +105,10 @@ b = b.move_piece('d1', 'f3')
 b = b.move_piece('f3', 'h5')
 try:
     b = b.move_piece('f7', 'f6')  # moves K into checked position
-except:
+except InvalidMoveException:
     pass
 else:
-    raise Exception("illegal move")
+    assert False
 
 # promotion on pawn moving up
 b = Board.custom_board({'p1': 'e7', 'k': 'e1', 'K': 'a8'})
