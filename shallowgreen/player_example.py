@@ -105,6 +105,8 @@ class LookAheadPlayer(object):
 
             analyzer = self.analyzer_class(ending_board)
             cur_score = analyzer.score(color, board)
+            # print("first move %s, end board score %s" % (first_move, cur_score))
+            # print(ending_board)
 
             if first_move not in first_move_scores:
                 first_move_scores[first_move] = cur_score
@@ -114,7 +116,8 @@ class LookAheadPlayer(object):
         best_move = None
         best_score = None
         for first_move, first_move_score in first_move_scores.items():
-            if best_score is None or analyzer.better_score(color, best_score, first_move_score):
+            # print("first move %s, score %s, color %s" % (first_move, first_move_score, color))
+            if best_score is None or analyzer.better_score(color, best_score, first_move_score) == first_move_score:
                 best_score = first_move_score
                 best_move = first_move
 

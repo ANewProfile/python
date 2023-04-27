@@ -37,6 +37,10 @@ def material(piece):
         return 0
 
 
+def king_material():
+    return 20
+
+
 class LocationHelper(object):
 
     def __init__(self, loc):
