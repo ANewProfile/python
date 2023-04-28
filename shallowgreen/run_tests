@@ -1,0 +1,2 @@
+PYTHONPATH=. python3 tests/test_chess.py
+PYTHONPATH=. python3 tests/test_dad.py

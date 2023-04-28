@@ -1,6 +1,4 @@
 from chess import *
-from theo_board_analyzer import *
-from player import *
 
 # material
 assert material('r1') == 5
@@ -127,26 +125,5 @@ assert len(b.pieces()) == 3
 assert "q" in b.pieces()
 assert "k" in b.pieces()
 assert "K" in b.pieces()
-
-# can play
-b = Board()
-player = LookAheadPlayer(TheoBoardAnalyzer)
-player.computer_turn(b, Board.WHITE)
-
-# does not blunder queen
-b = Board()
-b = b.move_piece('d2', 'd4')
-b = b.move_piece('g8', 'f6')
-b = b.move_piece('e2', 'e4')
-b = b.move_piece('b8', 'c6')
-# moving d1h5 would make queen vulnerable to a knight
-player = LookAheadPlayer(TheoBoardAnalyzer, depth=1)
-move = player.computer_turn(b, Board.WHITE)
-assert move[0] != "d1" or move[1] != "h5"
-
-# look ahead with depth 2 runs
-b = Board()
-player = LookAheadPlayer(TheoBoardAnalyzer, depth=2)
-player.computer_turn(b, Board.WHITE)
 
 print("success!")

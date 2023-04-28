@@ -1,11 +1,12 @@
 from time import sleep
 from chess import *
 from theo_board_analyzer import *
-from look_ahead_player import *
+from dad_board_analyzer import *
+from player import *
 
 board = Board()
-player1 = LookAheadPlayer(TheoBoardAnalyzer, depth=2)
-player2 = LookAheadPlayer(TheoBoardAnalyzer, depth=1)
+player1 = LookAheadPlayer(DadBoardAnalyzer, depth=2)
+player2 = LookAheadPlayer(TheoBoardAnalyzer, depth=2)
 move = 0
 
 while True:
