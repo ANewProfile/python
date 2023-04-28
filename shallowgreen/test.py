@@ -1,6 +1,6 @@
 from chess import *
 from theo_board_analyzer import *
-from look_ahead_player import *
+from player import *
 
 player = LookAheadPlayer(TheoBoardAnalyzer, depth=2)
 

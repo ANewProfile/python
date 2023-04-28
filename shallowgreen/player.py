@@ -126,5 +126,7 @@ class LookAheadPlayer(object):
                 raise GameOverException(f"Checkmate, {color} lost.")
             else:
                 raise GameOverException("Draw by stalemate.")
-
+            
+        
+        print(best_score)
         return best_move
