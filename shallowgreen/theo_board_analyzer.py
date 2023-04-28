@@ -64,7 +64,7 @@ class TheoBoardAnalyzer(BoardAnalyzer):
 
     def get_central_controls(self, just_moved_color):
         """
-        Returns amount of controlling space, positive favoring white, negative favoring black
+        Returns amount of controlling space in center and flank, positive favoring white, negative favoring black
         """
 
         locs = ["d4", "e4", "d5", "e5", 'c3', 'c4', 'c5', 'c6', 'd3', 'd6', 'e3', 'e6', 'f3', 'f4', 'f5', 'f6']
