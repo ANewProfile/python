@@ -82,7 +82,7 @@ class TheoBoardAnalyzer(BoardAnalyzer):
                 if just_moved_color == Board.WHITE:
                     for move in self.board.possible_moves(piece_loc):
                         try:
-                            new_board = new_board.move_piece(piece_loc, move)
+                            new_board = self.board.move_piece(piece_loc, move)
                         except InvalidMoveException:
                             continue
                         if new_board.controlling_side(move) == Board.BLACK:
