@@ -7,6 +7,17 @@ def col_row_to_loc(pos):
     return "".join([chr(ord('a') + pos[0]), str(pos[1]+1)])
 
 
+def loc_is_white(loc):
+    col, row = loc_to_col_row(loc)
+    return (col%2 == 0 and row%2 == 1) or \
+           (col%2 == 1 and row%2 == 0)
+
+def loc_is_black(loc):
+    col, row = loc_to_col_row(loc)
+    return (col%2 == 1 and row%2 == 1) or \
+           (col%2 == 0 and row%2 == 0)
+
+
 PAWNS = ('p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8',
          'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8')
 ROOKS = ('r1', 'r2', 'R1', 'R2')
@@ -111,7 +122,10 @@ class Board(object):
 
     def piece_at(self, loc):
         pos = loc_to_col_row(loc)
-        return self.positions[7-pos[1]][pos[0]]
+        if pos[0] >= 0 and pos[0] < 8 and \
+           pos[1] >= 0 and pos[1] < 8:
+            return self.positions[7-pos[1]][pos[0]]
+        return None
 
     def set_piece_at(self, piece, loc):
         assert self.__allow_set_piece is True

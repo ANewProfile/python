@@ -7,6 +7,16 @@ assert material('b1') == 3
 assert material('k1') == 3
 assert material('q') == 9
 
+# color of location
+assert loc_is_white('a1') is False
+assert loc_is_white('a2') is True
+assert loc_is_black('a1') is True
+assert loc_is_black('a2') is False
+assert loc_is_white('b1') is True
+assert loc_is_white('b2') is False
+assert loc_is_black('b1') is False
+assert loc_is_black('b2') is True
+
 # pawn movements
 b = Board()
 nb = b.move_piece('e2', 'e4')
