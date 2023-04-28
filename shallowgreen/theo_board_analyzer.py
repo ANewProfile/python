@@ -53,46 +53,12 @@ class TheoBoardAnalyzer(BoardAnalyzer):
             controlling = self.board.controlling_side(piece_loc, just_moved_color)
             if controlling is not None and controlling != just_moved_color:
                 if just_moved_color == Board.WHITE:
-                    for move in self.board.possible_moves(piece_loc):
-                        # print(piece_loc, move)
-                        try:
-                            new_board = self.board.move_piece(piece_loc, move)
-                        except InvalidMoveException:
-                            continue
-                        if new_board.controlling_side(move, just_moved_color) == Board.BLACK:
-                            risked += (material(piece)
+                    risked += (material(piece)
+                        if piece not in KINGS else king_material())
+                else:
+                    risked -= (material(piece)
                                 if piece not in KINGS else king_material())
-                else:
-                    for move in self.board.possible_moves(piece_loc):
-                        # print(piece_loc, move)
-                        try:
-                            new_board = self.board.move_piece(piece_loc, move)
-                        except InvalidMoveException:
-                            continue
-                        if new_board.controlling_side(move, just_moved_color) == Board.WHITE:
-                            risked -= (material(piece)
-                                       if piece not in KINGS else king_material())
 
-
-            elif controlling is not None and controlling == just_moved_color:
-                if just_moved_color == Board.WHITE:
-                    for move in self.board.possible_moves(piece_loc):
-                        try:
-                            new_board = self.board.move_piece(piece_loc, move)
-                        except InvalidMoveException:
-                            continue
-                        if new_board.controlling_side(move, just_moved_color) == Board.BLACK:
-                            risked -= (material(piece)
-                                       if piece not in KINGS else king_material())*0.25
-                else:
-                    for move in self.board.possible_moves(piece_loc):
-                        try:
-                            new_board = self.board.move_piece(piece_loc, move)
-                        except InvalidMoveException:
-                            continue
-                        if new_board.controlling_side(move, just_moved_color) == Board.WHITE:
-                            risked += (material(piece)
-                                       if piece not in KINGS else king_material())*0.25
 
         return risked
 
