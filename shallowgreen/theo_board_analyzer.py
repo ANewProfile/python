@@ -50,7 +50,7 @@ class TheoBoardAnalyzer(BoardAnalyzer):
     def get_piece_risked(self, just_moved_color):
         risked = 0
         for piece, piece_loc in self.board.piece_and_locations():
-            controlling = self.board.controlling_side(piece_loc)
+            controlling = self.board.controlling_side(piece_loc, just_moved_color)
             if controlling is not None and controlling != just_moved_color:
                 if just_moved_color == Board.WHITE:
                     for move in self.board.possible_moves(piece_loc):
@@ -59,7 +59,7 @@ class TheoBoardAnalyzer(BoardAnalyzer):
                             new_board = self.board.move_piece(piece_loc, move)
                         except InvalidMoveException:
                             continue
-                        if new_board.controlling_side(move) == Board.BLACK:
+                        if new_board.controlling_side(move, just_moved_color) == Board.BLACK:
                             risked += (material(piece)
                                 if piece not in KINGS else king_material())
                 else:
@@ -69,7 +69,7 @@ class TheoBoardAnalyzer(BoardAnalyzer):
                             new_board = self.board.move_piece(piece_loc, move)
                         except InvalidMoveException:
                             continue
-                        if new_board.controlling_side(move) == Board.WHITE:
+                        if new_board.controlling_side(move, just_moved_color) == Board.WHITE:
                             risked -= (material(piece)
                                        if piece not in KINGS else king_material())
 
@@ -81,7 +81,7 @@ class TheoBoardAnalyzer(BoardAnalyzer):
                             new_board = self.board.move_piece(piece_loc, move)
                         except InvalidMoveException:
                             continue
-                        if new_board.controlling_side(move) == Board.BLACK:
+                        if new_board.controlling_side(move, just_moved_color) == Board.BLACK:
                             risked -= (material(piece)
                                        if piece not in KINGS else king_material())*0.25
                 else:
@@ -90,29 +90,29 @@ class TheoBoardAnalyzer(BoardAnalyzer):
                             new_board = self.board.move_piece(piece_loc, move)
                         except InvalidMoveException:
                             continue
-                        if new_board.controlling_side(move) == Board.WHITE:
+                        if new_board.controlling_side(move, just_moved_color) == Board.WHITE:
                             risked += (material(piece)
                                        if piece not in KINGS else king_material())*0.25
 
         return risked
 
-    def get_central_controls(self):
+    def get_central_controls(self, just_moved_color):
         """
         Returns amount of controlling space, positive favoring white, negative favoring black
         """
 
         locs = ["d4", "e4", "d5", "e5"]
-        space = self.get_controlled_spaces(locs)*2
+        space = self.get_controlled_spaces(locs, just_moved_color)*2
         return space
 
-    def get_controlled_spaces(self, locs):
+    def get_controlled_spaces(self, locs, just_moved_color):
         """
         Returns amount of controlling space, positive favoring white, negative favoring black
         """
 
         space = 0
         for square in locs:
-            controlling = self.board.controlling_side(square)
+            controlling = self.board.controlling_side(square, just_moved_color)
             if controlling == Board.WHITE:
                 space += 1
             elif controlling == Board.BLACK:
@@ -166,4 +166,4 @@ class TheoBoardAnalyzer(BoardAnalyzer):
             self.get_material(),
             self.get_piece_risked(just_moved_color),
             self.get_king_safety(),
-            self.get_central_controls())
+            self.get_central_controls(just_moved_color))

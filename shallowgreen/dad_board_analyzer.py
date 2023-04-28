@@ -1,3 +1,9 @@
+# why it would block a e4->e5 rather than protecting the knight?
+#
+# based on available pieces, there are threat zones - squares that can cause checks
+# those squares have layered importance, based on reachability
+
+
 from chess import *
 board = Board()
 
@@ -51,7 +57,7 @@ class DadBoardAnalyzer(BoardAnalyzer):
         risked = 0
         for piece, piece_loc in self.board.piece_and_locations():
             if piece_color(piece) == just_moved_color:
-                controlling = self.board.controlling_side(piece_loc)
+                controlling = self.board.controlling_side(piece_loc, just_moved_color)
                 if controlling is not None and controlling != just_moved_color:
                     if just_moved_color == Board.WHITE:
                         risked -= (material(piece) if piece not in KINGS else king_material())
@@ -59,23 +65,23 @@ class DadBoardAnalyzer(BoardAnalyzer):
                         risked += (material(piece) if piece not in KINGS else king_material())
         return risked
 
-    def get_central_controls(self):
+    def get_central_controls(self, just_moved_color):
         """
         Returns amount of controlling space, positive favoring white, negative favoring black
         """
 
         locs = ["d4", "e4", "d5", "e5"]
-        space = self.get_controlled_spaces(locs)*10
+        space = self.get_controlled_spaces(locs, just_moved_color)*10
         return space
 
-    def get_controlled_spaces(self, locs):
+    def get_controlled_spaces(self, locs, just_moved_color):
         """
         Returns amount of controlling space, positive favoring white, negative favoring black
         """
 
         space = 0
         for square in locs:
-            controlling = self.board.controlling_side(square)
+            controlling = self.board.controlling_side(square, just_moved_color)
             if controlling == Board.WHITE:
                 space += 1
             elif controlling == Board.BLACK:
@@ -129,4 +135,4 @@ class DadBoardAnalyzer(BoardAnalyzer):
             self.get_material(),
             self.get_piece_risked(just_moved_color),
             self.get_king_safety(),
-            self.get_central_controls())
+            self.get_central_controls(just_moved_color))

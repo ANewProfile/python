@@ -119,25 +119,35 @@ class Board(object):
         self.positions[7-pos[1]][pos[0]] = piece
         self.__piece_locations = None
 
-    def assign_controls(self):
-        self.__controlling = {}
+    def assign_controls(self, just_moved_color):
+        self.__controlling[just_moved_color] = {}
         for piece, piece_loc in self.piece_and_locations():
+            piece_clr = piece_color(piece)
+            opp_color_of_piece = Board.WHITE if piece_clr == Board.BLACK else Board.BLACK
+            piece_controlled_by_opp = self.controlled_by(piece_loc, opp_color_of_piece)
+
+	    # a piece controlled by opp side that is about to move cannot
+	    # control other spaces - it's at risk. note that it's not the same
+	    # as checking if a piece is controlled by its own side.
+            if piece_controlled_by_opp and just_moved_color != opp_color_of_piece:
+                continue
+
             for next_move_loc in self.possible_moves(piece_loc):
                 # pawn cannot control same column
                 if piece in PAWNS and piece_loc[0] == next_move_loc[0]:
                     continue
-                if next_move_loc not in self.__controlling:
-                    self.__controlling[next_move_loc] = 0
-                if piece_color(piece) == Board.BLACK:
-                    self.__controlling[next_move_loc] -= 1
+                if next_move_loc not in self.__controlling[just_moved_color]:
+                    self.__controlling[just_moved_color][next_move_loc] = 0
+                if piece_clr == Board.BLACK:
+                    self.__controlling[just_moved_color][next_move_loc] -= 1
                 else:
-                    self.__controlling[next_move_loc] += 1
+                    self.__controlling[just_moved_color][next_move_loc] += 1
 
-    def controlling_side(self, loc):
-        if self.__controlling is None:
-            self.assign_controls()
-        if loc in self.__controlling:
-            pieces_guarding = self.__controlling[loc]
+    def controlling_side(self, loc, just_moved_color):
+        if self.__controlling[just_moved_color] is None:
+            self.assign_controls(just_moved_color)
+        if loc in self.__controlling[just_moved_color]:
+            pieces_guarding = self.__controlling[just_moved_color][loc]
         else:
             pieces_guarding = 0
 
@@ -219,7 +229,7 @@ class Board(object):
         self.__allow_set_piece = False
         self.__piece_locations = None
         self.__location_moves = {}
-        self.__controlling = None
+        self.__controlling = { Board.WHITE: None, Board.BLACK: None }
         self.__controlled_by = {}
         self.__check_mate = {}
 
