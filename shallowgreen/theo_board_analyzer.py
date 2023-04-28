@@ -54,7 +54,7 @@ class TheoBoardAnalyzer(BoardAnalyzer):
             if controlling is not None and controlling != just_moved_color:
                 if just_moved_color == Board.WHITE:
                     for move in self.board.possible_moves(piece_loc):
-                        print(piece_loc, move)
+                        # print(piece_loc, move)
                         try:
                             new_board = self.board.move_piece(piece_loc, move)
                         except InvalidMoveException:
@@ -64,15 +64,11 @@ class TheoBoardAnalyzer(BoardAnalyzer):
                                 if piece not in KINGS else king_material())
                 else:
                     for move in self.board.possible_moves(piece_loc):
-                        print(piece_loc, move)
-                        print("on")
-                        print(self.board)
+                        # print(piece_loc, move)
                         try:
                             new_board = self.board.move_piece(piece_loc, move)
                         except InvalidMoveException:
                             continue
-                        print("results in")
-                        print(new_board)
                         if new_board.controlling_side(move) == Board.WHITE:
                             risked -= (material(piece)
                                        if piece not in KINGS else king_material())
@@ -123,7 +119,7 @@ class TheoBoardAnalyzer(BoardAnalyzer):
                 space -= 1
         return space
 
-    def compute_score(self, material, risk, king_safety, space, board):
+    def compute_score(self, material, risk, king_safety, space):
         """
         Calculates and returns a board evaluation
         """
@@ -137,10 +133,10 @@ class TheoBoardAnalyzer(BoardAnalyzer):
 
         # doesn't blunder mate
         for color in (Board.WHITE, Board.BLACK):
-            if board.check_mate(Board.WHITE):
+            if self.board.check_mate(Board.WHITE):
                 score = -1_000_000_000_000_000_000_000_000_000
 
-            if board.check_mate(Board.BLACK):
+            if self.board.check_mate(Board.BLACK):
                 score = 1_000_000_000_000_000_000_000_000_000
 
         return score
@@ -161,7 +157,7 @@ class TheoBoardAnalyzer(BoardAnalyzer):
 
         return min(a, b) if color == Board.WHITE else max(a, b)
 
-    def score(self, just_moved_color, board):
+    def score(self, just_moved_color):
         """
         Returns a numeric score bassed off of the compute_score() func
         """
@@ -170,5 +166,4 @@ class TheoBoardAnalyzer(BoardAnalyzer):
             self.get_material(),
             self.get_piece_risked(just_moved_color),
             self.get_king_safety(),
-            self.get_central_controls(),
-            board)
+            self.get_central_controls())

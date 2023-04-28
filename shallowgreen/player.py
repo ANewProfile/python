@@ -104,9 +104,8 @@ class LookAheadPlayer(object):
                 return first_move
 
             analyzer = self.analyzer_class(ending_board)
-            cur_score = analyzer.score(color, board)
+            cur_score = analyzer.score(move_sequence[-1].just_moved_color)
             # print("first move %s, end board score %s" % (first_move, cur_score))
-            # print(ending_board)
 
             if first_move not in first_move_scores:
                 first_move_scores[first_move] = cur_score
@@ -126,7 +125,5 @@ class LookAheadPlayer(object):
                 raise GameOverException(f"Checkmate, {color} lost.")
             else:
                 raise GameOverException("Draw by stalemate.")
-            
-        
-        print(best_score)
+
         return best_move

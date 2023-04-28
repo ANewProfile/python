@@ -65,7 +65,7 @@ class DadBoardAnalyzer(BoardAnalyzer):
         """
 
         locs = ["d4", "e4", "d5", "e5"]
-        space = self.get_controlled_spaces(locs)*2
+        space = self.get_controlled_spaces(locs)*10
         return space
 
     def get_controlled_spaces(self, locs):
@@ -82,7 +82,7 @@ class DadBoardAnalyzer(BoardAnalyzer):
                 space -= 1
         return space
 
-    def compute_score(self, material, risk, king_safety, space, board):
+    def compute_score(self, material, risk, king_safety, space):
         """
         Calculates and returns a board evaluation
         """
@@ -96,10 +96,10 @@ class DadBoardAnalyzer(BoardAnalyzer):
 
         # doesn't blunder mate
         for color in (Board.WHITE, Board.BLACK):
-            if board.check_mate(Board.WHITE):
+            if self.board.check_mate(Board.WHITE):
                 score = -1_000_000_000_000_000
 
-            if board.check_mate(Board.BLACK):
+            if self.board.check_mate(Board.BLACK):
                 score = 1_000_000_000_000_000
 
         return score
@@ -120,7 +120,7 @@ class DadBoardAnalyzer(BoardAnalyzer):
 
         return min(a, b) if color == Board.WHITE else max(a, b)
 
-    def score(self, just_moved_color, board):
+    def score(self, just_moved_color):
         """
         Returns a numeric score bassed off of the compute_score() func
         """
@@ -129,5 +129,4 @@ class DadBoardAnalyzer(BoardAnalyzer):
             self.get_material(),
             self.get_piece_risked(just_moved_color),
             self.get_king_safety(),
-            self.get_central_controls(),
-            board)
+            self.get_central_controls())
