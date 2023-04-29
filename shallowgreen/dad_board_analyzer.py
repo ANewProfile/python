@@ -172,7 +172,7 @@ class DadBoardAnalyzer(BoardAnalyzer):
         """
         score = 0.0
         # material and risk (which is material in immediate danger) are equal weight
-        score += material*2
+        score += material
         score += risk
         score += safety
         score += center_controls/2
