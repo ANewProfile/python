@@ -14,8 +14,7 @@ while True:
         q = [input("Which piece would you like to move? "),
              input("Where would you like to move it? ")]
         if len(q[0]) != 2 or len(q[1]) != 2 or \
-           piece_color(board.piece_at(q[0])) != Board.WHITE or \
-           board.piece_at(q[1]) is not None:
+           piece_color(board.piece_at(q[0])) != Board.WHITE:
             print("Please move a white piece to an empty space.")
         else:
             try:
