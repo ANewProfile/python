@@ -6,7 +6,7 @@ class DadBoardAnalyzer(BoardAnalyzer):
         # a pawn becomes more important as it gets closer to end
         if piece in PAWNS:
             d = rows_to_opp_end(piece, self.board.location_of(piece))
-            return ((7-d)*1.0/7)*material("q")
+            return max(((7-d)*1.0/7)*material("q")/2, material(piece))
         return material(piece) if piece not in KINGS else king_material()
 
     def get_material(self):
