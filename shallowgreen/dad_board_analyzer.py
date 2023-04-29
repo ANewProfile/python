@@ -1,10 +1,3 @@
-# TODO
-#
-# why it would block a e4->e5 rather than protecting the knight?
-#
-# based on available pieces, there are threat zones - squares that can cause checks
-# those squares have layered importance, based on reachability
-
 from chess import *
 
 class DadBoardAnalyzer(BoardAnalyzer):
@@ -18,7 +11,7 @@ class DadBoardAnalyzer(BoardAnalyzer):
                 cur_material -= material(piece)
         return cur_material
 
-    def get_safety(self, start_loc, offsets, color):
+    def get_safety_with_offsets(self, start_loc, offsets, color):
         safety = 0
         loc_helper = LocationHelper(start_loc)
         opp_color = Board.WHITE if color == Board.BLACK else Board.BLACK
@@ -32,7 +25,6 @@ class DadBoardAnalyzer(BoardAnalyzer):
                     else:
                         safety += 1
 
-        # print("safety of %s for %s: %s" % (start_loc, color, safety))
         return safety
 
     def has_pieces(self, color, pieces):
@@ -42,11 +34,8 @@ class DadBoardAnalyzer(BoardAnalyzer):
                 return True
         return False
 
-    def get_king_safety(self):
+    def get_safety(self, white_loc, black_loc):
         safety = 0
-
-        white_king_loc = self.board.location_of(get_piece("k", Board.WHITE))
-        black_king_loc = self.board.location_of(get_piece("k", Board.BLACK))
 
         white_offsets = [ (+0, +0) ]
         black_offsets = [ (+0, +0) ]
@@ -58,16 +47,16 @@ class DadBoardAnalyzer(BoardAnalyzer):
             black_offsets.extend([ (-2, -1), (-2, +1), (-1, -2), (-1, +2),
                                    (+2, -1), (+2, +1), (+1, -2), (+1, +2) ])
 
-        if self.has_pieces(Board.BLACK, ["B1"]) and loc_is_white(white_king_loc):
+        if self.has_pieces(Board.BLACK, ["B1"]) and white_loc and loc_is_white(white_loc):
             white_offsets.extend([ (-1, -1), (-1, +1), (-2, -2), (-2, +2),
                                    (+1, -1), (+1, +1), (+2, -2), (+2, +2) ])
-        if self.has_pieces(Board.BLACK, ["B2"]) and loc_is_black(white_king_loc):
+        if self.has_pieces(Board.BLACK, ["B2"]) and white_loc and loc_is_black(white_loc):
             white_offsets.extend([ (-1, -1), (-1, +1), (-2, -2), (-2, +2),
                                    (+1, -1), (+1, +1), (+2, -2), (+2, +2) ])
-        if self.has_pieces(Board.WHITE, ["b1"]) and loc_is_black(black_king_loc):
+        if self.has_pieces(Board.WHITE, ["b1"]) and black_loc and loc_is_black(black_loc):
             black_offsets.extend([ (-1, -1), (-1, +1), (-2, -2), (-2, +2),
                                    (+1, -1), (+1, +1), (+2, -2), (+2, +2) ])
-        if self.has_pieces(Board.WHITE, ["b2"]) and loc_is_white(black_king_loc):
+        if self.has_pieces(Board.WHITE, ["b2"]) and black_loc and loc_is_white(black_loc):
             black_offsets.extend([ (-1, -1), (-1, +1), (-2, -2), (-2, +2),
                                    (+1, -1), (+1, +1), (+2, -2), (+2, +2) ])
 
@@ -104,9 +93,22 @@ class DadBoardAnalyzer(BoardAnalyzer):
         white_offsets = list(set(white_offsets))
         black_offsets = list(set(black_offsets))
 
-        king_safety = self.get_safety(white_king_loc, white_offsets, Board.WHITE) + \
-                      self.get_safety(black_king_loc, black_offsets, Board.BLACK)
-        return king_safety
+        safety = 0
+        if white_loc:
+            safety += self.get_safety_with_offsets(white_loc, white_offsets, Board.WHITE)
+        if black_loc:
+            safety += self.get_safety_with_offsets(black_loc, black_offsets, Board.BLACK)
+        return safety
+
+    def get_king_safety(self):
+        white_king_loc = self.board.location_of(get_piece("k", Board.WHITE))
+        black_king_loc = self.board.location_of(get_piece("k", Board.BLACK))
+        return self.get_safety(white_king_loc, black_king_loc)
+
+    def get_queen_safety(self):
+        white_queen_loc = self.board.location_of(get_piece("q", Board.WHITE))
+        black_queen_loc = self.board.location_of(get_piece("q", Board.BLACK))
+        return self.get_safety(white_queen_loc, black_queen_loc)
 
     def get_piece_risked(self, just_moved_color):
         risked = 0
@@ -125,23 +127,25 @@ class DadBoardAnalyzer(BoardAnalyzer):
         Returns amount of controlling space, positive favoring white, negative favoring black
         """
 
-        locs = ["d4", "e4", "d5", "e5"]
-        space = self.get_controlled_spaces(locs, just_moved_color)
-        return space
+        spaces = 0
 
-    def get_controlled_spaces(self, locs, just_moved_color):
+        locs = ["c5", "d5", "e5", "f5"]
+        spaces += self.get_controlled_spaces(locs, Board.WHITE, just_moved_color)
+        locs = ["c4", "d4", "e4", "f4"]
+        spaces -= self.get_controlled_spaces(locs, Board.BLACK, just_moved_color)
+        return spaces
+
+    def get_controlled_spaces(self, locs, color, just_moved_color):
         """
-        Returns amount of controlling space, positive favoring white, negative favoring black
+        Returns number of spaces controlled by the specified color
         """
 
-        space = 0
+        spaces = 0
         for square in locs:
-            controlling = self.board.controlling_side(square, just_moved_color)
-            if controlling == Board.WHITE:
-                space += 1
-            elif controlling == Board.BLACK:
-                space -= 1
-        return space
+            if self.board.controlled_by(square, color):
+                spaces += 1
+        # print("%s controls %s? %s" % (color, locs, spaces))
+        return spaces
 
     def compute_score(self, material, risk, king_safety, center_controls):
         """
@@ -149,7 +153,7 @@ class DadBoardAnalyzer(BoardAnalyzer):
         """
         score = 0.0
         # material and risk (which is material in immediate danger) are equal weight
-        score += material
+        score += material*2
         score += risk
         score += king_safety/10
         score += center_controls/2
@@ -189,5 +193,5 @@ class DadBoardAnalyzer(BoardAnalyzer):
         return self.compute_score(
             self.get_material(),
             self.get_piece_risked(just_moved_color),
-            self.get_king_safety(),
+            self.get_king_safety()+self.get_queen_safety(),
             self.get_central_controls(just_moved_color))
