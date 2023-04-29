@@ -36,13 +36,13 @@ class TheoBoardAnalyzer(BoardAnalyzer):
             new_loc, _ = white_king_loc_helper.at(
                 col_offset, row_offset, self.board)
             if new_loc:
-                if self.board.controlled_by(new_loc, Board.BLACK):
+                if self.board.attacked_by(new_loc, Board.BLACK):
                     king_safety -= 1
 
             new_loc, _ = black_king_loc_helper.at(
                 col_offset, row_offset, self.board)
             if new_loc:
-                if self.board.controlled_by(new_loc, Board.WHITE):
+                if self.board.attacked_by(new_loc, Board.WHITE):
                     king_safety += 1
 
         return king_safety

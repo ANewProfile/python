@@ -89,6 +89,14 @@ def get_piece(name, color):
     return white_piece(name) if color == Board.WHITE else black_piece(name)
 
 
+def rows_to_opp_end(piece, loc):
+    col, row = loc_to_col_row(loc)
+    if piece_color(piece) is Board.WHITE:
+        return 7-row
+    else:
+        return row
+
+
 class Board(object):
     WHITE = "white"
     BLACK = "black"
@@ -138,12 +146,12 @@ class Board(object):
         for piece, piece_loc in self.piece_and_locations():
             piece_clr = piece_color(piece)
             opp_color_of_piece = Board.WHITE if piece_clr == Board.BLACK else Board.BLACK
-            piece_controlled_by_opp = self.controlled_by(piece_loc, opp_color_of_piece)
+            piece_attacked_by_opp = self.attacked_by(piece_loc, opp_color_of_piece)
 
 	    # a piece controlled by opp side that is about to move cannot
 	    # control other spaces - it's at risk. note that it's not the same
 	    # as checking if a piece is controlled by its own side.
-            if piece_controlled_by_opp and just_moved_color != opp_color_of_piece:
+            if piece_attacked_by_opp and just_moved_color != opp_color_of_piece:
                 continue
 
             for next_move_loc in self.possible_moves(piece_loc):
@@ -172,20 +180,24 @@ class Board(object):
         else:
             return None
 
-    def controlled_by(self, loc, color, include_castle=True):
+    def attacked_by(self, loc, color, include_castle=True):
+        """
+        Returns True if specified location can be taken by a piece of the specified color.
+        """
+
         cache_key = (loc, color, include_castle)
-        if cache_key in self.__controlled_by:
-            return self.__controlled_by[cache_key]
+        if cache_key in self.__attacked_by:
+            return self.__attacked_by[cache_key]
 
         for piece, piece_loc in self.piece_and_locations():
             if piece_color(piece) == color:
                 if loc in self.possible_moves(piece_loc, include_castle=include_castle, assume_pawn_takes=True):
-                    # pawn cannot control what's in front of it
+                    # pawn cannot attackedat's in front of it
                     if piece not in PAWNS or piece_loc[0] != loc[0]:
-                        self.__controlled_by[cache_key] = True
+                        self.__attacked_by[cache_key] = True
                         return True
 
-        self.__controlled_by[cache_key] = False
+        self.__attacked_by[cache_key] = False
         return False
 
     def __str__(self):
@@ -244,7 +256,7 @@ class Board(object):
         self.__piece_locations = None
         self.__location_moves = {}
         self.__controlling = { Board.WHITE: None, Board.BLACK: None }
-        self.__controlled_by = {}
+        self.__attacked_by = {}
         self.__check_mate = {}
 
         self.white_can_castle_right = True
@@ -457,7 +469,7 @@ class Board(object):
         king_piece = get_piece('k', color)
         king_loc = self.location_of(king_piece)
 
-        if self.controlled_by(king_loc, opp_color):
+        if self.attacked_by(king_loc, opp_color):
             return True
         return False
 
@@ -527,32 +539,32 @@ class Board(object):
 
         if piece_color(piece) == Board.WHITE:
             if self.white_can_castle_left and \
-               not self.controlled_by('d1', Board.BLACK, include_castle=False) and \
-               not self.controlled_by('c1', Board.BLACK, include_castle=False) and \
-               not self.controlled_by('b1', Board.BLACK, include_castle=False) and \
-               not self.controlled_by('e1', Board.BLACK, include_castle=False):
+               not self.attacked_by('d1', Board.BLACK, include_castle=False) and \
+               not self.attacked_by('c1', Board.BLACK, include_castle=False) and \
+               not self.attacked_by('b1', Board.BLACK, include_castle=False) and \
+               not self.attacked_by('e1', Board.BLACK, include_castle=False):
                 castle_vals[1] = -2
 
             if self.white_can_castle_right and \
-               not self.controlled_by('f1', Board.BLACK, include_castle=False) and \
-               not self.controlled_by('g1', Board.BLACK, include_castle=False) and \
-               not self.controlled_by('e1', Board.BLACK, include_castle=False):
+               not self.attacked_by('f1', Board.BLACK, include_castle=False) and \
+               not self.attacked_by('g1', Board.BLACK, include_castle=False) and \
+               not self.attacked_by('e1', Board.BLACK, include_castle=False):
                 castle_vals[0] = 2
 
         else:  # black castle
 
             # can't castle through or from check - black
             if self.black_can_castle_left and \
-               not self.controlled_by('d8', Board.WHITE, include_castle=False) and \
-               not self.controlled_by('c8', Board.WHITE, include_castle=False) and \
-               not self.controlled_by('b8', Board.WHITE, include_castle=False) and \
-               not self.controlled_by('e8', Board.WHITE, include_castle=False):
+               not self.attacked_by('d8', Board.WHITE, include_castle=False) and \
+               not self.attacked_by('c8', Board.WHITE, include_castle=False) and \
+               not self.attacked_by('b8', Board.WHITE, include_castle=False) and \
+               not self.attacked_by('e8', Board.WHITE, include_castle=False):
                 castle_vals[3] = -2
 
             if self.black_can_castle_right and \
-               not self.controlled_by('f8', Board.WHITE, include_castle=False) and \
-               not self.controlled_by('g8', Board.WHITE, include_castle=False) and \
-               not self.controlled_by('e8', Board.WHITE, include_castle=False):
+               not self.attacked_by('f8', Board.WHITE, include_castle=False) and \
+               not self.attacked_by('g8', Board.WHITE, include_castle=False) and \
+               not self.attacked_by('e8', Board.WHITE, include_castle=False):
                 castle_vals[2] = 2
 
         new_positions = []

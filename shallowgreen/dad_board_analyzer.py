@@ -2,29 +2,47 @@ from chess import *
 
 class DadBoardAnalyzer(BoardAnalyzer):
 
+    def piece_material(self, piece):
+        # a pawn becomes more important as it gets closer to end
+        if piece in PAWNS:
+            d = rows_to_opp_end(piece, self.board.location_of(piece))
+            return ((7-d)*1.0/7)*material("q")
+        return material(piece) if piece not in KINGS else king_material()
+
     def get_material(self):
         cur_material = 0
         for piece in self.board.pieces():
-            if piece_color(piece) == Board.WHITE:
-                cur_material += material(piece)
-            else:
-                cur_material -= material(piece)
+            if piece not in KINGS:
+                if piece_color(piece) == Board.WHITE:
+                    cur_material += self.piece_material(piece)
+                else:
+                    cur_material -= self.piece_material(piece)
         return cur_material
 
     def get_safety_with_offsets(self, start_loc, offsets, color):
-        safety = 0
+        """
+	Returns safety for a set of locations, positive favoring white,
+	negative favoring black. The absoluate safety value is a float between
+        0 and 1 representing fraction of the locations that are safe.
+        """
+
+        safe_locations = 0
+        checked_locations = 0
         loc_helper = LocationHelper(start_loc)
         opp_color = Board.WHITE if color == Board.BLACK else Board.BLACK
 
         for col_offset, row_offset in offsets:
             new_loc, new_loc_piece = loc_helper.at(col_offset, row_offset, self.board)
             if new_loc:
-                if self.board.controlled_by(new_loc, opp_color):
-                    if color == Board.WHITE:
-                        safety -= 1
-                    else:
-                        safety += 1
+                checked_locations += 1
+                if not self.board.attacked_by(new_loc, opp_color):
+                    safe_locations += 1
 
+        safety = safe_locations*1.0/checked_locations
+        if color == Board.WHITE:
+            return safety
+        else:
+            return -1*safety
         return safety
 
     def has_pieces(self, color, pieces):
@@ -34,8 +52,17 @@ class DadBoardAnalyzer(BoardAnalyzer):
                 return True
         return False
 
-    def get_safety(self, white_loc, black_loc):
+    def get_safety(self, piece_name):
+        """
+	Returns relative, combined safety for both side for the piece, positive
+	favoring white, negative favoring black. The absoluate safety value is
+        a float between 0 and 1.
+        """
+
         safety = 0
+
+        white_loc = self.board.location_of(get_piece(piece_name, Board.WHITE))
+        black_loc = self.board.location_of(get_piece(piece_name, Board.BLACK))
 
         white_offsets = [ (+0, +0) ]
         black_offsets = [ (+0, +0) ]
@@ -98,28 +125,20 @@ class DadBoardAnalyzer(BoardAnalyzer):
             safety += self.get_safety_with_offsets(white_loc, white_offsets, Board.WHITE)
         if black_loc:
             safety += self.get_safety_with_offsets(black_loc, black_offsets, Board.BLACK)
+
         return safety
-
-    def get_king_safety(self):
-        white_king_loc = self.board.location_of(get_piece("k", Board.WHITE))
-        black_king_loc = self.board.location_of(get_piece("k", Board.BLACK))
-        return self.get_safety(white_king_loc, black_king_loc)
-
-    def get_queen_safety(self):
-        white_queen_loc = self.board.location_of(get_piece("q", Board.WHITE))
-        black_queen_loc = self.board.location_of(get_piece("q", Board.BLACK))
-        return self.get_safety(white_queen_loc, black_queen_loc)
 
     def get_piece_risked(self, just_moved_color):
         risked = 0
+        next_move_color = Board.WHITE if just_moved_color == Board.BLACK else Board.BLACK
+
         for piece, piece_loc in self.board.piece_and_locations():
             if piece_color(piece) == just_moved_color:
-                controlling = self.board.controlling_side(piece_loc, just_moved_color)
-                if controlling is not None and controlling != just_moved_color:
+                if self.board.attacked_by(piece_loc, next_move_color):
                     if just_moved_color == Board.WHITE:
-                        risked -= (material(piece) if piece not in KINGS else king_material())
+                        risked -= self.piece_material(piece)
                     else:
-                        risked += (material(piece) if piece not in KINGS else king_material())
+                        risked += self.piece_material(piece)
         return risked
 
     def get_central_controls(self, just_moved_color):
@@ -142,12 +161,12 @@ class DadBoardAnalyzer(BoardAnalyzer):
 
         spaces = 0
         for square in locs:
-            if self.board.controlled_by(square, color):
+            if self.board.attacked_by(square, color):
                 spaces += 1
         # print("%s controls %s? %s" % (color, locs, spaces))
         return spaces
 
-    def compute_score(self, material, risk, king_safety, center_controls):
+    def compute_score(self, material, risk, safety, center_controls):
         """
         Calculates and returns a board evaluation
         """
@@ -155,9 +174,9 @@ class DadBoardAnalyzer(BoardAnalyzer):
         # material and risk (which is material in immediate danger) are equal weight
         score += material*2
         score += risk
-        score += king_safety/10
+        score += safety
         score += center_controls/2
-        # print(f"m {material} r {risk} k {king_safety} s {center_controls}")
+        # print(f"m {material} r {risk} s {safety} c {center_controls}")
 
         # doesn't blunder mate
         for color in (Board.WHITE, Board.BLACK):
@@ -193,5 +212,5 @@ class DadBoardAnalyzer(BoardAnalyzer):
         return self.compute_score(
             self.get_material(),
             self.get_piece_risked(just_moved_color),
-            self.get_king_safety()+self.get_queen_safety(),
+            self.get_safety("k")*5 + self.get_safety("q")*5 + self.get_safety("r")*3,
             self.get_central_controls(just_moved_color))
