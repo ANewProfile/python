@@ -5,6 +5,8 @@ if which.lower() == 'r':
     api = requests.get('https://uselessfacts.jsph.pl/api/v2/facts/random')
 elif which.lower() == 'd':
     api = requests.get('https://uselessfacts.jsph.pl/api/v2/facts/today')
+else:
+    print('Invalid')
 
 # print(api.json())
 
