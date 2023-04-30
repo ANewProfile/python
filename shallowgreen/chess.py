@@ -69,7 +69,7 @@ class LocationHelper(object):
         new_row = self.col_row[1] + row_offset
         if new_col >= 0 and new_col < 8 and new_row >= 0 and new_row < 8:
             new_loc = col_row_to_loc([new_col, new_row])
-            return [new_loc, board.piece_at(new_loc)]
+            return [new_loc, board.piece_at_col_row(new_col, new_row)]
         else:
             return [None, None]
 
@@ -77,7 +77,8 @@ class LocationHelper(object):
 def piece_color(piece):
     if piece == "" or piece is None:
         return None
-    return Board.WHITE if piece.islower() else Board.BLACK
+    # faster than regex or islower
+    return Board.WHITE if piece[0] in 'abcdefghijklmnopqrstuvwxyz' else Board.BLACK
 
 
 def white_piece(piece):
@@ -131,12 +132,15 @@ class Board(object):
             self.find_locations()
         return self.__piece_locations.items()
 
-    def piece_at(self, loc):
-        pos = loc_to_col_row(loc)
-        if pos[0] >= 0 and pos[0] < 8 and \
-           pos[1] >= 0 and pos[1] < 8:
-            return self.positions[7-pos[1]][pos[0]]
+    def piece_at_col_row(self, col, row):
+        if col >= 0 and col < 8 and \
+           row >= 0 and row < 8:
+            return self.positions[7-row][col]
         return None
+
+    def piece_at(self, loc):
+        col, row = loc_to_col_row(loc)
+        return self.piece_at_col_row(col, row)
 
     def set_piece_at(self, piece, loc):
         assert self.__allow_set_piece is True
@@ -159,7 +163,7 @@ class Board(object):
                 # print("%s cannot control anything" % piece)
                 continue
 
-            locs_to_check = self.possible_moves(piece_loc, assume_pawn_takes=True) + self.blocked_at(piece_loc)
+            locs_to_check = self.possible_moves(piece_loc) + self.blocked_at(piece_loc)
             for next_move_loc in set(locs_to_check):
                 # pawn cannot control same column
                 if piece in PAWNS and piece_loc[0] == next_move_loc[0]:
@@ -186,18 +190,18 @@ class Board(object):
         else:
             return None
 
-    def attacked_by(self, loc, color, include_castle=True):
+    def attacked_by(self, loc, color):
         """
         Returns True if specified location can be taken by a piece of the specified color.
         """
 
-        cache_key = (loc, color, include_castle)
+        cache_key = (loc, color)
         if cache_key in self.__attacked_by:
             return self.__attacked_by[cache_key]
 
         for piece, piece_loc in self.piece_and_locations():
             if piece_color(piece) == color:
-                if loc in self.possible_moves(piece_loc, include_castle=include_castle, assume_pawn_takes=True) or \
+                if loc in self.possible_moves(piece_loc, include_castle=False) or \
                    loc in self.blocked_at(piece_loc):
                     # pawn cannot attack the square in front of it
                     if piece not in PAWNS or piece_loc[0] != loc[0]:
@@ -260,9 +264,12 @@ class Board(object):
     def __init__(self, empty=False):
         self.positions = [[None for i in range(8)] for j in range(8)]
         self.__allow_set_piece = False
+
+        # data structures for caching
         self.__piece_locations = None
-        self.__location_moves = {}
-        self.__location_blocking = {}
+        self.__moves_non_castle = {}
+        self.__moves_castle = {}
+        self.__moves_blocked = {}
         self.__controlling = { Board.WHITE: None, Board.BLACK: None }
         self.__attacked_by = {}
         self.__check_mate = {}
@@ -300,18 +307,18 @@ class Board(object):
         return piece_color(piece)
 
     def diagonal_moves(self, piece, loc, total_range):
-
         loc_helper = LocationHelper(loc)
         cont = [True, True, True, True]
         new_locations = []
         blocking_locations = []
+        piece_clr = piece_color(piece)
 
         for i in range(1, total_range):
             if cont[0] is True:
                 new_loc, new_loc_piece = loc_helper.at(-i, -i, self)
                 if new_loc:  # location is valid
                     # if empty or opponent
-                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_clr:
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         blocking_locations.append(new_loc)
@@ -321,7 +328,7 @@ class Board(object):
                 new_loc, new_loc_piece = loc_helper.at(-i, +i, self)
                 if new_loc:  # location is valid
                     # if empty or opponent
-                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_clr:
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         blocking_locations.append(new_loc)
@@ -331,7 +338,7 @@ class Board(object):
                 new_loc, new_loc_piece = loc_helper.at(+i, -i, self)
                 if new_loc:  # location is valid
                     # if empty or opponent
-                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_clr:
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         blocking_locations.append(new_loc)
@@ -341,7 +348,7 @@ class Board(object):
                 new_loc, new_loc_piece = loc_helper.at(+i, +i, self)
                 if new_loc:  # location is valid
                     # if empty or opponent
-                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_clr:
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         blocking_locations.append(new_loc)
@@ -350,18 +357,18 @@ class Board(object):
         return new_locations, blocking_locations
 
     def cross_moves(self, piece, loc, total_range):
-
         loc_helper = LocationHelper(loc)
         cont = [True, True, True, True]
         new_locations = []
         blocking_locations = []
+        piece_clr = piece_color(piece)
 
         for i in range(1, total_range):
             if cont[0] is True:
                 new_loc, new_loc_piece = loc_helper.at(0, -i, self)
                 if new_loc:  # location is valid
                     # if empty or opponent
-                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_clr:
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         blocking_locations.append(new_loc)
@@ -371,7 +378,7 @@ class Board(object):
                 new_loc, new_loc_piece = loc_helper.at(0, +i, self)
                 if new_loc:  # location is valid
                     # if empty or opponent
-                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_clr:
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         blocking_locations.append(new_loc)
@@ -381,7 +388,7 @@ class Board(object):
                 new_loc, new_loc_piece = loc_helper.at(+i, 0, self)
                 if new_loc:  # location is valid
                     # if empty or opponent
-                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_clr:
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         blocking_locations.append(new_loc)
@@ -391,7 +398,7 @@ class Board(object):
                 new_loc, new_loc_piece = loc_helper.at(-i, 0, self)
                 if new_loc:  # location is valid
                     # if empty or opponent
-                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_clr:
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         blocking_locations.append(new_loc)
@@ -399,64 +406,72 @@ class Board(object):
 
         return new_locations, blocking_locations
 
-    def pawn_moves(self, loc, assume_pawn_takes=False):
-
+    def pawn_moves(self, loc):
         loc_helper = LocationHelper(loc)
         _, cur_row = loc_to_col_row(loc)
         new_locations = []
+        blocking_locations = []
         piece_clr = self.loc_piece_color(loc)
 
         if piece_clr == Board.WHITE:  # white moves
 
             # move up one
-            new_loc, new_loc_piece = loc_helper.at(0, 1, self)
-            if new_loc is not None and new_loc_piece is None:
-                new_locations.append(new_loc)
+            loc_in_front, piece_in_front = loc_helper.at(0, 1, self)
+            if loc_in_front is not None and piece_in_front is None:
+                new_locations.append(loc_in_front)
 
             # move up two if nothing blocking it
-            if cur_row == 1 and loc_helper.at(0, 1, self)[1] is None:
+            if loc_in_front is not None and cur_row == 1 and piece_in_front is None:
                 new_loc, new_loc_piece = loc_helper.at(0, 2, self)
-                if new_loc is not None and loc_helper.at(0, 1, self)[0] is not None and new_loc_piece is None:
+                if new_loc is not None and new_loc_piece is None:
                     new_locations.append(new_loc)
 
             # take right!
             new_loc, new_loc_piece = loc_helper.at(+1, +1, self)
-            if new_loc is not None and \
-               (assume_pawn_takes or (new_loc_piece is not None and piece_color(new_loc_piece) == Board.BLACK)):
-                new_locations.append(new_loc)
+            if new_loc is not None:
+               if new_loc_piece is not None and piece_color(new_loc_piece) == Board.BLACK:
+                  new_locations.append(new_loc)
+               else:
+                  blocking_locations.append(new_loc)
 
             # take left!
             new_loc, new_loc_piece = loc_helper.at(-1, +1, self)
-            if new_loc is not None and \
-               (assume_pawn_takes or (new_loc_piece is not None and piece_color(new_loc_piece) == Board.BLACK)):
-                new_locations.append(new_loc)
+            if new_loc is not None:
+               if new_loc_piece is not None and piece_color(new_loc_piece) == Board.BLACK:
+                  new_locations.append(new_loc)
+               else:
+                  blocking_locations.append(new_loc)
 
         else:  # black moves
 
             # move down one
-            new_loc, new_loc_piece = loc_helper.at(0, -1, self)
-            if new_loc is not None and new_loc_piece is None:
-                new_locations.append(new_loc)
+            loc_in_front, piece_in_front = loc_helper.at(0, -1, self)
+            if loc_in_front is not None and piece_in_front is None:
+                new_locations.append(loc_in_front)
 
             # move down two if nothing blocking it
-            if cur_row == 6 and loc_helper.at(0, -1, self)[1] is None:
+            if loc_in_front is not None and cur_row == 6 and piece_in_front is None:
                 new_loc, new_loc_piece = loc_helper.at(0, -2, self)
-                if new_loc is not None and loc_helper.at(0, -1, self)[0] is not None and new_loc_piece is None:
+                if new_loc is not None and new_loc_piece is None:
                     new_locations.append(new_loc)
 
             # take right!
             new_loc, new_loc_piece = loc_helper.at(+1, -1, self)
-            if new_loc is not None and \
-               (assume_pawn_takes or (new_loc_piece is not None and piece_color(new_loc_piece) == Board.WHITE)):
-                new_locations.append(new_loc)
+            if new_loc is not None:
+               if new_loc_piece is not None and piece_color(new_loc_piece) == Board.WHITE:
+                  new_locations.append(new_loc)
+               else:
+                  blocking_locations.append(new_loc)
 
             # take left!
             new_loc, new_loc_piece = loc_helper.at(-1, -1, self)
-            if new_loc is not None and \
-               (assume_pawn_takes or (new_loc_piece is not None and piece_color(new_loc_piece) == Board.WHITE)):
-                new_locations.append(new_loc)
+            if new_loc is not None:
+               if new_loc_piece is not None and piece_color(new_loc_piece) == Board.WHITE:
+                  new_locations.append(new_loc)
+               else:
+                  blocking_locations.append(new_loc)
 
-        return new_locations
+        return new_locations, blocking_locations
 
     def knight_moves(self, piece, loc):
         loc_helper = LocationHelper(loc)
@@ -494,6 +509,10 @@ class Board(object):
     def check_mate(self, color):
         if color in self.__check_mate:
             return self.__check_mate[color]
+
+        if self.in_check(color) is False:
+            self.__check_mate[color] = False
+            return False
 
         for piece, piece_location in self.piece_and_locations():
             if piece_color(piece) == color:
@@ -557,32 +576,32 @@ class Board(object):
 
         if piece_color(piece) == Board.WHITE:
             if self.white_can_castle_left and \
-               not self.attacked_by('d1', Board.BLACK, include_castle=False) and \
-               not self.attacked_by('c1', Board.BLACK, include_castle=False) and \
-               not self.attacked_by('b1', Board.BLACK, include_castle=False) and \
-               not self.attacked_by('e1', Board.BLACK, include_castle=False):
+               not self.attacked_by('d1', Board.BLACK) and \
+               not self.attacked_by('c1', Board.BLACK) and \
+               not self.attacked_by('b1', Board.BLACK) and \
+               not self.attacked_by('e1', Board.BLACK):
                 castle_vals[1] = -2
 
             if self.white_can_castle_right and \
-               not self.attacked_by('f1', Board.BLACK, include_castle=False) and \
-               not self.attacked_by('g1', Board.BLACK, include_castle=False) and \
-               not self.attacked_by('e1', Board.BLACK, include_castle=False):
+               not self.attacked_by('f1', Board.BLACK) and \
+               not self.attacked_by('g1', Board.BLACK) and \
+               not self.attacked_by('e1', Board.BLACK):
                 castle_vals[0] = 2
 
         else:  # black castle
 
             # can't castle through or from check - black
             if self.black_can_castle_left and \
-               not self.attacked_by('d8', Board.WHITE, include_castle=False) and \
-               not self.attacked_by('c8', Board.WHITE, include_castle=False) and \
-               not self.attacked_by('b8', Board.WHITE, include_castle=False) and \
-               not self.attacked_by('e8', Board.WHITE, include_castle=False):
+               not self.attacked_by('d8', Board.WHITE) and \
+               not self.attacked_by('c8', Board.WHITE) and \
+               not self.attacked_by('b8', Board.WHITE) and \
+               not self.attacked_by('e8', Board.WHITE):
                 castle_vals[3] = -2
 
             if self.black_can_castle_right and \
-               not self.attacked_by('f8', Board.WHITE, include_castle=False) and \
-               not self.attacked_by('g8', Board.WHITE, include_castle=False) and \
-               not self.attacked_by('e8', Board.WHITE, include_castle=False):
+               not self.attacked_by('f8', Board.WHITE) and \
+               not self.attacked_by('g8', Board.WHITE) and \
+               not self.attacked_by('e8', Board.WHITE):
                 castle_vals[2] = 2
 
         new_positions = []
@@ -593,22 +612,20 @@ class Board(object):
         return new_locs
 
     def blocked_at(self, loc):
-        if loc in self.__location_blocking:
-            return self.__location_blocking[loc]
+        if loc in self.__moves_blocked:
+            return self.__moves_blocked[loc]
+
         self.possible_moves(loc)
-        if loc in self.__location_blocking:
-            return self.__location_blocking[loc]
+
+        if loc in self.__moves_blocked:
+            return self.__moves_blocked[loc]
         return []
 
-    def possible_moves(self, loc, include_castle=True, assume_pawn_takes=False):
-        cache_key = (loc, include_castle, assume_pawn_takes)
-        if cache_key in self.__location_moves:
-            return self.__location_moves[cache_key]
-
+    def compute_moves(self, loc):
         piece = self.piece_at(loc)
         new_locations = []
         blocking_locations = []
-        piece_clr = piece_color(self.piece_at(loc))
+        castled_locations = []
 
         # bishop
         if piece in BISHOPS:
@@ -618,7 +635,9 @@ class Board(object):
 
         # pawn
         if piece in PAWNS:
-            new_locations.extend(self.pawn_moves(loc, assume_pawn_takes=assume_pawn_takes))
+            moves, blocking = self.pawn_moves(loc)
+            new_locations.extend(moves)
+            blocking_locations.extend(blocking)
 
         # queen
         if piece in QUEENS:
@@ -640,8 +659,7 @@ class Board(object):
             new_locations.extend(moves)
             blocking_locations.extend(blocking)
 
-            if include_castle:
-                new_locations.extend(self.castle(piece, loc))
+            castled_locations.extend(self.castle(piece, loc))
 
         # rook
         if piece in ROOKS:
@@ -653,10 +671,19 @@ class Board(object):
         if piece in KNIGHTS:
             new_locations.extend(self.knight_moves(piece, loc))
 
-        self.__location_moves[cache_key] = new_locations
-        self.__location_blocking[loc] = blocking_locations
+        # tuples faster than lists
+        return tuple(new_locations), tuple(castled_locations), tuple(blocking_locations)
 
-        return new_locations
+    def possible_moves(self, loc, include_castle=True):
+        if loc not in self.__moves_non_castle:
+            moves_non_castle, moves_castle, moves_blocked = self.compute_moves(loc)
+            self.__moves_non_castle[loc] = moves_non_castle
+            self.__moves_castle[loc] = moves_castle
+            self.__moves_blocked[loc] = moves_blocked
+
+        if include_castle:
+            return self.__moves_castle[loc]+self.__moves_non_castle[loc]
+        return self.__moves_non_castle[loc]
 
     def move_piece(self, old_loc, new_loc, promotion=None):
         # creates a new board with the piece from the old loc to a new loc

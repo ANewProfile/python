@@ -141,8 +141,7 @@ assert "K" in b.pieces()
 b = Board()
 b = b.move_piece("e2", "e4")
 b = b.move_piece("f1", "b5")
-assert b.attacked_by("e7", Board.WHITE) is True
-print(b)
+assert b.attacked_by("d7", Board.WHITE) is True
 
 # protected by its own bishop even when the piece is "blocking" the bishop
 b = Board()
