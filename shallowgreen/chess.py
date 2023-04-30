@@ -77,7 +77,8 @@ class LocationHelper(object):
 def piece_color(piece):
     if piece == "" or piece is None:
         return None
-    return Board.WHITE if piece.islower() else Board.BLACK
+    # faster than regex or islower
+    return Board.WHITE if piece[0] in 'abcdefghijklmnopqrstuvwxyz' else Board.BLACK
 
 
 def white_piece(piece):
@@ -306,18 +307,18 @@ class Board(object):
         return piece_color(piece)
 
     def diagonal_moves(self, piece, loc, total_range):
-
         loc_helper = LocationHelper(loc)
         cont = [True, True, True, True]
         new_locations = []
         blocking_locations = []
+        piece_clr = piece_color(piece)
 
         for i in range(1, total_range):
             if cont[0] is True:
                 new_loc, new_loc_piece = loc_helper.at(-i, -i, self)
                 if new_loc:  # location is valid
                     # if empty or opponent
-                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_clr:
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         blocking_locations.append(new_loc)
@@ -327,7 +328,7 @@ class Board(object):
                 new_loc, new_loc_piece = loc_helper.at(-i, +i, self)
                 if new_loc:  # location is valid
                     # if empty or opponent
-                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_clr:
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         blocking_locations.append(new_loc)
@@ -337,7 +338,7 @@ class Board(object):
                 new_loc, new_loc_piece = loc_helper.at(+i, -i, self)
                 if new_loc:  # location is valid
                     # if empty or opponent
-                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_clr:
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         blocking_locations.append(new_loc)
@@ -347,7 +348,7 @@ class Board(object):
                 new_loc, new_loc_piece = loc_helper.at(+i, +i, self)
                 if new_loc:  # location is valid
                     # if empty or opponent
-                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_clr:
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         blocking_locations.append(new_loc)
@@ -356,18 +357,18 @@ class Board(object):
         return new_locations, blocking_locations
 
     def cross_moves(self, piece, loc, total_range):
-
         loc_helper = LocationHelper(loc)
         cont = [True, True, True, True]
         new_locations = []
         blocking_locations = []
+        piece_clr = piece_color(piece)
 
         for i in range(1, total_range):
             if cont[0] is True:
                 new_loc, new_loc_piece = loc_helper.at(0, -i, self)
                 if new_loc:  # location is valid
                     # if empty or opponent
-                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_clr:
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         blocking_locations.append(new_loc)
@@ -377,7 +378,7 @@ class Board(object):
                 new_loc, new_loc_piece = loc_helper.at(0, +i, self)
                 if new_loc:  # location is valid
                     # if empty or opponent
-                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_clr:
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         blocking_locations.append(new_loc)
@@ -387,7 +388,7 @@ class Board(object):
                 new_loc, new_loc_piece = loc_helper.at(+i, 0, self)
                 if new_loc:  # location is valid
                     # if empty or opponent
-                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_clr:
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         blocking_locations.append(new_loc)
@@ -397,7 +398,7 @@ class Board(object):
                 new_loc, new_loc_piece = loc_helper.at(-i, 0, self)
                 if new_loc:  # location is valid
                     # if empty or opponent
-                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
+                    if new_loc_piece is None or piece_color(new_loc_piece) != piece_clr:
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
                         blocking_locations.append(new_loc)
@@ -621,7 +622,6 @@ class Board(object):
         new_locations = []
         blocking_locations = []
         castled_locations = []
-        piece_clr = piece_color(self.piece_at(loc))
 
         # bishop
         if piece in BISHOPS:
