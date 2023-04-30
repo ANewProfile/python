@@ -136,4 +136,24 @@ assert "q" in b.pieces()
 assert "k" in b.pieces()
 assert "K" in b.pieces()
 
+# a piece can be protected by its own bishop even when the piece is "blocking"
+# the bishop
+b = Board()
+b = b.move_piece("e2", "e4")
+b = b.move_piece("f1", "b5")
+assert b.attacked_by("e7", Board.WHITE) is True
+print(b)
+
+# protected by its own bishop even when the piece is "blocking" the bishop
+b = Board()
+b = Board.custom_board({'b1': 'b5', 'P1': 'd7', 'B1': 'c8', 'k': 'e1', 'K': 'e8'})
+assert b.attacked_by("d7", Board.WHITE) is True
+assert b.controlling_side("d7", Board.WHITE) is Board.BLACK
+
+# no control if both sides have same number of pieces attacking the location
+b = Board()
+b = Board.custom_board({'b1': 'b5', 'P1': 'd7', 'B1': 'c8', 'k': 'f1', 'K': 'f8'})
+assert b.attacked_by("d7", Board.WHITE) is True
+assert b.controlling_side("d7", Board.WHITE) is None
+
 print("success!")

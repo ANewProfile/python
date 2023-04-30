@@ -1,3 +1,6 @@
+DEBUG_MOVE = False
+
+
 def loc_to_col_row(loc):
     loc = loc.lower()
     return ord(loc[0])-ord('a'), int(loc[1])-1
@@ -143,6 +146,7 @@ class Board(object):
 
     def assign_controls(self, just_moved_color):
         self.__controlling[just_moved_color] = {}
+
         for piece, piece_loc in self.piece_and_locations():
             piece_clr = piece_color(piece)
             opp_color_of_piece = Board.WHITE if piece_clr == Board.BLACK else Board.BLACK
@@ -152,9 +156,11 @@ class Board(object):
 	    # control other spaces - it's at risk. note that it's not the same
 	    # as checking if a piece is controlled by its own side.
             if piece_attacked_by_opp and just_moved_color != opp_color_of_piece:
+                # print("%s cannot control anything" % piece)
                 continue
 
-            for next_move_loc in self.possible_moves(piece_loc):
+            locs_to_check = self.possible_moves(piece_loc, assume_pawn_takes=True) + self.blocked_at(piece_loc)
+            for next_move_loc in set(locs_to_check):
                 # pawn cannot control same column
                 if piece in PAWNS and piece_loc[0] == next_move_loc[0]:
                     continue
@@ -191,8 +197,9 @@ class Board(object):
 
         for piece, piece_loc in self.piece_and_locations():
             if piece_color(piece) == color:
-                if loc in self.possible_moves(piece_loc, include_castle=include_castle, assume_pawn_takes=True):
-                    # pawn cannot attackedat's in front of it
+                if loc in self.possible_moves(piece_loc, include_castle=include_castle, assume_pawn_takes=True) or \
+                   loc in self.blocked_at(piece_loc):
+                    # pawn cannot attack the square in front of it
                     if piece not in PAWNS or piece_loc[0] != loc[0]:
                         self.__attacked_by[cache_key] = True
                         return True
@@ -255,6 +262,7 @@ class Board(object):
         self.__allow_set_piece = False
         self.__piece_locations = None
         self.__location_moves = {}
+        self.__location_blocking = {}
         self.__controlling = { Board.WHITE: None, Board.BLACK: None }
         self.__attacked_by = {}
         self.__check_mate = {}
@@ -296,6 +304,7 @@ class Board(object):
         loc_helper = LocationHelper(loc)
         cont = [True, True, True, True]
         new_locations = []
+        blocking_locations = []
 
         for i in range(1, total_range):
             if cont[0] is True:
@@ -305,6 +314,7 @@ class Board(object):
                     if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
+                        blocking_locations.append(new_loc)
                         cont[0] = False
 
             if cont[1] is True:
@@ -314,6 +324,7 @@ class Board(object):
                     if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
+                        blocking_locations.append(new_loc)
                         cont[1] = False
 
             if cont[2] is True:
@@ -323,6 +334,7 @@ class Board(object):
                     if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
+                        blocking_locations.append(new_loc)
                         cont[2] = False
 
             if cont[3] is True:
@@ -332,15 +344,17 @@ class Board(object):
                     if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
+                        blocking_locations.append(new_loc)
                         cont[3] = False
 
-        return new_locations
+        return new_locations, blocking_locations
 
     def cross_moves(self, piece, loc, total_range):
 
         loc_helper = LocationHelper(loc)
         cont = [True, True, True, True]
         new_locations = []
+        blocking_locations = []
 
         for i in range(1, total_range):
             if cont[0] is True:
@@ -350,6 +364,7 @@ class Board(object):
                     if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
+                        blocking_locations.append(new_loc)
                         cont[0] = False
 
             if cont[1] is True:
@@ -359,6 +374,7 @@ class Board(object):
                     if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
+                        blocking_locations.append(new_loc)
                         cont[1] = False
 
             if cont[2] is True:
@@ -368,6 +384,7 @@ class Board(object):
                     if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
+                        blocking_locations.append(new_loc)
                         cont[2] = False
 
             if cont[3] is True:
@@ -377,9 +394,10 @@ class Board(object):
                     if new_loc_piece is None or piece_color(new_loc_piece) != piece_color(piece):
                         new_locations.append(new_loc)
                     if new_loc_piece:  # blocked, don't continue
+                        blocking_locations.append(new_loc)
                         cont[3] = False
 
-        return new_locations
+        return new_locations, blocking_locations
 
     def pawn_moves(self, loc, assume_pawn_takes=False):
 
@@ -574,6 +592,14 @@ class Board(object):
         new_locs = [col_row_to_loc(col_row) for col_row in new_positions]
         return new_locs
 
+    def blocked_at(self, loc):
+        if loc in self.__location_blocking:
+            return self.__location_blocking[loc]
+        self.possible_moves(loc)
+        if loc in self.__location_blocking:
+            return self.__location_blocking[loc]
+        return []
+
     def possible_moves(self, loc, include_castle=True, assume_pawn_takes=False):
         cache_key = (loc, include_castle, assume_pawn_takes)
         if cache_key in self.__location_moves:
@@ -581,11 +607,14 @@ class Board(object):
 
         piece = self.piece_at(loc)
         new_locations = []
+        blocking_locations = []
         piece_clr = piece_color(self.piece_at(loc))
 
         # bishop
         if piece in BISHOPS:
-            new_locations.extend(self.diagonal_moves(piece, loc, 8))
+            moves, blocking = self.diagonal_moves(piece, loc, 8)
+            new_locations.extend(moves)
+            blocking_locations.extend(blocking)
 
         # pawn
         if piece in PAWNS:
@@ -593,25 +622,40 @@ class Board(object):
 
         # queen
         if piece in QUEENS:
-            new_locations.extend(self.diagonal_moves(piece, loc, 8))
-            new_locations.extend(self.cross_moves(piece, loc, 8))
+            moves, blocking = self.diagonal_moves(piece, loc, 8)
+            new_locations.extend(moves)
+            blocking_locations.extend(blocking)
+
+            moves, blocking = self.cross_moves(piece, loc, 8)
+            new_locations.extend(moves)
+            blocking_locations.extend(blocking)
 
         # king
         if piece in KINGS:
-            new_locations.extend(self.diagonal_moves(piece, loc, 2))
-            new_locations.extend(self.cross_moves(piece, loc, 2))
+            moves, blocking = self.diagonal_moves(piece, loc, 2)
+            new_locations.extend(moves)
+            blocking_locations.extend(blocking)
+
+            moves, blocking = self.cross_moves(piece, loc, 2)
+            new_locations.extend(moves)
+            blocking_locations.extend(blocking)
+
             if include_castle:
                 new_locations.extend(self.castle(piece, loc))
 
         # rook
         if piece in ROOKS:
-            new_locations.extend(self.cross_moves(piece, loc, 8))
+            moves, blocking = self.cross_moves(piece, loc, 8)
+            new_locations.extend(moves)
+            blocking_locations.extend(blocking)
 
         # knight
         if piece in KNIGHTS:
             new_locations.extend(self.knight_moves(piece, loc))
 
         self.__location_moves[cache_key] = new_locations
+        self.__location_blocking[loc] = blocking_locations
+
         return new_locations
 
     def move_piece(self, old_loc, new_loc, promotion=None):

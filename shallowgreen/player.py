@@ -99,13 +99,19 @@ class LookAheadPlayer(object):
             first_move_resulting_board = move_sequence[0].new_board
             second_move_color = move_sequence[0].next_move_color
             ending_board = move_sequence[-1].new_board
+            ending_move = move_sequence[-1].move
 
             if first_move_resulting_board.check_mate(second_move_color):
                 return first_move
 
             analyzer = self.analyzer_class(ending_board)
             cur_score = analyzer.score(move_sequence[-1].just_moved_color)
-            # print("first move %s, end board score %s" % (first_move, cur_score))
+
+            if DEBUG_MOVE:
+                print("first move %s%s, end board score after %s move %s%s = %.4f, tracking for %s" % (
+                  first_move[0], first_move[1],
+                  move_sequence[-1].just_moved_color, ending_move[0], ending_move[1],
+                  cur_score, color))
 
             if first_move not in first_move_scores:
                 first_move_scores[first_move] = cur_score
@@ -115,7 +121,8 @@ class LookAheadPlayer(object):
         best_move = None
         best_score = None
         for first_move, first_move_score in first_move_scores.items():
-            # print("first move %s, score %s, color %s" % (first_move, first_move_score, color))
+            if DEBUG_MOVE:
+                print("first move %s%s, score %.4f, color %s" % (first_move[0], first_move[1], first_move_score, color))
             if best_score is None or analyzer.better_score(color, best_score, first_move_score) == first_move_score:
                 best_score = first_move_score
                 best_move = first_move
