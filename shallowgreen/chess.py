@@ -416,14 +416,14 @@ class Board(object):
         if piece_clr == Board.WHITE:  # white moves
 
             # move up one
-            new_loc, new_loc_piece = loc_helper.at(0, 1, self)
-            if new_loc is not None and new_loc_piece is None:
-                new_locations.append(new_loc)
+            loc_in_front, piece_in_front = loc_helper.at(0, 1, self)
+            if loc_in_front is not None and piece_in_front is None:
+                new_locations.append(loc_in_front)
 
             # move up two if nothing blocking it
-            if cur_row == 1 and loc_helper.at(0, 1, self)[1] is None:
+            if loc_in_front is not None and cur_row == 1 and piece_in_front is None:
                 new_loc, new_loc_piece = loc_helper.at(0, 2, self)
-                if new_loc is not None and loc_helper.at(0, 1, self)[0] is not None and new_loc_piece is None:
+                if new_loc is not None and new_loc_piece is None:
                     new_locations.append(new_loc)
 
             # take right!
@@ -445,14 +445,14 @@ class Board(object):
         else:  # black moves
 
             # move down one
-            new_loc, new_loc_piece = loc_helper.at(0, -1, self)
-            if new_loc is not None and new_loc_piece is None:
-                new_locations.append(new_loc)
+            loc_in_front, piece_in_front = loc_helper.at(0, -1, self)
+            if loc_in_front is not None and piece_in_front is None:
+                new_locations.append(loc_in_front)
 
             # move down two if nothing blocking it
-            if cur_row == 6 and loc_helper.at(0, -1, self)[1] is None:
+            if loc_in_front is not None and cur_row == 6 and piece_in_front is None:
                 new_loc, new_loc_piece = loc_helper.at(0, -2, self)
-                if new_loc is not None and loc_helper.at(0, -1, self)[0] is not None and new_loc_piece is None:
+                if new_loc is not None and new_loc_piece is None:
                     new_locations.append(new_loc)
 
             # take right!
