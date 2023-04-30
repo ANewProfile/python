@@ -510,6 +510,10 @@ class Board(object):
         if color in self.__check_mate:
             return self.__check_mate[color]
 
+        if self.in_check(color) is False:
+            self.__check_mate[color] = False
+            return False
+
         for piece, piece_location in self.piece_and_locations():
             if piece_color(piece) == color:
                 for new_location in self.possible_moves(piece_location):
@@ -667,7 +671,8 @@ class Board(object):
         if piece in KNIGHTS:
             new_locations.extend(self.knight_moves(piece, loc))
 
-        return new_locations, castled_locations, blocking_locations
+        # tuples faster than lists
+        return tuple(new_locations), tuple(castled_locations), tuple(blocking_locations)
 
     def possible_moves(self, loc, include_castle=True):
         if loc not in self.__moves_non_castle:
@@ -676,11 +681,9 @@ class Board(object):
             self.__moves_castle[loc] = moves_castle
             self.__moves_blocked[loc] = moves_blocked
 
-        moves = [m for m in self.__moves_non_castle[loc]]
         if include_castle:
-            for m in self.__moves_castle[loc]:
-                moves.append(m)
-        return moves
+            return self.__moves_castle[loc]+self.__moves_non_castle[loc]
+        return self.__moves_non_castle[loc]
 
     def move_piece(self, old_loc, new_loc, promotion=None):
         # creates a new board with the piece from the old loc to a new loc
