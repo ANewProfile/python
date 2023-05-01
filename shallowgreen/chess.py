@@ -780,7 +780,8 @@ class Move(object):
     tuple, a resulting board, and the side that moved.
     """
 
-    def __init__(self, move, new_board, just_moved_color):
+    def __init__(self, moved_piece, move, new_board, just_moved_color):
+        self.moved_piece = moved_piece
         self.move = move
         self.new_board = new_board
         self.just_moved_color = just_moved_color

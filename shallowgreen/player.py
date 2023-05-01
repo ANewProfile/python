@@ -36,6 +36,7 @@ class LookAheadPlayer(object):
         move_and_new_boards = []
 
         for old_location, new_location in self.get_possible_next_move(board, color):
+            moved_piece = board.piece_at(old_location)
             try:
                 new_board = board.move_piece(
                     old_location, new_location, promotion=promote_to)
@@ -43,24 +44,28 @@ class LookAheadPlayer(object):
                 pass
             else:
                 move_and_new_boards.append(
-                    Move((old_location, new_location),
+                    Move(moved_piece,
+                         (old_location, new_location),
                          new_board,
                          color)
                 )
 
         return move_and_new_boards
 
-    def get_future_moves(self, board, color, depth):
+    def get_search_depth(self, last_move, cur_depth):
+        return cur_depth-1
+
+    def get_future_moves(self, board, color, cur_depth):
         """
 	Given a starting board and a color, return a list of sequences of Move
 	objects, where the number of Move objects in a sequence is no more than
-        the depth argument (it may be less because of check-mates).
+        the cur_depth argument (it may be less because of check-mates).
         """
 
-        assert depth > 0
+        assert cur_depth > 0
         next_moves = self.get_next_moves(board, color)
 
-        if depth == 1:
+        if cur_depth == 1:
             for m in next_moves:
                 self.visited_boards[m.new_board.key()] = 1
             return [[m] for m in next_moves]
@@ -80,8 +85,10 @@ class LookAheadPlayer(object):
 
                 else:
                     self.visited_boards[last_move.new_board.key()] = 1
+                    next_depth = self.get_search_depth(last_move, cur_depth)
+
                     future_moves = self.get_future_moves(
-                        last_move.new_board, last_move.next_move_color, depth-1)
+                        last_move.new_board, last_move.next_move_color, next_depth)
                     for move_sequence in future_moves:
                         move_sequence = [last_move] + move_sequence
                         all_moves.append(move_sequence)
