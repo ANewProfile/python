@@ -33,8 +33,8 @@ def run_discord_bot():
 
         if user_message[0] == '?':
             user_message = user_message[1:]
-            await send_message(message, user_message, is_private=True)
+            await responses(message, user_message, is_private=True)
         else:
-            await send_message(message, user_message, is_private=False)
+            await responses(message, user_message, is_private=False)
 
     client.run(TOKEN)
