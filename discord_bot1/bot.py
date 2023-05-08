@@ -1,6 +1,7 @@
 import discord
 import responses
 
+
 async def send_message(message, user_message, is_private):
     try:
         response = responses.get_response(user_message)
@@ -8,8 +9,9 @@ async def send_message(message, user_message, is_private):
     except Exception as e:
         print(e)
 
+
 def run_discord_bot():
-    TOKEN = 'MTEwNDUyNzgzODYwMzkyMzUyOA.GUfB86.aW3byuJ7ZP0_2CqqbtSNS7cUCbBoZI8Chg2QOs'
+    TOKEN = 'MTEwNDUyNzgzODYwMzkyMzUyOA.G7SPfQ.9zvVyyJkKpqczOL_m99lSCTBkdaOEAGi3AZZJM'
     intents = discord.Intents.default()
     intents.message_content = True
     client = discord.Client(intents=intents)
@@ -22,7 +24,7 @@ def run_discord_bot():
     async def on_message(message):
         if message.author == client.user:
             return
-        
+
         username = str(message.author)
         user_message = str(message.content)
         channel = str(message.channel)
@@ -34,6 +36,5 @@ def run_discord_bot():
             await send_message(message, user_message, is_private=True)
         else:
             await send_message(message, user_message, is_private=False)
-        
 
     client.run(TOKEN)
