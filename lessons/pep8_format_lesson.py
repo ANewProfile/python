@@ -79,3 +79,49 @@ class ClassNames:
         # class names should be in Pascal Case
         # not snake case or camel case
         pass
+
+    # fun fact: exceptions should also be in Pascal Case
+
+
+class Spacing:
+    def __init__(self) -> None:
+        pass
+
+    def class_spacing(self, c1, c2) -> None:
+        class c1:
+            def __init__(self) -> None:
+                pass
+        
+        class c2:
+            def __init__(self) -> None:
+                pass
+            def example(self, c2):
+                print(c2)
+
+    # global(leftmost indentation) classes and functions should be two new lines apart
+    # methods should be one new line apart
+
+    def fixed_class_spacing(self, c1, c2) -> None:
+        class c1:
+            def __init__(self) -> None:
+                pass
+        
+
+        class c2:
+            def __init__(self) -> None:
+                pass
+
+            def example(self, c2) -> None:
+                print(c2)
+
+    # fixed!
+
+    def summary(self) -> None:
+        # top-level classes and functions should be two whitespaces apart
+        # methods should be one whitespace apart
+        pass
+
+
+class Imports:
+    def __init__(self) -> None:
+        pass
