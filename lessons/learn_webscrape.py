@@ -1,3 +1,5 @@
+import re
+import requests
 from bs4 import BeautifulSoup
 import sys
 
@@ -5,7 +7,6 @@ import sys
 Lesson 1 - Searching HTML Files
 """
 
-# import requests
 
 # url = 'https://www.newegg.com/asus-geforce-rtx-4070-tuf-rtx4070-o12g-gaming/p/N82E16814126637?Item=N82E16814126637&quicklink=true'
 # result = requests.get(url)
@@ -32,7 +33,6 @@ Lesson 1 - Searching HTML Files
 Lesson 2 - Search and Filter
 """
 
-# import re
 
 # with open('bs4test.html', 'r') as f:
 #     doc = BeautifulSoup(f, 'html.parser')
@@ -51,7 +51,6 @@ Lesson 2 - Search and Filter
 Lesson 3 - Navigating the HTML Tree
 """
 
-# import requests
 
 # url = 'https://coinmarketcap.com/'
 # result = requests.get(url).text
@@ -65,6 +64,7 @@ Lesson 3 - Navigating the HTML Tree
 # # print(trs[0].next_siblings) # looks at all of the next sibilings
 # # print(trs[4].previous_siblings) # looks at all of the previous siblings
 # # print(trs[0].parent) # looks at the parent (item that this item is inside of)
+# # print(trs[0].find_parent('parent-name-here')) # looks at the first instance of a specific parent
 # # print(trs[0].parent.name) # .name looks at the name of an object
 # # print(trs[0].descendants) # looks at all of the descendants (things that are inside of this object)
 # # print(trs[0].contents) # looks at all of the descendants
@@ -84,3 +84,50 @@ Lesson 3 - Navigating the HTML Tree
 #     print(f'Name: {name}\nPrice: {price}\n-----------------------------------------------------')
 
 # # print("\n".join(prices))
+
+
+"""
+Lesson 4 - Finding the Best GPU Prices
+"""
+
+
+search_term = input("What product do you want to search for? ")
+
+url = f"https://www.newegg.ca/p/pl?d={search_term}&N=4131"
+page = requests.get(url).text
+doc = BeautifulSoup(page, "html.parser")
+
+page_text = doc.find(class_="list-tool-pagination-text").strong
+pages = int(str(page_text).split("/")[-2].split(">")[-1][:-1])
+
+items_found = {}
+
+for page in range(1, pages + 1):
+	url = f"https://www.newegg.com/p/pl?d={search_term}&N=4131&page={page}"
+	page = requests.get(url).text
+	doc = BeautifulSoup(page, "html.parser")
+
+	div = doc.find(
+		class_="item-cells-wrap border-cells items-grid-view four-cells expulsion-one-cell")
+	items = div.find_all(text=re.compile(search_term))
+
+	for item in items:
+		parent = item.parent
+		if parent.name != "a":
+			continue
+
+		link = parent['href']
+		next_parent = item.find_parent(class_="item-container")
+		try:
+			price = next_parent.find(class_="price-current").find("strong").string
+			items_found[item] = {"price": int(price.replace(",", "")), "link": link}
+		except:
+			pass
+
+sorted_items = sorted(items_found.items(), key=lambda x: x[1]['price'])
+
+for item in sorted_items:
+	print(item[0])
+	print(f"${item[1]['price']}")
+	print(item[1]['link'])
+	print("-------------------------------")
