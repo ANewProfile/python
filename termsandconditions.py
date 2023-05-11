@@ -7,7 +7,7 @@ webbrowser.open_new_tab('file:///'+os.getcwd()+'/'+'termsandconditions.html')
 t1 = time.time()
 
 def two():
-    trust = input('Do you agree to the terms and conditions([y]es or [n]o)? ')
+    trust = input('Have you read and agreed to the terms and conditions([y]es or [n]o)? ')
     while True:
         try:
             if trust.lower() == 'n':
