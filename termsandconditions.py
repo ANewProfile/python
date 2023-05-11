@@ -1,21 +1,12 @@
-import asyncio
+import time
 import webbrowser
 import os
 
 input('Would you like to see the terms and conditions? ')
 webbrowser.open_new_tab('file:///'+os.getcwd()+'/'+'termsandconditions.html')
+t1 = time.time()
 
-
-async def one(timer=15):
-    while True:
-        if timer > 0:
-            await asyncio.sleep(1)
-            timer -= 1
-        else:
-            return True
-
-
-async def two(done):
+def two():
     trust = input('Do you agree to the terms and conditions([y]es or [n]o)? ')
     while True:
         try:
@@ -23,6 +14,11 @@ async def two(done):
                 print('SERIOUSLY BRO!!!???')
                 return
             elif trust.lower() == 'y':
+                    if time.time() - t1 > 300:
+                         done = True
+                    else:
+                        done = False
+
                     if done is True:
                         print(
                             'Wow. I think I\'ve met the most trustworthy\
@@ -35,11 +31,4 @@ async def two(done):
         except Exception as e:
             print(e)
 
-
-async def main():
-    task2 = asyncio.create_task(one())
-    task = asyncio.create_task(two(task2))
-
-
-
-asyncio.run(main())
+two()
