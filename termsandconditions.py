@@ -14,7 +14,7 @@ def two():
                 print('SERIOUSLY BRO!!!???')
                 return
             elif trust.lower() == 'y':
-                    if time.time() - t1 > 300:
+                    if time.time() - t1 > 600:
                          done = True
                     else:
                         done = False
