@@ -6,7 +6,7 @@ input('Would you like to see the terms and conditions? ')
 webbrowser.open_new_tab('file:///'+os.getcwd()+'/'+'termsandconditions.html')
 t1 = time.time()
 
-def two():
+def test():
     trust = input('Have you read and agreed to the terms and conditions([y]es or [n]o)? ')
     while True:
         try:
@@ -31,4 +31,4 @@ def two():
         except Exception as e:
             print(e)
 
-two()
+test()
