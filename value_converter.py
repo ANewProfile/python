@@ -1,4 +1,4 @@
-import currencyconverter
+import currency_converter
 import fahrenheit_celsius
 import len_converter
 import sys
@@ -15,7 +15,7 @@ while True:
         if which == '1':
             fahrenheit_celsius.main()
         elif which == '2':
-            currencyconverter.main()
+            currency_converter.main()
         elif which == '3':
             len_converter.main()
         elif which == '4':
