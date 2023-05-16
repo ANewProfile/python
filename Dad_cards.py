@@ -1,2 +1,0 @@
-from itertools import product as product
-print("\n".join([f"{card[0] if (card[0] <= 10) else 'JQKA'[card[0] - 11]} of {card[1]}" for card in list(product(range(2, 15), ("Spade", "Diamond", "Club", "Heart")))]))

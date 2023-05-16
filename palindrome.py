@@ -1,4 +1,9 @@
-num = input("Welcome to the the Palindrome Machine, where you type in a 5-digits or lower number and we will tell you if it is a palindrome. Let's Start! Type a number. ")
+num = input("Welcome to the the Palindrome Machine,\
+             where you type in a 5-digits or lower number\
+             and we will tell you if it is a palindrome.\
+             Let's Start! Type a number. ")
+
+
 def palindrome(x):
     if len(x) == 1:
         print('Your number is a palindrome!')
@@ -24,4 +29,6 @@ def palindrome(x):
             print('True')
     else:
         print("Invalid.")
+
+
 palindrome(num)

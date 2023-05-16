@@ -1,6 +1,5 @@
 from functime import *
 import time
-import random
 from coolprint import *
 
 num = int(input("What number do you want to check? "))

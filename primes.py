@@ -1,4 +1,6 @@
-max_num = float(input('What number would you like to check primes(e.g. 100 will check for all prime numbers under 100)? '))
+max_num = float(input('What number would you like to check primes\
+                      (e.g. 100 will check for all prime numbers under 100)\
+                      ? '))
 max_num = int(round(max_num, 0))
 nums = []
 
