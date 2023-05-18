@@ -1,5 +1,7 @@
 # snake game
-import pygame, sys, random
+import pygame
+import sys
+import random
 from pygame.locals import *
 
 SCREEN_WIDTH = 640
