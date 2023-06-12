@@ -126,7 +126,7 @@ confirm = input('Confirm [y/n]: ')
 if confirm.lower() == 'y':
     # entry = get_user_inputs()
     loc_object: Loc = entry['Loc']
-    entry['Loc'] = [loc_object.city, loc_object.country, loc_object.lalo]
+    entry['Loc'] = {'city': loc_object.city, 'country': loc_object.country, 'lat-long': loc_object.lalo}
     restaurantDB.insert_one(entry)
 else:
     print('Ok! Thanks!')
