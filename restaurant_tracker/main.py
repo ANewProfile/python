@@ -1,5 +1,6 @@
+import re
+from pprint import pprint
 import requests
-import pymongo
 from pymongo import MongoClient
 
 
@@ -37,9 +38,10 @@ class Loc:
 
 
 def slugify(text: str):
-    lower_text: str = text.lower()
-    no_spaces: list = lower_text.split(' ')
-    final: str = '-'.join(no_spaces)
+    processed_text: str = re.sub('\W', '', text)
+    lower_text: str = processed_text.lower()  # text text
+    no_spaces: list = lower_text.split(' ')  # ['text', 'text']
+    final: str = '-'.join(no_spaces)  # 'text-text'
     
     return final
 
@@ -68,18 +70,28 @@ def get_user_inputs() -> dict:
             rating = float(input('Enter the rating: '))
             items['Rating'] = rating
             break
-        except:
+        except ValueError:
             print('Not a valid number.')
             continue
+
     
     # Restaurant Location
-    city = input('What city is the restaurant in? ').lower()
-    country = input('What country is the restaurant in? ').lower()
     # response = 'https://api.radar.io/v1/geocode/forward?query=841+broadway+new+york'
-    url = f'https://api.radar.io/v1/geocode/forward?query={city},+{country}'
-    response = requests.get(url, headers={'Authorization': 'prj_live_sk_9f1c623207cfd14adabf5ed963d167f327e22df7'}).json()
-    loc = [Loc(city, country, addr) for addr in response["addresses"]][0]
-    items['Loc'] = loc
+    while True:
+        try:
+            city = input('What city is the restaurant in? ').lower()
+            country = input('What country or state is the restaurant in? ').lower()
+            url = f'https://api.radar.io/v1/geocode/forward?query={city},+{country}'
+            response = requests.get(url, headers={'Authorization': 'prj_live_sk_9f1c623207cfd14adabf5ed963d167f327e22df7'}).json()
+            pprint(response)
+            loc = [Loc(city, country, addr) for addr in response["addresses"]][0]
+            items['Loc'] = loc
+            print(f'\n\n\nLocation Found: {response["addresses"][0]["formattedAddress"]}')
+            break
+        except IndexError:
+            print('Invalid Location.')
+            continue
+
 
     # Restaurant Type(s)
     types = []
@@ -127,6 +139,7 @@ if confirm.lower() == 'y':
     # entry = get_user_inputs()
     loc_object: Loc = entry['Loc']
     entry['Loc'] = {'city': loc_object.city, 'country': loc_object.country, 'lat-long': loc_object.lalo}
-    restaurantDB.insert_one(entry)
+    # restaurantDB.insert_one(entry)
+    pprint(entry)
 else:
     print('Ok! Thanks!')
