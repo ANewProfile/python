@@ -129,17 +129,20 @@ def get_user_inputs() -> dict:
 
     return items
 
+def main():
+    # print(get_user_inputs())
+    entry = get_user_inputs()
+    print('\n\n\n')
+    confirm = input('Confirm [y/n]: ')
 
-# print(get_user_inputs())
-entry = get_user_inputs()
-print('\n\n\n')
-confirm = input('Confirm [y/n]: ')
+    if confirm.lower() == 'y':
+        # entry = get_user_inputs()
+        loc_object: Loc = entry['Loc']
+        entry['Loc'] = {'city': loc_object.city, 'country': loc_object.country, 'lat-long': loc_object.lalo}
+        # restaurantDB.insert_one(entry)
+        pprint(entry)
+    else:
+        print('Ok! Thanks!')
 
-if confirm.lower() == 'y':
-    # entry = get_user_inputs()
-    loc_object: Loc = entry['Loc']
-    entry['Loc'] = {'city': loc_object.city, 'country': loc_object.country, 'lat-long': loc_object.lalo}
-    # restaurantDB.insert_one(entry)
-    pprint(entry)
-else:
-    print('Ok! Thanks!')
+if __name__ == '__main__':
+    main()
