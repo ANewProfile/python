@@ -2,21 +2,22 @@ import re
 from pprint import pprint
 import requests
 from pymongo import MongoClient
+from gui import GUIWindow
 
-
+window = GUIWindow()
 client = MongoClient('localhost', 27017)
 restaurantDB = client['restaurants'].entries
 
 
 # entry = {'_id': 'dishoom', \
 #          'Name': 'Dishoom', \
-#             'Link': 'https://www.yelp.com/biz/dishoom-london?osq=Dishoom', \
-#                 'Rating': 7.125, \
-#                     'Loc': 'London', \
-#                         'Type': ['Indian', 'Aranian'], \
-#                             'Fav_Dishes': ['Steamed Veggie Bowl'], \
-#                                 'Notes': ['Very popular', 'Long line'], \
-#                                     'IsOpen': True}
+#          'Link': 'https://www.yelp.com/biz/dishoom-london?osq=Dishoom', \
+#          'Rating': 7.125, \
+#          'Loc': 'London', \
+#          'Type': ['Indian', 'Aranian'], \
+#          'Fav_Dishes': ['Steamed Veggie Bowl'], \
+#          'Notes': ['Very popular', 'Long line'], \
+#          'IsOpen': True}
 
 
 # *Name: String - User
