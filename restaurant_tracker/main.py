@@ -3,6 +3,7 @@ from pprint import pprint
 import requests
 from pymongo import MongoClient
 from gui import GUIWindow
+from loc_object import Loc
 
 window = GUIWindow()
 client = MongoClient('localhost', 27017)
@@ -29,13 +30,6 @@ restaurantDB = client['restaurants'].entries
 # Fav_Dishes: Array/Tuple[String] - User
 # Notes: Array/Tuple[String] - User
 # *IsOpen: Boolean - Calculated [default True]
-
-
-class Loc:
-    def __init__(self, city, country, response) -> None:
-        self.city = city
-        self.country = country
-        self.lalo = (response['latitude'], response['longitude'])
 
 
 def slugify(text: str):
