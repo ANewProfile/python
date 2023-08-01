@@ -2,6 +2,7 @@ import tkinter as tk
 import re
 from loc_object import Loc
 import requests
+from pprint import pprint
 
 
 text_color = '#000000'
@@ -20,6 +21,25 @@ def slugify(text: str):
     return final
 
 
+class InputFrame(tk.Frame):
+    def __init__(self, master, label: str) -> None:
+        super().__init__(master)
+        self.label = tk.Label(master=self,
+                              text=label)
+        self.string_var = tk.StringVar(master=self,
+                                       value='')
+        self.entry = tk.Entry(master=self,
+                              textvariable=self.string_var)
+    
+    def get(self):
+        return self.string_var.get()
+    
+    def pack(self):
+        self.label.pack(side='left')
+        self.entry.pack(side='right')
+        super().pack()
+
+
 class AddFrame:
     def __init__(self, window):
         self.frame = tk.Frame(master=window,
@@ -28,49 +48,25 @@ class AddFrame:
         self.master = window
         
         # Variables
-        self.name = tk.StringVar(master=self.frame, value='')
-        self.link = tk.StringVar(master=self.frame, value='')
-        self.rating = tk.StringVar(master=self.frame, value='')
-        self.city = tk.StringVar(master=self.frame, value='')
-        self.country = tk.StringVar(master=self.frame, value='')
-        self.type = tk.StringVar(master=self.frame, value='')
-        self.fav_dishes = tk.StringVar(master=self.frame, value='')
+        self.name = InputFrame(self.frame, 'Name')
+        self.link = InputFrame(self.frame, 'Link')
+        self.rating = InputFrame(self.frame, 'Rating')
+        self.city = InputFrame(self.frame, 'City')
+        self.country = InputFrame(self.frame, 'Country/State')
+        self.type = InputFrame(self.frame, 'Type of Cuisine')
+        self.fav_dishes = InputFrame(self.frame, 'Notable Dishes')
         self.submit_btn = tk.Button(master=self.frame,
                                     command=self.submit,
                                     text='SUBMIT')
 
-        # Inputs
-        self.name_entry = tk.Entry(master=self.frame,
-                                   textvariable=self.name)
-        self.link_entry = tk.Entry(master=self.frame,
-                                   textvariable=self.link)
-        self.rating_entry = tk.Entry(master=self.frame,
-                                     textvariable=self.rating)
-        self.city_entry = tk.Entry(master=self.frame,
-                                     textvariable=self.city)
-        self.country_entry = tk.Entry(master=self.frame,
-                                     textvariable=self.country)
-        self.type_entry = tk.Entry(master=self.frame,
-                                     textvariable=self.type)
-        self.dishes_entry = tk.Entry(master=self.frame,
-                                     textvariable=self.fav_dishes)
-        
-        # # Labels
-        # self.name_label = tk.Label(master=self.frame,
-        #                            text="Name")
-        # self.link_label = tk.Label(master=self.frame,
-        #                            text="Link")
-
         # Pack
-        # self.name_label.pack(side='left')
-        # self.name_entry.pack(side='right')
-        self.name_entry.pack()
-        self.link_entry.pack()
-        self.rating_entry.pack()
-        self.city_entry.pack()
-        self.country_entry.pack()
-        self.type_entry.pack()
-        self.dishes_entry.pack()
+        self.name.pack()
+        self.link.pack()
+        self.rating.pack()
+        self.city.pack()
+        self.country.pack()
+        self.type.pack()
+        self.fav_dishes.pack()
         self.submit_btn.pack()
     
     def validate_types(self):
@@ -83,7 +79,7 @@ class AddFrame:
             country = self.country.get().lower()
             url = f'https://api.radar.io/v1/geocode/forward?query={city},+{country}'
             response = requests.get(url, headers={'Authorization': 'prj_live_sk_9f1c623207cfd14adabf5ed963d167f327e22df7'}).json()
-            print(response)
+            # print(response)
             loc = [Loc(city, country, addr) for addr in response["addresses"]][0]
             # print(f'\n\n\nLocation Found: {response["addresses"][0]["formattedAddress"]}')
         except IndexError:
@@ -103,7 +99,7 @@ class AddFrame:
         return restaurantEntry
 
     def submit(self):
-        print(self.validate_types())
+        pprint(self.validate_types())
 
 
 class ViewFrame:

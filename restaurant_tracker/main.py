@@ -78,10 +78,10 @@ def get_user_inputs() -> dict:
             country = input('What country or state is the restaurant in? ').lower()
             url = f'https://api.radar.io/v1/geocode/forward?query={city},+{country}'
             response = requests.get(url, headers={'Authorization': 'prj_live_sk_9f1c623207cfd14adabf5ed963d167f327e22df7'}).json()
-            pprint(response)
+            # pprint(response)
             loc = [Loc(city, country, addr) for addr in response["addresses"]][0]
             items['Loc'] = loc
-            print(f'\n\n\nLocation Found: {response["addresses"][0]["formattedAddress"]}')
+            # print(f'\n\n\nLocation Found: {response["addresses"][0]["formattedAddress"]}')
             break
         except IndexError:
             print('Invalid Location.')
@@ -139,5 +139,5 @@ def main():
     else:
         print('Ok! Thanks!')
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
