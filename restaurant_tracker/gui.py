@@ -23,7 +23,7 @@ def slugify(text: str):
 
 class InputFrame(tk.Frame):
     def __init__(self, master, label: str) -> None:
-        super().__init__(master)
+        super.__init__(master)
         self.label = tk.Label(master=self,
                               text=label)
         self.string_var = tk.StringVar(master=self,
