@@ -5,9 +5,10 @@ from pymongo import MongoClient
 from gui import GUIWindow
 from loc_object import Loc
 
-window = GUIWindow()
+
 client = MongoClient('localhost', 27017)
-restaurantDB = client['restaurants'].entries
+# restaurantDB = client['restaurants'].entries
+window = GUIWindow(client)
 
 
 # entry = {'_id': 'dishoom', \

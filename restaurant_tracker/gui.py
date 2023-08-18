@@ -1,8 +1,10 @@
 import tkinter as tk
+from tkinter import messagebox
 import re
 from loc_object import Loc
 import requests
 from pprint import pprint
+import pymongo
 
 
 text_color = '#000000'
@@ -23,7 +25,7 @@ def slugify(text: str):
 
 class InputFrame(tk.Frame):
     def __init__(self, master, label: str) -> None:
-        super.__init__(master)
+        super().__init__(master)
         self.label = tk.Label(master=self,
                               text=label)
         self.string_var = tk.StringVar(master=self,
@@ -89,17 +91,45 @@ class AddFrame:
         restaurantEntry['_id'] = slugify(name)
         restaurantEntry['Link'] = self.link.get()
         try:
-            restaurantEntry['Rating'] = float(self.rating.get())
+            rating = float(self.rating.get())
+            if (rating >= 0) and (rating <= 10):
+                restaurantEntry['Rating'] = rating
+            else:
+                return "Rating must be between 0 and 10"
         except ValueError:
             return "Invalid rating."
         restaurantEntry['Loc'] = loc.to_dictionary()
-        restaurantEntry['Type'] = types
+        if types == ['']:
+            return "Type required"
+        else:
+            restaurantEntry['Type'] = types
+        if dishes == ['']:
+            dishes = []
         restaurantEntry['Fav_Dishes'] = dishes
 
         return restaurantEntry
 
     def submit(self):
-        pprint(self.validate_types())
+        # pprint(self.validate_types())
+        try:
+            validation = self.validate_types()
+            if type(validation) is dict:
+                result = GUIWindow.restaurantDB.insert_one(validation)        
+                if result.acknowledged:
+                    messagebox.showinfo('Success', 'Added to database.')
+                    # pprint(result)
+                else:
+                    messagebox.showerror('Invalid', 'Invalid Operation')
+            elif type(validation) is str:
+                error = validation
+                messagebox.showerror('Validation Error', error)
+            else:
+                messagebox.showerror('You shouldn\'t be seeing this', 'This error message should NEVER appear.')
+        except pymongo.errors.DuplicateKeyError:
+            messagebox.showerror('Duplicate Error', 'Entry has already been entered')
+        except:
+            messagebox.showerror('Unknown Error', 'An unknown error occurred')
+
 
 
 class ViewFrame:
@@ -111,11 +141,14 @@ class ViewFrame:
 
 
 class GUIWindow:
-    def __init__(self):
+    def __init__(self, client):
+        GUIWindow.client = client
+        GUIWindow.restaurantDB = client['restaurants'].entries
         self.show_add = False
         self.show_view = False
 
         self.window = tk.Tk()
+        self.window.title('Restaurant Tracker')
         self.nav_frame = tk.Frame(master=self.window,
                                   width=button_width * 2,
                                   height=button_height)
