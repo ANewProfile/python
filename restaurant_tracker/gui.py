@@ -14,11 +14,10 @@ title_font = ('BM Hanna 11yrs Old', 50)
 buttton_font = ('Krungthep', 30)
 
 
-def slugify(text: str):
-    processed_text: str = re.sub('\W', '', text)
+def slugify(text: str):  # $Text Text
+    processed_text: str = re.sub('\W', '', text)  # Text Text
     lower_text: str = processed_text.lower()  # text text
-    no_spaces: list = lower_text.split(' ')  # ['text', 'text']
-    final: str = '-'.join(no_spaces)  # 'text-text'
+    final: str = lower_text.replace(' ', '-')  # text-text
     
     return final
 
