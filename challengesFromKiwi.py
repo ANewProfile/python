@@ -27,7 +27,7 @@ for i in range(4):
 #
 
 
-# Challenge 3: Cesar Cypher
+# Challenge 3: Caesar Cypher
 #
 # cesarNum = int(input("What number is your cesar encryption(1 to 25)(if you want to decode something than make it negative)? "))
 # encryptionSen = input("Enter the sentence you want to encrypt. ")
