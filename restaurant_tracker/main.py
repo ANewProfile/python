@@ -8,6 +8,7 @@ from loc_object import Loc
 
 client = MongoClient('localhost', 27017)
 # restaurantDB = client['restaurants'].entries
+# { "Loc.lat-long": { $near: { $geometry: { type: "Point", coordinates: [42.700118, -74.929717] }, $maxDistance: 8046.72, $minDistance: 0 } } }
 window = GUIWindow(client)
 
 
@@ -30,7 +31,6 @@ window = GUIWindow(client)
 # Type: Array/Tuple[String] - User
 # Fav_Dishes: Array/Tuple[String] - User
 # Notes: Array/Tuple[String] - User
-# *IsOpen: Boolean - Calculated [default True]
 
 
 def slugify(text: str):

@@ -113,7 +113,7 @@ class AddFrame:
         try:
             validation = self.validate_types()
             if type(validation) is dict:
-                result = GUIWindow.restaurantDB.insert_one(validation)        
+                result = GUIWindow.restaurantDB.insert_one(validation)
                 if result.acknowledged:
                     messagebox.showinfo('Success', 'Added to database.')
                     # pprint(result)
@@ -137,7 +137,10 @@ class ViewFrame:
                               width=button_width * 2,
                               height=button_height)
         self.master = window
-
+        self.filter_items({})
+    
+    def filter_items(self, filter):
+        print(list(GUIWindow.restaurantDB.find({ "Rating": { "$gt": 7 }})))
 
 class GUIWindow:
     def __init__(self, client):
