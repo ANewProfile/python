@@ -69,21 +69,69 @@
 
 
 
-import random
+# import random
 
-dict = {'python': random.randint(1, 1000), 'html': random.randint(1, 1000),
-         'css': random.randint(1, 1000), 'javascript': random.randint(1,1000),
-           'c#': random.randint(1, 1000)}
-sorted_dict = []
-for key, value in dict.items():
-    sorted_dict.append(value)
-    print(sorted_dict)
-sorted_dict.sort()
-print(sorted_dict)
-for i, item in enumerate(sorted_dict):
-    for key, val in dict.items():
-        if val == item:
-            sorted_dict[i] = key
-print('\n\n\n')
-print(dict)
-print(sorted_dict)
+# dict = {'a': random.randint(1, 100), 'b': random.randint(1, 100),
+#          'c': random.randint(1, 100), 'd': random.randint(1,100),
+#            'e': random.randint(1, 100)}
+# sorted_dict = []
+# for key, value in dict.items():
+#     sorted_dict.append(value)
+#     print(sorted_dict)
+# sorted_dict.sort()
+# print(sorted_dict)
+# for i, item in enumerate(sorted_dict):
+#     for key, val in dict.items():
+#         if val == item:
+#             sorted_dict[i] = (key, val)
+# print('\n\n\n')
+# print(dict)
+# print(sorted_dict)
+
+
+
+# import random
+
+# # Create List
+# nums = [random.randint(1, 100_000) for _ in range(20)]
+# print(nums)
+
+# # Mean the list w/ odd numbers
+# mean_odd = 0
+# total_odd = 0
+# for num in nums:
+#     total_odd += num
+# mean_odd = total_odd / 20
+# print(f'The mean is: {mean_odd}')
+
+# # Remove Odd numbers
+# even_nums = []
+# for num in nums:
+#     if num % 2 == 0:
+#         even_nums.append(num)
+
+# # Mean
+# mean_even = 0
+# total_even = 0
+# for num in even_nums:
+#     total_even += num
+# mean_even = total_even / len(even_nums)
+# print(f'The mean of the even numbers is: {mean_even}')
+
+
+
+# alphabet = {'a': 0, 'b': 0, 'c': 0, 'd': 0, 'e': 0,
+#             'f': 0, 'g': 0, 'h': 0, 'i': 0, 'j': 0,
+#             'k': 0, 'l': 0, 'm': 0, 'n': 0, 'o': 0,
+#             'p': 0, 'q': 0, 'r': 0, 's': 0, 't': 0,
+#             'u': 0, 'v': 0, 'w': 0, 'x': 0, 'y': 0,
+#             'z': 0}
+# while True:
+#     word = input('Enter a word(stop to exit): ')
+#     if word.lower() != 'stop':
+#         for letter in word.lower():
+#             alphabet[letter] += 1
+#     else:
+#         break
+
+# print(alphabet)
