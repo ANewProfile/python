@@ -11,10 +11,10 @@ def make_board(solution):
 	return board
 
 def spin_wheel(possibilities):
-	for i in range(1, 31):
+	for i in range(1, 21):
 		# print(i)
 		print(random.choice(possibilities))
-		sleep(i/120)
+		sleep(i/30)
 	amount = random.choice(possibilities)
 	
 	return amount
@@ -22,16 +22,19 @@ def spin_wheel(possibilities):
 def guess_letter(letter, solution, board):
 	board = list(board)
 	list_solution = list(solution)
-	print(list_solution)
+	fake_solution = list_solution.copy()
+	items_correct = 0
 	for character in list_solution:
 		if letter == character:
-			board[list_solution.index(letter)] = letter
-			continue
-		else:
-			continue
+			# print(f'{board[fake_solution.index(letter)]} (index {fake_solution.index(letter)}) was set to {letter}')
+			board[fake_solution.index(letter)] = letter
+			# print(f'Removing: {letter} (index {list_solution.index(letter)})
+			fake_solution[fake_solution.index(letter)] = ' '
+			items_correct += 1
 
+	print(''.join(list_solution))
 	board = ''.join(board)
-	return board
+	return board, items_correct
 
 def main():
 	bank = 0
@@ -50,6 +53,7 @@ def main():
 			if spin == 'bankrupt':
 				bank = 0
 				print('Bankrupt!')
+				print(f'Your balance is ${bank}!')
 				continue
 			print(f'{spin}!')
 			while True:
@@ -64,15 +68,32 @@ def main():
 					print('Only letters in the English alphabet please!')
 					guess = None
 				else:
-					newboard = guess_letter(guess, answer, board)
+					newboard, num_items_correct = guess_letter(guess, answer, board)
 					print(newboard)
 					if newboard != board:
-						bank += spin
-						print(f'Your new balance is: {bank}!')
+						bank += spin * num_items_correct
+						print(f'Your balance is ${bank}!')
 					board = newboard+'.'[:-1]
 					break
 		elif turn.lower() == 'b':
-			raise Exception('This code hasn\'t been made yet!')
+			while True:
+				guess = input('Enter the vowel you would like to guess: ').lower()
+				if guess in ['b', 'c', 'd', 'f' 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'y', 'z']:
+					print('No consonants please!')
+					guess = None
+				elif len(guess) > 1 or len(guess) < 1:
+					print('Only one letter please!')
+					guess = None
+				elif guess not in ['a', 'e', 'i', 'o', 'u']:
+					print('Only letters in the English alphabet please!')
+					guess = None
+				else:
+					newboard, num_items_correct = guess_letter(guess, answer, board)
+					print(newboard)
+					bank -= 250
+					print(f'Your balance is ${bank}!')
+					board = newboard+'.'[:-1]
+					break
 		elif turn.lower() == 'p':
 			raise Exception('This code hasn\'t been made yet!')
 		else:
