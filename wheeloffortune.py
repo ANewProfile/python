@@ -36,6 +36,15 @@ def guess_letter(letter, solution, board):
 	board = ''.join(board)
 	return board, items_correct
 
+def guess_answer(guess, answer):
+	correct = None
+	if guess == answer:
+		correct = True
+	else:
+		correct = False	
+
+	return correct
+
 def main():
 	bank = 0
 	input('Press enter when you\'re ready to start: ')
@@ -45,6 +54,7 @@ def main():
 	board = make_board(answer)
 	print(board)
 	possible_spins = ['bankrupt', 600, 400, 300, 800, 350, 450, 700, 300, 600, 2500, 'bankrupt', 300, 600, 300, 500, 800, 550, 400, 300, 900, 1500, 500, 900]
+	turns = 0
 	while True:
 		spin = None
 		turn = input('Would you like to [s]pin, [b]uy a  vowel, or solve the [p]uzzle? ')
@@ -58,6 +68,7 @@ def main():
 			print(f'{spin}!')
 			while True:
 				guess = input('Enter the consonant you would like to guess: ').lower()
+				
 				if guess in ['a', 'e', 'i', 'o', 'u']:
 					print('No vowels please!')
 					guess = None
@@ -74,11 +85,17 @@ def main():
 						bank += spin * num_items_correct
 						print(f'Your balance is ${bank}!')
 					board = newboard+'.'[:-1]
+					turns += 1
 					break
 		elif turn.lower() == 'b':
 			while True:
 				guess = input('Enter the vowel you would like to guess: ').lower()
-				if guess in ['b', 'c', 'd', 'f' 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'y', 'z']:
+				
+				if bank < 250:
+					print('You don\'t have enough money!')
+					guess = None
+					break
+				elif guess in ['b', 'c', 'd', 'f' 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'y', 'z']:
 					print('No consonants please!')
 					guess = None
 				elif len(guess) > 1 or len(guess) < 1:
@@ -93,9 +110,18 @@ def main():
 					bank -= 250
 					print(f'Your balance is ${bank}!')
 					board = newboard+'.'[:-1]
+					turns += 1
 					break
 		elif turn.lower() == 'p':
-			raise Exception('This code hasn\'t been made yet!')
+			guess = input('Enter your guess: ').lower()
+			is_correct = guess_answer(guess, answer)
+			if is_correct is True:
+				print(f'You got it right! It took you a total of {turns} turns and you had ${bank} remaining!')
+				break
+			elif is_correct is False:
+				print('Incorrect!')
+			else:
+				raise Exception('YOU SHOULD NEVER SEE THIS')
 		else:
 			print('Invalid. Try again.')
 			continue
