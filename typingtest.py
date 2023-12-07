@@ -42,7 +42,7 @@ def main():
 	speed_wps = speed_wpm / 60
 	speed_cpm = num_chars / (time_taken/60) * accuracy
 	speed_cps = speed_cpm / 60
-	print(f'Speed (WPM): {speed_wpm}')
+	print(f'Speed (WPM): {speed_wpm}\n\
 Speed (WPS): {speed_wps},\n\
 Speed (CPM): {speed_cpm},\n\
 Speed (CPS): {speed_cpm}')
