@@ -32,7 +32,7 @@ def guess_letter(letter, solution, board):
 			fake_solution[fake_solution.index(letter)] = ' '
 			items_correct += 1
 
-	print(''.join(list_solution))
+	# print(''.join(list_solution))
 	board = ''.join(board)
 	return board, items_correct
 
@@ -48,9 +48,9 @@ def guess_answer(guess, answer):
 def main():
 	bank = 0
 	input('Press enter when you\'re ready to start: ')
-	possible_answers = ['an apple a day keeps the doctor away', 'the quick brown fox jumps over the lazy dog']
-	answer = 'an apple a day keeps the doctor away'
-	# answer = random.choice(possible_answers)
+	possible_answers = ['an apple a day keeps the doctor away', 'the quick brown fox jumps over the lazy dog', 'a bird in the hand is worth two in the bush']
+	# answer = 'an apple a day keeps the doctor away'
+	answer = random.choice(possible_answers)
 	board = make_board(answer)
 	print(board)
 	possible_spins = ['bankrupt', 600, 400, 300, 800, 350, 450, 700, 300, 600, 2500, 'bankrupt', 300, 600, 300, 500, 800, 550, 400, 300, 900, 1500, 500, 900]
