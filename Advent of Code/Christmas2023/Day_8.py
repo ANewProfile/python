@@ -24,6 +24,7 @@ def main(node_set, pattern) -> int:
     pointer_node = find_node_coords('AAA', node_set)
     int_pattern = intify_pattern(pattern)
     while True:
+        print('next')
         if pointer_node != 'ZZZ':
             pattern_index += 1
             try:
