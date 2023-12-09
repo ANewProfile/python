@@ -3,7 +3,7 @@ import sys, re
 
 map = {}
 pattern = sys.argv[-1]
-f = open('Day_8_Input.txt', 'r')
+f = open('Day_8_Test_Input.txt', 'r')
 for line in f.readlines():
     values = re.split('[\s\=\(\)\,]+', line)
     map[values[0]] = [values[1], values[2]]
