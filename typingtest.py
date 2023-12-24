@@ -22,9 +22,7 @@ def main():
 	quote = prompt['q']
 	author = prompt['a']
 	num_words = len(quote.split(' '))
-	print(num_words)
 	num_chars = len(list(''.join(quote.split(' '))))
-	print(num_chars)
 	for i in range(3, 1, -1):
 		print(f'The prompt will appear in {i} seconds!', end='\r')
 		time.sleep(1)
@@ -35,9 +33,8 @@ def main():
 	print(termcolor.colored(quote, 'green', attrs=['bold']), end='\r')
 	typed = input('')
 	time_taken = time.time() - start_time
-	print(time_taken)
 	accuracy = find_accuracy(''.join(quote.split(' ')), ''.join(typed.split(' ')), num_chars)
-	print(f'speed_wpm = {num_words} / ({time_taken}/60) * {accuracy}')
+    # print(f'speed_wpm = {num_words} / ({time_taken}/60) * {accuracy}')
 	speed_wpm = num_words / (time_taken/60) * accuracy
 	speed_wps = speed_wpm / 60
 	speed_cpm = num_chars / (time_taken/60) * accuracy
@@ -45,7 +42,11 @@ def main():
 	print(f'Speed (WPM): {speed_wpm}\n\
 Speed (WPS): {speed_wps},\n\
 Speed (CPM): {speed_cpm},\n\
-Speed (CPS): {speed_cpm}')
+Speed (CPS): {speed_cps}')
+    print(f'\nWords: {num_words},\n\
+Characters: {num_chars},\n\
+Time Taken: {time_taken},\n\
+Accuracy: {accuracy}')
 	print(f'\nQuote: {quote}\n\
 Author: {author}')
 
