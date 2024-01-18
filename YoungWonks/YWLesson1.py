@@ -13,27 +13,71 @@ class Square:
     def __init__(self, length, color, position, up=False, down=False, left=False, right=False):
         self.length = length
         self.color = color
-        self.position = position
         self.up = up
         self.down = down
         self.left = left
         self.right = right
+        self.set_position(position)
+
+    def set_position(self, position):
+        self.position = list(position)
+        self.top_left = position
+        self.top_right = (position[0]+self.length, position[1])
+        self.bottom_left = (position[0], position[1]+self.length)
+        self.bottom_right = (position[0]+self.length, position[1]+self.length)
     
+    def point_in_square(self, point):
+        if point[0] in range(self.position[0], self.position[0]+self.length+1) and \
+           point[1] in range(self.position[1], self.position[1]+self.length+1):
+            # print('Collision!')
+            return True
+        # print('No collision!')
+        return False
+
     def draw(self):
         pygame.draw.rect(window, self.color, (self.position[0], self.position[1], self.length, self.length))
     
     def check_collision_square(self, other):
-        if (self.position[1]+self.length > other.position[1] and self.position[1]+self.length < other.position[1]+other.length) and (self.position[0] > other.position[0]):
-            self.position[1] = other.position[1]-other.length
+        for point in (other.top_left, other.top_right, other.bottom_left, other.bottom_right):
+            # print("is", point, "in", self.position)
+            if self.point_in_square(point):
+                if True in (other.up, other.down, other.left, other.right):
+                    print("Moving collision between user", other.position, "and", self.position)
+                if other.up is True:
+                    return other.position[0], self.bottom_left[1]
+                elif other.down is True:
+                    return other.position[0], self.top_left[1]
+                if other.left is True:
+                    return self.bottom_right[0], other.position[1]
+                elif other.right is True:
+                    return self.bottom_left[0], other.position[1]
+                
+        for point in (self.top_left, self.top_right, self.bottom_left, self.bottom_right):
+            # print("is", point, "in", self.position)
+            if other.point_in_square(point):
+                if True in (other.up, other.down, other.left, other.right):
+                    print("Moving collision between user", other.position, "and", self.position)
+                if other.up is True:
+                    return other.position[0], self.bottom_left[1]
+                elif other.down is True:
+                    return other.position[0], self.top_left[1]
+                if other.left is True:
+                    return self.bottom_right[0], other.position[1]
+                elif other.right is True:
+                    return self.bottom_left[0], other.position[1]
+        
+        return other.position
 
 
 x = 524
 y = 344
 
 user = Square(32, WHITE, (x, y))
-collision1 = Square(50, RED, (492, 538))
-collision2 = Square(25, RED, (238, 375))
-collision3 = Square(40, RED, (846, 192))
+collision1 = Square(50, RED, [492, 538])
+collision2 = Square(25, RED, [238, 375])
+collision3 = Square(40, RED, [846, 192])
+collisions = (collision1, collision2, collision3)
+# print("obstacles", [c.position for c in collisions])
 
 running = True
 while running:
@@ -81,8 +125,12 @@ while running:
         y = 0
 
     window.fill(BLACK)
-    user.position = (x, y)
-    user.draw()
+    user.set_position((x, y))
+    for collision in collisions:
+        x, y = collision.check_collision_square(user)
+        collision.draw()
+        user.set_position((x, y))
+        user.draw()
 
     pygame.display.update()
 
