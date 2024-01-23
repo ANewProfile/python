@@ -59,6 +59,7 @@ for _ in range(100):
     circle = Circle(radius, WHITE, (random.randint(radius, WIDTH-radius), random.randint(radius, HEIGHT-radius)))
     circles.append(circle)
 
+
 clock = pygame.time.Clock()
 
 running = True
