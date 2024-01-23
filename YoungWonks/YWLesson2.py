@@ -28,7 +28,29 @@ class Circle:
         return dist(self.position, pos)
 
     def change_color(self, index, list_count):
-        pass
+        percentage = (index/list_count) * 100
+        if percentage >= 90:
+            self.color = (255, 255, 255)
+        elif percentage in range(80, 90):
+            self.color = (230, 230, 230)
+        elif percentage in range(70, 80):
+            self.color = (204, 204, 204)
+        elif percentage in range(60, 70):
+            self.color = (179, 179, 179)
+        elif percentage in range(50, 60):
+            self.color = (153, 153, 153)
+        elif percentage in range(40, 50):
+            self.color = (128, 128, 128)
+        elif percentage in range(30, 40):
+            self.color = (102, 102, 102)
+        elif percentage in range(20, 30):
+            self.color = (77, 77, 77)
+        elif percentage in range(10, 20):
+            self.color = (51, 51, 51)
+        elif percentage in range(0, 10):
+            self.color = (26, 26, 26)
+        
+        print(self.color)
 
 
 circles = []
@@ -65,6 +87,12 @@ while running:
             circles.insert(0, new_circle)
         
         circle.shrink(0.1)
+
+        try:
+            circle.change_color(circles.index(circle), len(circles))
+        except ValueError:
+            pass
+
         circle.draw()
 
     pygame.display.update()
