@@ -1,4 +1,5 @@
 import pygame
+
 pygame.init()
 
 WIDTH = 720
@@ -6,54 +7,76 @@ HEIGHT = 720
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 
 WHITE = (255, 255, 255)
-BLACK = (0, 0, 0, )
+BLACK = (
+    0,
+    0,
+    0,
+)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 
-board = [[None, None, None],
-         [None, None, None],
-         [None, None, None]]
+board = {
+    (0, 0): None,
+    (0, 1): None,
+    (0, 2): None,
+    (1, 0): None,
+    (1, 1): None,
+    (1, 2): None,
+    (2, 0): None,
+    (2, 1): None,
+    (2, 2): None,
+}
 
 def draw_x(section):
     if section == 1:
-        pygame.draw.line(window, RED, (0, 0), (0, 0))
-        pygame.draw.line(window, RED, (240, 240), (240, 240))
+        pygame.draw.line(window, RED, (0, 0), (240, 240), width=3)
+        pygame.draw.line(window, RED, (240, 0), (0, 240), width=3)
     elif section == 2:
-        ...
+        pygame.draw.line(window, RED, (240, 0), (480, 240), width=3)
+        pygame.draw.line(window, RED, (480, 0), (240, 240), width=3)
     elif section == 3:
-        ...
+        pygame.draw.line(window, RED, (480, 0), (720, 240), width=3)
+        pygame.draw.line(window, RED, (720, 0), (480, 240), width=3)
     elif section == 4:
-        ...
+        pygame.draw.line(window, RED, (0, 240), (240, 480), width=3)
+        pygame.draw.line(window, RED, (240, 240), (0, 480), width=3)
     elif section == 5:
-        ...
+        pygame.draw.line(window, RED, (240, 240), (480, 480), width=3)
+        pygame.draw.line(window, RED, (480, 240), (240, 480), width=3)
     elif section == 6:
-        ...
+        pygame.draw.line(window, RED, (480, 240), (720, 480), width=3)
+        pygame.draw.line(window, RED, (720, 240), (480, 480), width=3)
     elif section == 7:
-        ...
+        pygame.draw.line(window, RED, (0, 480), (240, 720), width=3)
+        pygame.draw.line(window, RED, (240, 480), (0, 720), width=3)
     elif section == 8:
-        ...
+        pygame.draw.line(window, RED, (240, 480), (480, 720), width=3)
+        pygame.draw.line(window, RED, (480, 480), (240, 720), width=3)
     else:
-        ...
+        pygame.draw.line(window, RED, (480, 480), (720, 720), width=3)
+        pygame.draw.line(window, RED, (720, 480), (480, 720), width=3)
+
 
 def draw_o(section):
     if section == 1:
-        ...
+        pygame.draw.circle(window, BLUE, (120, 120), 119, width=3)
     elif section == 2:
-        ...
+        pygame.draw.circle(window, BLUE, (360, 120), 119, width=3)
     elif section == 3:
-        ...
+        pygame.draw.circle(window, BLUE, (600, 120), 119, width=3)
     elif section == 4:
-        ...
+        pygame.draw.circle(window, BLUE, (120, 360), 119, width=3)
     elif section == 5:
-        ...
+        pygame.draw.circle(window, BLUE, (360, 360), 119, width=3)
     elif section == 6:
-        ...
+        pygame.draw.circle(window, BLUE, (600, 360), 119, width=3)
     elif section == 7:
-        ...
+        pygame.draw.circle(window, BLUE, (120, 600), 119, width=3)
     elif section == 8:
-        ...
+        pygame.draw.circle(window, BLUE, (360, 600), 119, width=3)
     else:
-        ...
+        pygame.draw.circle(window, BLUE, (600, 600), 119, width=3)
+
 
 def draw_shape(is_x, section):
     if section == (0, 0):
@@ -102,6 +125,7 @@ def draw_shape(is_x, section):
         else:
             draw_o(9)
 
+
 running = True
 turn = 0
 while running:
@@ -109,14 +133,17 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
+            print("MOUSE DOWN")
             mouse_pos = event.pos
             mouse_x = mouse_pos[0]
             mouse_y = mouse_pos[1]
-            x_section = mouse_x // 240
-            y_section = mouse_y // 240
-            board[x_section][y_section] = 'X' if turn%2 == 0 else 'O'
+            y_section = mouse_x // 240
+            x_section = mouse_y // 240
+            if board[(x_section, y_section)] is None:
+                board[(x_section, y_section)] = "X" if turn % 2 == 0 else "O"
+            else:
+                print("INVALID.")
             turn += 1
-
 
     window.fill(BLACK)
 
@@ -127,10 +154,14 @@ while running:
     pygame.draw.line(window, WHITE, (240, 0), (240, 720))
     pygame.draw.line(window, WHITE, (480, 0), (480, 720))
 
-    for row in board:
-        for column in row:
-            if column is not None:
-                draw_shape(turn%2==0, (row, column))
+    for square, value in board.items():
+        if value is not None:
+            if value is 'X':
+                draw_shape(True, square)
+            else:
+                draw_shape(False, square)
+
+    # print(board)
 
     pygame.display.update()
 
