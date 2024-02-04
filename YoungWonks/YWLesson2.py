@@ -9,6 +9,9 @@ window = pygame.display.set_mode((WIDTH, HEIGHT))
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+BLUE = (0, 0, 255)
+RED = (255, 0, 0)
 
 FRAMERATE = 60
 
@@ -53,11 +56,8 @@ class Circle:
         print(self.color)
 
 
-circles = []
-for _ in range(100):
-    radius = random.randint(20, 40)
-    circle = Circle(radius, WHITE, (random.randint(radius, WIDTH-radius), random.randint(radius, HEIGHT-radius)))
-    circles.append(circle)
+circles = {'a': Circle(50, WHITE, (random.randint(50, 1030), random.randint(50, 680))), 'b': Circle(45, YELLOW, (random.randint(50, 1030), random.randint(50, 680))),
+             'c': Circle(25, BLUE, (random.randint(50, 1030), random.randint(50, 680))), 'd': Circle(5, RED, (random.randint(50, 1030), random.randint(50, 680)))}
 
 
 clock = pygame.time.Clock()
@@ -69,32 +69,44 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_pos = event.pos
-            reversed_circles = circles[::-1]
-            for circle in reversed_circles:
-                if circle.check_distance(mouse_pos) <= circle.radius:
-                    reversed_circles.remove(circle)
-                    break
-            
-            circles = reversed_circles[::-1]
+        # elif event.type == pygame.MOUSEBUTTONDOWN:
+        #     mouse_pos = event.pos
+        #     reversed_circles = circles[::-1]
+        #     for circle in reversed_circles:
+        #         if circle.check_distance(mouse_pos) <= circle.radius:
+        #             reversed_circles.remove(circle)
+        #             break
+            # 
+            # circles = reversed_circles[::-1]
 
     window.fill(BLACK)
-    for circle in circles:
-        if circle.radius <= 5:
-            circles.remove(circle)
-            radius = random.randint(20, 40)
-            new_circle = Circle(radius, WHITE, (random.randint(radius, WIDTH-radius), random.randint(radius, HEIGHT-radius)))
-            circles.insert(0, new_circle)
+    for circle, object in circles.items():
+        if object.radius <= 5:
+
+            if circle == 'a':
+                radius = 50
+                color = WHITE
+            elif circle == 'b':
+                radius = 45
+                color = YELLOW
+            elif circle == 'c':
+                radius = 25
+                color = BLUE
+            else:
+                radius = 5
+                color = RED
+
+            new_circle = Circle(radius, color, (random.randint(radius, WIDTH-radius), random.randint(radius, HEIGHT-radius)))
+            circles[circle] = new_circle
         
-        circle.shrink(0.1)
+        object.shrink(0.1)
 
-        try:
-            circle.change_color(circles.index(circle), len(circles))
-        except ValueError:
-            pass
+        # try:
+        #     circle.change_color(circles.index(circle), len(circles))
+        # except ValueError:
+        #     pass
 
-        circle.draw()
+        object.draw()
 
     pygame.display.update()
 
