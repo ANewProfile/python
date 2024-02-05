@@ -40,11 +40,12 @@ for image in range(1, 14):
     walk_left.append(sprite)
 
 x = 0
-y = 0
+y = 120
 speed_x = 10
 speed_y = 10
 
 image_rect = pygame.Rect(x, y, image_w, image_h)
+hitbox = pygame.Rect(x, y, 50, 50)
 wall_right = pygame.Rect(800, 0, 10, 720)
 
 run = True
@@ -81,11 +82,13 @@ while run:
 
     # Move Sprite
     if current_list == walk_right:
-        image_rect.x += speed_x
-        if image_rect.colliderect(wall_right):
-            image_rect.right = wall_right.left
+        hitbox.x += speed_x
+        if hitbox.colliderect(wall_right):
+            hitbox.right = wall_right.left
     elif current_list == walk_left:
-        image_rect.x -= speed_x
+        hitbox.x -= speed_x
+    
+    image_rect.center = hitbox.center
 
     pygame.display.update()
 
