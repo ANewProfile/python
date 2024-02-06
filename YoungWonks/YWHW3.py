@@ -3,7 +3,7 @@ pygame.init()
 
 WIDTH = 720
 HEIGHT = 720
-FRAMERATE = 1
+FRAMERATE = 10
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 
 WHITE = (255, 255, 255)
@@ -19,14 +19,18 @@ class Player(pygame.Rect):
         self.length = len(snake)
         self.head_x = snake[0][0]
         self.head_y = snake[0][1]
+        self.snake = snake
         self.path = path
-        self.right = right
-        self.left = left
+        self.go_right = right
+        self.go_left = left
         self.up = up
         self.down = down
     
     def draw(self):
-        pygame.draw.rect(window, LIGHT_GREEN, (self.head_x, self.head_y, STEP_W, STEP_H))
+        for square in self.snake:
+            pygame.draw.rect(window, LIGHT_GREEN, (square[0], square[1], STEP_W, STEP_H))
+        
+        # pygame.draw.rect(window, LIGHT_GREEN, (self.head_x, self.head_y, STEP_W, STEP_H))
 
 class Fruit(pygame.Rect):
     def __init__(self, x, y):
@@ -48,6 +52,8 @@ player_y = int((HEIGHT//2) - (1/2)*(STEP_H))
 fruit_x = WIDTH - 2*STEP_W
 fruit_y = int((HEIGHT//2) - (1/2)*(STEP_H))
 
+score = 0
+
 running = True
 clock = pygame.time.Clock()
 player = Player([[player_x, player_y]], [])
@@ -59,45 +65,50 @@ while running:
             running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
-                player.right = False
-                player.left = False
+                player.go_right = False
+                player.go_left = False
                 player.up = True
                 player.down = False
             elif event.key == pygame.K_DOWN:
-                player.right = False
-                player.left = False
+                player.go_right = False
+                player.go_left = False
                 player.up = False
                 player.down = True
             elif event.key == pygame.K_LEFT:
-                print('going left')
-                player.right = False
-                player.left = True
+                player.go_right = False
+                player.go_left = True
                 player.up = False
                 player.down = False
             elif event.key == pygame.K_RIGHT:
-                print('going right')
-                player.right = True
-                player.left = False
+                player.go_right = True
+                player.go_left = False
                 player.up = False
                 player.down = False
-    
+
     if player.up is True:
         player_y -= STEP_H
-        player.head_y = player_y
+        player.snake[0][1] = player_y
     elif player.down is True:
         player_y += STEP_H
-        player.head_y = player_y
-    elif player.left is True:
+        player.snake[0][1] = player_y
+    elif player.go_left is True:
         player_x -= STEP_W
-        player.head_x = player_x
+        player.snake[0][0] = player_x
     else:
         player_x += STEP_W
-        player.head_x = player_x
+        player.snake[0][0] = player_x
+    
+    if player.colliderect(fruit):  # Not working- ask Jayson
+        # Move the fruit to a non-snake position and add to score
+        # Elongate the snake
+        score += 1
+        print(f'Player picked up fruit! Score: {score}')
+        pass
     
     window.fill(BLACK)
     draw_grid()
-    player.draw()
     fruit.draw()
+    player.draw()
 
     pygame.display.update()
 
