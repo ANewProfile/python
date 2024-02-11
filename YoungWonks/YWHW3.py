@@ -15,6 +15,7 @@ LIGHT_GREEN = (144, 238, 144)
 STEP_W = WIDTH // 9
 STEP_H = HEIGHT // 9
 
+
 class Player(pygame.Rect):
     def __init__(self, snake, right=False, left=False, up=False, down=False):
         self.length = len(snake)
