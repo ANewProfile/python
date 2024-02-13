@@ -1,5 +1,6 @@
 import pygame
 import random
+from time import sleep
 pygame.init()
 
 WIDTH = 720
@@ -11,9 +12,11 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 LIGHT_GREEN = (144, 238, 144)
+BLUE = (173, 216, 230)
 
-STEP_W = WIDTH // 9
-STEP_H = HEIGHT // 9
+GRID_SIZE = 9
+STEP_W = WIDTH // GRID_SIZE
+STEP_H = HEIGHT // GRID_SIZE
 
 
 class Player(pygame.Rect):
@@ -47,8 +50,9 @@ class Player(pygame.Rect):
             self.snake[0] = [self.snake[0][0]+x, self.snake[0][1]+y]
     
     def draw(self):
-        for square in self.snake:
+        for square in self.snake[1:]:
             pygame.draw.rect(window, LIGHT_GREEN, (square[0], square[1], STEP_W, STEP_H))
+        pygame.draw.rect(window, BLUE, (self.snake[0][0], self.snake[0][1], STEP_W, STEP_H))
     
     def elongate(self):
         if self.up:
@@ -74,16 +78,23 @@ def draw_grid():
     for y in range(0, HEIGHT+1, STEP_H):
         pygame.draw.line(window, WHITE, (0, y), (WIDTH, y))
 
-player_x = STEP_W
-player_y = int((HEIGHT//2) - (1/2)*(STEP_H))
-fruit_x = WIDTH - 2*STEP_W
-fruit_y = int((HEIGHT//2) - (1/2)*(STEP_H))
+if GRID_SIZE % 2 == 1:
+    player_x = STEP_W
+    player_y = int((HEIGHT//2) - (1/2)*(STEP_H))
+    fruit_x = WIDTH - 2*STEP_W
+    fruit_y = int((HEIGHT//2) - (1/2)*(STEP_H))
+else:
+    player_x = STEP_W
+    player_y = HEIGHT // 2
+    fruit_x = WIDTH - 2*STEP_W
+    fruit_y = HEIGHT // 2
 
 score = 0
+already_increased_size = False
 
 running = True
 clock = pygame.time.Clock()
-player = Player([[player_x, player_y]])
+player = Player([[player_x, player_y]], True)
 fruit = Fruit(fruit_x, fruit_y)
 while running:
     clock.tick(FRAMERATE)
@@ -92,25 +103,29 @@ while running:
             running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
-                player.go_right = False
-                player.go_left = False
-                player.up = True
-                player.down = False
+                if player.down is not True:
+                    player.go_right = False
+                    player.go_left = False
+                    player.up = True
+                    player.down = False
             elif event.key == pygame.K_DOWN:
-                player.go_right = False
-                player.go_left = False
-                player.up = False
-                player.down = True
+                if player.up is not True:
+                    player.go_right = False
+                    player.go_left = False
+                    player.up = False
+                    player.down = True
             elif event.key == pygame.K_LEFT:
-                player.go_right = False
-                player.go_left = True
-                player.up = False
-                player.down = False
+                if player.go_right is not True:
+                    player.go_right = False
+                    player.go_left = True
+                    player.up = False
+                    player.down = False
             elif event.key == pygame.K_RIGHT:
-                player.go_right = True
-                player.go_left = False
-                player.up = False
-                player.down = False
+                if player.go_left is not True:
+                    player.go_right = True
+                    player.go_left = False
+                    player.up = False
+                    player.down = False
 
     if player.up is True:
         player.move(0, -STEP_H)
@@ -122,9 +137,33 @@ while running:
         player.move(STEP_W, 0)
     
     if player.colliderect(fruit):
-        fruit.update(random.randint(0, 8)*STEP_W, random.randint(0, 8)*STEP_H, STEP_W, STEP_H)
+        fruit.update(random.randint(0, GRID_SIZE-1)*STEP_W, random.randint(0, GRID_SIZE-1)*STEP_H, STEP_W, STEP_H)
         player.elongate()
         score += 1
+    
+    for part in player.snake[1:]:
+        temp_rect = pygame.Rect(part[0], part[1], STEP_W, STEP_H)
+        if player.colliderect(temp_rect):
+            print(f'Game over! Your score was: {score}')
+            running = False
+    temp_rect = None
+
+    if player.snake[0][0] > WIDTH or player.snake[0][1] > HEIGHT or player.snake[0][0] < 0 or player.snake[0][1] < 0:
+        print(f'Game over! Your score was: {score}')
+        running = False
+
+    if score % 10 == 0 and score > 0 and not already_increased_size:
+        GRID_SIZE += 1
+        already_increased_size = True
+        height_difference = HEIGHT // GRID_SIZE - (HEIGHT // (GRID_SIZE - 1))
+        width_difference = WIDTH // GRID_SIZE - (WIDTH // (GRID_SIZE - 1))
+        player.snake = [[part[0]-width_difference, part[1]-height_difference] for part in player.snake]
+    
+    if score % 10 != 0 and already_increased_size:
+        already_increased_size = False
+    
+    STEP_W = WIDTH // GRID_SIZE
+    STEP_H = HEIGHT // GRID_SIZE
     
     window.fill(BLACK)
     draw_grid()
@@ -133,5 +172,4 @@ while running:
 
     pygame.display.update()
 
-print(player.snake)
 pygame.quit()
