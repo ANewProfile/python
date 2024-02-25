@@ -137,16 +137,15 @@ while running:
         player.move(STEP_W, 0)
     
     if player.colliderect(fruit):
-        fruit.update(random.randint(0, GRID_SIZE-1)*STEP_W, random.randint(0, GRID_SIZE-1)*STEP_H, STEP_W, STEP_H)
+        new_fruit = [random.randint(0, GRID_SIZE-1)*STEP_W, random.randint(0, GRID_SIZE-1)*STEP_H]
+        while new_fruit in player.snake:
+            new_fruit = [random.randint(0, GRID_SIZE-1)*STEP_W, random.randint(0, GRID_SIZE-1)*STEP_H]
+        fruit.update(new_fruit[0], new_fruit[1], STEP_W, STEP_H)
         player.elongate()
         score += 1
     
-    for part in player.snake[1:]:
-        temp_rect = pygame.Rect(part[0], part[1], STEP_W, STEP_H)
-        if player.colliderect(temp_rect):
-            print(f'Game over! Your score was: {score}')
-            running = False
-    temp_rect = None
+    if player.snake[0]:
+        ...
 
     if player.snake[0][0] > WIDTH or player.snake[0][1] > HEIGHT or player.snake[0][0] < 0 or player.snake[0][1] < 0:
         print(f'Game over! Your score was: {score}')
@@ -154,21 +153,23 @@ while running:
 
     if score % 10 == 0 and score > 0 and not already_increased_size:
         GRID_SIZE += 1
+        STEP_W = WIDTH // GRID_SIZE
+        STEP_H = HEIGHT // GRID_SIZE
         already_increased_size = True
-        height_difference = HEIGHT // GRID_SIZE - (HEIGHT // (GRID_SIZE - 1))
-        width_difference = WIDTH // GRID_SIZE - (WIDTH // (GRID_SIZE - 1))
-        player.snake = [[part[0]-width_difference, part[1]-height_difference] for part in player.snake]
+        height_difference = STEP_H / (HEIGHT // (GRID_SIZE - 1))
+        width_difference = STEP_W / (WIDTH // (GRID_SIZE - 1))
+        player.snake = [[part[0]*width_difference, part[1]*height_difference] for part in player.snake]
+        player.update(player.snake[0][0], player.snake[0][1], STEP_W, STEP_H)
+        fruit.update(fruit.x*width_difference, fruit.y*height_difference, STEP_W, STEP_H)
     
     if score % 10 != 0 and already_increased_size:
         already_increased_size = False
     
-    STEP_W = WIDTH // GRID_SIZE
-    STEP_H = HEIGHT // GRID_SIZE
     
     window.fill(BLACK)
     draw_grid()
-    fruit.draw()
     player.draw()
+    fruit.draw()
 
     pygame.display.update()
 
