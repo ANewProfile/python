@@ -115,13 +115,14 @@ while running:
         character_rect.move_ip(5, 0)
     
     if character_rect.colliderect(left_wall):
-        character_rect.update(0, character_rect.top, character_rect.width, character_rect.height)
+        character_rect.left = left_wall.right
     elif character_rect.colliderect(right_wall):
-        character_rect.update(WIDTH-character_rect.width, character_rect.top, character_rect.width, character_rect.height)
+        character_rect.right = right_wall.left
     elif character_rect.colliderect(floor):
-        character_rect.update(character_rect.left, HEIGHT-character_rect.height, character_rect.width, character_rect.height)
+        character_rect.bottom = floor.top
     elif character_rect.colliderect(ceiling):
-        character_rect.update(character_rect.left, 0, character_rect.width, character_rect.height)
+        character_rect.top = ceiling.bottom
+
     
     window.fill(BLACK)
     window.blit(current_list[current_sprite%len(current_list)], (character_rect.x, character_rect.y))
