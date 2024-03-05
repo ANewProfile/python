@@ -37,7 +37,7 @@ bouncy_rect2 = BouncyRectangle(400, 50, randint(0, 608), randint(0, 670))
 bouncy_rect3 = BouncyRectangle(235, 175, randint(0, 773), randint(0, 440))
 
 clock = pygame.time.Clock()
-bouncing = (True, 1)
+bouncing = (False, 1)
 bounce_count = 0
 direction = 2
 running = True
@@ -57,18 +57,22 @@ while running:
                 # Bounce North
                 direction = 1
                 bouncing_circle.pos = (bouncing_circle.pos[0], bouncing_circle.pos[1]-5)
+                bouncing = (False, direction)
             elif bouncing[1] == 2:
                 # Bounce East
                 direction = 2
                 bouncing_circle.pos = (bouncing_circle.pos[0]+5, bouncing_circle.pos[1])
+                bouncing = (False, direction)
             elif bouncing[1] == 3:
                 # Bounce South
                 direction = 3
                 bouncing_circle.pos = (bouncing_circle.pos[0], bouncing_circle.pos[1]+5)
+                bouncing = (False, direction)
             elif bouncing[1] == 4:
                 # Bounce West
                 direction = 4
                 bouncing_circle.pos = (bouncing_circle.pos[0]-5, bouncing_circle.pos[1])
+                bouncing = (False, direction)
             else:
                 print('You should never see this!')
                 running = False
@@ -84,6 +88,16 @@ while running:
         else:
             print('You should never see this!')
             running = False
+
+    for rect in (bouncy_rect1, bouncy_rect2, bouncy_rect3):
+        if rect.collidepoint(bouncing_circle.pos[0]+bouncing_circle.radius, bouncing_circle.pos[1]):
+            bouncing = (True, 4)
+        elif rect.collidepoint(bouncing_circle.pos[0]-bouncing_circle.radius, bouncing_circle.pos[1]):
+            bouncing = (True, 2)
+        elif rect.collidepoint(bouncing_circle.pos[0], bouncing_circle.pos[1]+bouncing_circle.radius):
+            bouncing_circle = (True, 1)
+        elif rect.collidepoint(bouncing_circle.pos[0], bouncing_circle.pos[1]-bouncing_circle.radius):
+            bouncing_circle = (True, 3)
 
     window.fill(BLACK)
 
