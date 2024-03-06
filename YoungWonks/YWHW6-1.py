@@ -25,11 +25,13 @@ while running:
             if event.key == pygame.K_UP:
                 width += 5
                 height += 5
+                image_rect.scale_by_ip(5, 5)
                 image = pygame.transform.scale(image, (width, height))
                 print('Size up')
             elif event.key == pygame.K_DOWN:
                 width -= 5
                 height -= 5
+                image_rect.scale_by_ip(-5, -5)
                 image = pygame.transform.scale(image, (width, height))
                 print('Size down')
             elif event.key == pygame.K_SPACE:
