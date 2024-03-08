@@ -107,21 +107,20 @@ while running:
     
     if character_rect.moving_up:
         character_rect.move_ip(0, -5)
+        if character_rect.colliderect(ceiling):
+            character_rect.top = ceiling.bottom
     elif character_rect.moving_down:
         character_rect.move_ip(0, 5)
+        if character_rect.colliderect(floor):
+            character_rect.bottom = floor.top
     if character_rect.moving_left:
         character_rect.move_ip(-5, 0)
+        if character_rect.colliderect(left_wall):
+            character_rect.left = left_wall.right
     elif character_rect.moving_right:
         character_rect.move_ip(5, 0)
-    
-    if character_rect.colliderect(left_wall):
-        character_rect.left = left_wall.right
-    elif character_rect.colliderect(right_wall):
-        character_rect.right = right_wall.left
-    elif character_rect.colliderect(floor):
-        character_rect.bottom = floor.top
-    elif character_rect.colliderect(ceiling):
-        character_rect.top = ceiling.bottom
+        if character_rect.colliderect(right_wall):
+            character_rect.right = right_wall.left
 
     
     window.fill(BLACK)
