@@ -16,7 +16,6 @@ for image in range(1, 11):
     sprite = pygame.image.load(f'python/YoungWonks/platformer_game/png/dog/Idle ({image}).png')
     sprite = pygame.transform.scale(sprite, (image_width, image_height))
     idle_right.append(sprite)
-print(len(idle_right))
 
 idle_left = []
 for image in range(1, 11):
@@ -59,6 +58,7 @@ class Character(pygame.Rect):
         self.moving_down = False
         self.moving_left = False
         self.moving_right = False
+        self.hitbox = pygame.Rect(self.x, self.y, self.width-60, self.height)
 
 
 character_rect = Character(0, HEIGHT-image_height, image_width, image_height)
@@ -106,25 +106,33 @@ while running:
                 character_rect.moving_left = False
     
     if character_rect.moving_up:
-        character_rect.move_ip(0, -5)
-        if character_rect.colliderect(ceiling):
-            character_rect.top = ceiling.bottom
+        character_rect.hitbox.move_ip(0, -5)
+        if character_rect.hitbox.colliderect(ceiling):
+            character_rect.hitbox.top = ceiling.bottom
     elif character_rect.moving_down:
-        character_rect.move_ip(0, 5)
-        if character_rect.colliderect(floor):
-            character_rect.bottom = floor.top
+        character_rect.hitbox.move_ip(0, 5)
+        if character_rect.hitbox.colliderect(floor):
+            character_rect.hitbox.bottom = floor.top
     if character_rect.moving_left:
-        character_rect.move_ip(-5, 0)
-        if character_rect.colliderect(left_wall):
-            character_rect.left = left_wall.right
+        character_rect.hitbox.move_ip(-5, 0)
+        if character_rect.hitbox.colliderect(left_wall):
+            character_rect.hitbox.left = left_wall.right
     elif character_rect.moving_right:
-        character_rect.move_ip(5, 0)
-        if character_rect.colliderect(right_wall):
-            character_rect.right = right_wall.left
+        character_rect.hitbox.move_ip(5, 0)
+        if character_rect.hitbox.colliderect(right_wall):
+            character_rect.hitbox.right = right_wall.left
 
-    
+
+    character_rect.center = character_rect.hitbox.center    
     window.fill(BLACK)
     window.blit(current_list[current_sprite%len(current_list)], (character_rect.x, character_rect.y))
+    pygame.draw.rect(window, (255, 0, 0), floor)
+    pygame.draw.rect(window, (255, 0, 0), ceiling)
+    pygame.draw.rect(window, (255, 0, 0), right_wall)
+    pygame.draw.rect(window, (255, 0, 0), left_wall)
+
+    pygame.draw.rect(window, (0, 0, 255), character_rect.hitbox, 5)
+    pygame.draw.rect(window, (0, 255, 0), character_rect, 5)
 
     current_sprite += 1
     

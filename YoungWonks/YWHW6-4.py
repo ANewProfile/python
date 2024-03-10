@@ -43,9 +43,13 @@ while running:
 
     image_rect.scale_by_ip(scale_by, scale_by)
     print(f'image_rect.scale_by_ip({scale_by}, {scale_by})')
+    temp_list = []
     for sprite in idle_right:
         sprite = pygame.transform.scale(sprite, (image_width, image_height))
         print(f'sprite = pygame.transform.scale(sprite, ({image_width}, {image_height}))')
+        temp_list.append(sprite)
+    
+    idle_right = temp_list.copy()
 
     pygame.display.update()
 
