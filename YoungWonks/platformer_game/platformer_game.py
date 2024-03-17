@@ -131,8 +131,22 @@ for row in range(len(board)):
                 middle_grass_platforms.append(platform)
 
 
-character_rect = Character(0, HEIGHT-image_height, image_width, image_height)
+with open('python/YoungWonks/platformer_game/save.txt', 'r') as save_file:
+    print(save_file.readline())
+    if save_file.readline():
+        data = save_file.readline().split(' ')
+        print(data)
+        for num in range(len(data)):
+            print(data[num])
+            data[num] = int(data[num])
+        character_rect = Character(data[0], data[1], data[2], data[3])
+    else:
+        character_rect = Character(0, HEIGHT-image_height, image_width, image_height)
+
 current_list = idle_right
+
+# if platform.collide_point(hitbox.left, hitbox.bottom+1) or platform.collide_point(hitbox.right, hitbox.bottom+1):
+#    DO NOT JUMP
 
 floor = pygame.Rect(0, HEIGHT, WIDTH, 1)
 left_wall = pygame.Rect(-1, 0, 1, HEIGHT)
@@ -148,10 +162,13 @@ running = True
 clock = pygame.time.Clock()
 current_sprite = 0
 up_counter = 0
+jumped = True
 while running:
     clock.tick(FPS)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
+            with open('python/YoungWonks/platformer_game/save.txt', 'w') as save_file:
+                save_file.write(f'{character_rect.x} {character_rect.y} {character_rect.width} {character_rect.height}')
             running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_d:
@@ -162,7 +179,7 @@ while running:
                 current_list = walk_left
                 current_sprite = 0
                 character_rect.moving_left = True
-            elif event.key == pygame.K_SPACE:
+            elif event.key == pygame.K_SPACE and not jumped:
                 if not character_rect.moving_up:
                     if current_list in (idle_left, walk_left):
                         current_list = jump_left
@@ -171,6 +188,7 @@ while running:
                     current_sprite = 0
                     up_counter = 0
                     character_rect.moving_up = True
+                jumped = True
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_d:
                 current_list = idle_right
@@ -190,12 +208,20 @@ while running:
                 character_rect.hitbox.top = platform.bottom
         up_counter += 1
     elif character_rect.moving_down:
+        last_y = character_rect.hitbox.top
         character_rect.hitbox.move_ip(0, 5)
         if character_rect.hitbox.colliderect(floor):
             character_rect.hitbox.bottom = floor.top
+            jumped = False
+            character_rect.moving_down = False
         for platform in collision_platforms:
             if character_rect.hitbox.colliderect(platform):
                 character_rect.hitbox.bottom = platform.top
+                jumped = False
+
+        if last_y != character_rect.hitbox.top:
+            # print(last_y, character_rect.hitbox.top)
+            jumped = True
 
     if character_rect.moving_left:
         character_rect.hitbox.move_ip(-5, 0)
@@ -218,6 +244,7 @@ while running:
 
     if up_counter >= (FPS * (3/4)):
         character_rect.moving_up = False
+        character_rect.moving_down = True
         if current_list == jump_right:
             current_list = idle_right
         elif current_list == jump_left:
@@ -242,6 +269,9 @@ while running:
 
     pygame.draw.rect(window, (0, 0, 255), character_rect.hitbox, 5)
     pygame.draw.rect(window, (0, 255, 0), character_rect, 5)
+
+    # if jumped and the ground below the character is not air:
+    #     jumped = False
 
     current_sprite += 1
     if current_list in (jump_left, jump_right) and current_sprite >= len(current_list):
