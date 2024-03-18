@@ -16,49 +16,49 @@ image_height = 60
 
 idle_right = []
 for image in range(1, 11):
-    sprite = pygame.image.load(f'python/YoungWonks/platformer_game/png/dog/Idle ({image}).png')
+    sprite = pygame.image.load(f'YoungWonks/platformer_game/png/dog/Idle ({image}).png')
     sprite = pygame.transform.scale(sprite, (image_width, image_height))
     idle_right.append(sprite)
 
 idle_left = []
 for image in range(1, 11):
-    sprite = pygame.image.load(f'python/YoungWonks/platformer_game/png/dog/Idle ({image}).png')
+    sprite = pygame.image.load(f'YoungWonks/platformer_game/png/dog/Idle ({image}).png')
     sprite = pygame.transform.scale(sprite, (image_width, image_height))
     sprite = pygame.transform.flip(sprite, True, False)
     idle_left.append(sprite)
 
 walk_right = []
 for image in range(1, 11):
-    sprite = pygame.image.load(f'python/YoungWonks/platformer_game/png/dog/Walk ({image}).png')
+    sprite = pygame.image.load(f'YoungWonks/platformer_game/png/dog/Walk ({image}).png')
     sprite = pygame.transform.scale(sprite, (image_width, image_height))
     walk_right.append(sprite)
 
 walk_left = []
 for image in range(1, 11):
-    sprite = pygame.image.load(f'python/YoungWonks/platformer_game/png/dog/Walk ({image}).png')
+    sprite = pygame.image.load(f'YoungWonks/platformer_game/png/dog/Walk ({image}).png')
     sprite = pygame.transform.scale(sprite, (image_width, image_height))
     sprite = pygame.transform.flip(sprite, True, False)
     walk_left.append(sprite)
 
 jump_right = []
 for image in range(1, 9):
-    sprite = pygame.image.load(f'python/YoungWonks/platformer_game/png/dog/Jump ({image}).png')
+    sprite = pygame.image.load(f'YoungWonks/platformer_game/png/dog/Jump ({image}).png')
     sprite = pygame.transform.scale(sprite, (image_width, image_height))
     jump_right.append(sprite)
 
 jump_left = []
 for image in range(1, 9):
-    sprite = pygame.image.load(f'python/YoungWonks/platformer_game/png/dog/Jump ({image}).png')
+    sprite = pygame.image.load(f'YoungWonks/platformer_game/png/dog/Jump ({image}).png')
     sprite = pygame.transform.scale(sprite, (image_width, image_height))
     sprite = pygame.transform.flip(sprite, True, False)
     jump_left.append(sprite)
 
 
-middle_grass_image = pygame.image.load(f'python/YoungWonks/platformer_game/deserttileset/png/Tile/2.png')
+middle_grass_image = pygame.image.load(f'YoungWonks/platformer_game/deserttileset/png/Tile/2.png')
 middle_grass_image = pygame.transform.scale(middle_grass_image, (20, 20))
-left_grass_image = pygame.image.load(f'python/YoungWonks/platformer_game/deserttileset/png/Tile/1.png')
+left_grass_image = pygame.image.load(f'YoungWonks/platformer_game/deserttileset/png/Tile/1.png')
 left_grass_image = pygame.transform.scale(left_grass_image, (20, 20))
-right_grass_image = pygame.image.load(f'python/YoungWonks/platformer_game/deserttileset/png/Tile/3.png')
+right_grass_image = pygame.image.load(f'YoungWonks/platformer_game/deserttileset/png/Tile/3.png')
 right_grass_image = pygame.transform.scale(right_grass_image, (20, 20))
 
 
@@ -131,10 +131,11 @@ for row in range(len(board)):
                 middle_grass_platforms.append(platform)
 
 
-with open('python/YoungWonks/platformer_game/save.txt', 'r') as save_file:
-    print(save_file.readline())
-    if save_file.readline():
-        data = save_file.readline().split(' ')
+with open('YoungWonks/platformer_game/save.txt', 'r') as save_file:
+    line = save_file.readline()
+    print(line)
+    if line:
+        data = line.split(' ')
         print(data)
         for num in range(len(data)):
             print(data[num])
@@ -167,7 +168,7 @@ while running:
     clock.tick(FPS)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            with open('python/YoungWonks/platformer_game/save.txt', 'w') as save_file:
+            with open('YoungWonks/platformer_game/save.txt', 'w') as save_file:
                 save_file.write(f'{character_rect.x} {character_rect.y} {character_rect.width} {character_rect.height}')
             running = False
         elif event.type == pygame.KEYDOWN:
