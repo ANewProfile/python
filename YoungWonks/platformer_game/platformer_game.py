@@ -169,8 +169,10 @@ collision_platforms.append(right_wall)
 collision_platforms.append(ceiling)
 
 title_rect = pygame.Rect(0, 0, WIDTH, 100)
-start_rect = pygame.Rect(500, 100, WIDTH/4, 80)
-quit_rect = pygame.Rect(500, 150, WIDTH/4, 80)
+start_rect = pygame.Rect(420, 300, WIDTH/4, 80)
+quit_rect = pygame.Rect(420, 390, WIDTH/4, 80)
+
+
 def display_start_screen():
     pygame.draw.rect(window, LIGHT_GREEN, title_rect)
     pygame.draw.rect(window, RED, start_rect)
