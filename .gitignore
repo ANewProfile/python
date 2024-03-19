@@ -2,3 +2,4 @@ venv
 .idea
 .DS_Store
 .*.swp
+YoungWonks/platformer_game/save.txt
