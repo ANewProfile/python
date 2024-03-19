@@ -9,6 +9,8 @@ window = pygame.display.set_mode((WIDTH, HEIGHT))
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 LIGHT_GREEN = (144, 238, 144)
+RED = (255, 0, 0)
+BLUE = (173, 216, 230)
 
 
 image_width = 60
@@ -166,6 +168,14 @@ collision_platforms.append(left_wall)
 collision_platforms.append(right_wall)
 collision_platforms.append(ceiling)
 
+title_rect = pygame.Rect(0, 0, WIDTH, 100)
+start_rect = pygame.Rect(500, 100, WIDTH/4, 80)
+quit_rect = pygame.Rect(500, 150, WIDTH/4, 80)
+def display_start_screen():
+    pygame.draw.rect(window, LIGHT_GREEN, title_rect)
+    pygame.draw.rect(window, RED, start_rect)
+    pygame.draw.rect(window, BLUE, quit_rect)
+
 running = True
 clock = pygame.time.Clock()
 current_sprite = 0
@@ -265,26 +275,25 @@ while running:
     window.fill(BLACK)
     window.blit(background, bg_rect)
 
-    for platform in middle_grass_platforms:
-        window.blit(middle_grass_image, platform)
+    # for platform in middle_grass_platforms:
+    #     window.blit(middle_grass_image, platform)
 
-    for platform in left_grass_platforms:
-        window.blit(left_grass_image, platform)
+    # for platform in left_grass_platforms:
+    #     window.blit(left_grass_image, platform)
 
-    for platform in right_grass_platforms:
-        window.blit(right_grass_image, platform)
+    # for platform in right_grass_platforms:
+    #     window.blit(right_grass_image, platform)
 
-    window.blit(current_list[current_sprite%len(current_list)], character_rect)
+    # window.blit(current_list[current_sprite%len(current_list)], character_rect)
 
-    pygame.draw.rect(window, (0, 0, 255), character_rect.hitbox, 5)
-    pygame.draw.rect(window, (0, 255, 0), character_rect, 5)
+    # # if jumped and the ground below the character is not air:
+    # #     jumped = False
 
-    # if jumped and the ground below the character is not air:
-    #     jumped = False
+    # current_sprite += 1
+    # if current_list in (jump_left, jump_right) and current_sprite >= len(current_list):
+    #     current_sprite -= 1
 
-    current_sprite += 1
-    if current_list in (jump_left, jump_right) and current_sprite >= len(current_list):
-        current_sprite -= 1
+    display_start_screen()
     
     pygame.display.update()
 
