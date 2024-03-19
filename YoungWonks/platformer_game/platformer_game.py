@@ -53,6 +53,9 @@ for image in range(1, 9):
     sprite = pygame.transform.flip(sprite, True, False)
     jump_left.append(sprite)
 
+background = pygame.image.load(f'YoungWonks/platformer_game/deserttileset/png/BG.png')
+background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+
 
 middle_grass_image = pygame.image.load(f'YoungWonks/platformer_game/deserttileset/png/Tile/2.png')
 middle_grass_image = pygame.transform.scale(middle_grass_image, (20, 20))
@@ -72,7 +75,7 @@ class Character(pygame.Rect):
         self.hitbox = pygame.Rect(self.x, self.y, self.width-(image_width/2), self.height)
 
 
-board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+level_one = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -110,6 +113,8 @@ board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
 
 
+board = level_one
+
 def convert_index_to_coords(i, j):  # i = row, j = column
     return (j*20, i*20)
 
@@ -133,12 +138,12 @@ for row in range(len(board)):
 
 with open('YoungWonks/platformer_game/save.txt', 'r') as save_file:
     line = save_file.readline()
-    print(line)
+    # print(line)
     if line:
         data = line.split(' ')
-        print(data)
+        # print(data)
         for num in range(len(data)):
-            print(data[num])
+            # print(data[num])
             data[num] = int(data[num])
         character_rect = Character(data[0], data[1], data[2], data[3])
     else:
@@ -148,6 +153,8 @@ current_list = idle_right
 
 # if platform.collide_point(hitbox.left, hitbox.bottom+1) or platform.collide_point(hitbox.right, hitbox.bottom+1):
 #    DO NOT JUMP
+
+bg_rect = pygame.Rect(0, 0, WIDTH, HEIGHT)
 
 floor = pygame.Rect(0, HEIGHT, WIDTH, 1)
 left_wall = pygame.Rect(-1, 0, 1, HEIGHT)
@@ -256,6 +263,7 @@ while running:
 
 
     window.fill(BLACK)
+    window.blit(background, bg_rect)
 
     for platform in middle_grass_platforms:
         window.blit(middle_grass_image, platform)
