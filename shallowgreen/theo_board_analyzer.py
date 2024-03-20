@@ -80,9 +80,9 @@ class TheoBoardAnalyzer(BoardAnalyzer):
         """
         score = 0.0
         # material and risk (which is material in immediate danger) are equal weight
-        score += material
+        score += material * 4/5
         score += risk
-        score += safety
+        score += safety / 2
         score += center_controls/2
         if DEBUG_MOVE:
            print(f"m {material} r {risk} s {safety} c {center_controls}")

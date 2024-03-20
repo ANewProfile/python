@@ -52,7 +52,7 @@ def material(piece):
 
 
 def king_material():
-    return 20
+    return 10000
 
 
 class LocationHelper(object):
