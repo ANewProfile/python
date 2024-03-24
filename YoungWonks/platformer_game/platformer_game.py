@@ -234,6 +234,8 @@ def display_start_screen():
                                 return game(level_one)
                             else:
                                 return game(level_two)
+                        else:
+                            return game(level_one)
 
         window.fill(BLACK)
         window.blit(background, bg_rect)
