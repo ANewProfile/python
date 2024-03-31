@@ -1,5 +1,6 @@
 import pygame
 from math import dist
+from time import sleep
 pygame.init()
 
 FPS = 60
@@ -12,6 +13,7 @@ sprite = pygame.transform.scale(sprite, (120, 120))
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+RED = (255, 10, 10)
 
 class Character(pygame.Rect):
     def __init__(self, rect: pygame.Rect):
@@ -27,6 +29,12 @@ class Circle:
     def draw(self):
         pygame.draw.circle(window, self.color, self.center, self.radius)
 
+def show_text(msg, color, size):
+    fontobj = pygame.font.SysFont('freesans', size)
+    return fontobj.render(msg, False, color)
+
+game_over_text = show_text('Game Over!', RED, 50)
+
 sprite_rect = Character(pygame.Rect(0, 0, 120, 120))
 sprite_rect.hitbox.center = (WIDTH / 3, HEIGHT / 2)
 
@@ -41,10 +49,6 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
-    if dist(circle.center, sprite_rect.hitbox.center) < circle.radius:
-        print('Game over!')  # I don't know how to display text on the pygame window
-        running = False
     
     if right:
         sprite_rect.hitbox.move_ip(5, 0)
@@ -56,6 +60,11 @@ while running:
 
     window.blit(sprite, sprite_rect)
     circle.draw()
+    if dist(circle.center, sprite_rect.hitbox.center) < circle.radius:
+        window.blit(game_over_text, (WIDTH//2, HEIGHT//2))
+        pygame.display.update()
+        sleep(2)
+        running = False
 
     pygame.display.update()
 
