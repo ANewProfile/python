@@ -31,16 +31,16 @@ for image in range(1, 17):
 for image in range(1, 12):
     sprite = pygame.image.load(f'YoungWonks/santasprites/png/Run ({image}).png')
     sprite = pygame.transform.scale(sprite, (img_width, img_height))
-    idle_right.append(sprite)
+    run_right.append(sprite)
     sprite = pygame.transform.flip(sprite, True, False)
-    idle_left.append(sprite)
+    run_left.append(sprite)
 
 for image in range(1, 12):
     sprite = pygame.image.load(f'YoungWonks/santasprites/png/Slide ({image}).png')
     sprite = pygame.transform.scale(sprite, (img_width, img_height))
-    idle_right.append(sprite)
+    slide_right.append(sprite)
     sprite = pygame.transform.flip(sprite, True, False)
-    idle_left.append(sprite)
+    slide_left.append(sprite)
 
 
 class Character(pygame.Rect):
@@ -65,37 +65,37 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        # elif event.type == pygame.KEYDOWN:
-        #     if event.key == pygame.K_RIGHT:
-        #         character.moving_right = True
-        #         character.moving_left = False
-        #         character.sliding_left = False
-        #         character.sliding_right = False
-        #         current_list = run_right
-        #         current_sprite = 0
-        #     elif event.key == pygame.K_LEFT:
-        #         character.moving_right = False
-        #         character.moving_left = True
-        #         character.sliding_left = False
-        #         character.sliding_right = False
-        #         current_list = run_left
-        #         current_sprite = 0
-        #     elif event.key == pygame.K_SPACE:
-        #         if character.moving_right or character.sliding_right:
-        #             character.moving_right = False
-        #             character.moving_left = False
-        #             character.sliding_left = False
-        #             character.sliding_right = True
-        #             current_list = slide_right
-        #         elif character.moving_left or character.sliding_left:
-        #             character.moving_right = False
-        #             character.moving_left = False
-        #             character.sliding_left = True
-        #             character.sliding_right = False
-        #             current_list = slide_left
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RIGHT:
+                character.moving_right = True
+                character.moving_left = False
+                character.sliding_left = False
+                character.sliding_right = False
+                current_list = run_right
+                current_sprite = 0
+            elif event.key == pygame.K_LEFT:
+                character.moving_right = False
+                character.moving_left = True
+                character.sliding_left = False
+                character.sliding_right = False
+                current_list = run_left
+                current_sprite = 0
+            elif event.key == pygame.K_SPACE:
+                if character.moving_right or character.sliding_right:
+                    character.moving_right = False
+                    character.moving_left = False
+                    character.sliding_left = False
+                    character.sliding_right = True
+                    current_list = slide_right
+                elif character.moving_left or character.sliding_left:
+                    character.moving_right = False
+                    character.moving_left = False
+                    character.sliding_left = True
+                    character.sliding_right = False
+                    current_list = slide_left
                 
-        #         current_sprite = 0
-        #         slide_counter = 0
+                current_sprite = 0
+                slide_counter = 0
     
     
     if character.moving_right or character.sliding_right:
@@ -103,16 +103,16 @@ while running:
     elif character.moving_left or character.sliding_left:
         character.move_ip(-5, 0)
     
-    # if character.sliding_left or character.sliding_right:
-    #     if slide_counter < 15:
-    #         slide_counter += 1
-    #     elif slide_counter >= 15:
-    #         if character.sliding_left:
-    #             current_list = idle_left
-    #             character.sliding_left = False
-    #         else:
-    #             current_list = idle_right
-    #             character.sliding_right = False
+    if character.sliding_left or character.sliding_right:
+        if slide_counter < 15:
+            slide_counter += 1
+        elif slide_counter >= 15:
+            if character.sliding_left:
+                current_list = idle_left
+                character.sliding_left = False
+            else:
+                current_list = idle_right
+                character.sliding_right = False
     
     current_sprite += 1
     window.fill(BLACK)
