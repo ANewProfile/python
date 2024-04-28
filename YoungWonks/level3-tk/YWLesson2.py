@@ -20,14 +20,14 @@ def check_guess():
                 impossible_list = list('impossible')
                 shuffle(impossible_list)
                 words.append(''.join(impossible_list))
-                words.remove(word.get())
+                # words.remove(word.get())
                 word.set(choice(words))
                 fake_word.set(randomize_word(word.get()))
                 messagebox.showinfo('You got the answer correct!', 'Nice job! You guessed the answer correctly!')
             else:
                 messagebox.showinfo('You finished everything!', 'Congratulations! You finished all the words!')
     else:
-        messagebox.showerror('You got the answer incorrect!', 'Nice try! You guessed the answer incoorectly! Try again to move on!')        
+        messagebox.showerror('You got the answer incorrect!', 'Nice try! You guessed the answer incorectly! Try again to move on!')        
     
     guess.delete(0, END)
 
@@ -35,7 +35,8 @@ def check_guess():
 root = Tk()
 
 finished = False
-words = ['word', 'letter', 'sentence', 'space', 'comment', 'terminal', 'comments', 'comma', 'period']
+# words = ['word', 'letter', 'sentence', 'space', 'comment', 'terminal', 'comments', 'comma', 'period']
+words = ['hello', 'world']
 word = StringVar()
 word.set(choice(words))
 fake_word = StringVar()
