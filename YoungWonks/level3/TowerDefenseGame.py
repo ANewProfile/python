@@ -1,4 +1,5 @@
 import sqlite3
+import pygame
 
 
 conn = sqlite3.connect('TowerDefense.db')
@@ -68,9 +69,63 @@ class Game:
             raise Exception('Not enough money. PLEASE ADD SOMETHING TO THIS LINE THAT MAKES THIS LOOK BETTER THAN AN ERROR')
     
     def spawn_enemy(self, type, location):
-        # enemy = Enemy
-        # self.enemies.append(enemy)
-        raise Exception('Please put some code in here. It would be much appreciated!')
+        if type == 'triangle':
+            enemy = Enemy(1, 3, 1, location)
+        elif type == 'square':
+            enemy = Enemy(5, 1, 3, location)
+        elif type == 'circle':
+            enemy = Enemy(5, 3, 7, location)
+
+        self.enemies.append(enemy)
+        # raise Exception('Please put some code in here. It would be much appreciated!')
         
-    def spawn_ally(self, location, ally):
-        raise Exception('Please put some code in here. It would be much appreciated!')
+    def spawn_ally(self, type, location):
+        if type == 'basic':
+            ally = Ally(1, 2, 1, location)
+        elif type == 'intermediate':
+            ally = Ally(3, 5, 3, location)
+        elif type == 'advanced':
+            ally = Ally(6, 10, 5, location)
+        
+        self.allies.append(ally)
+        # raise Exception('Please put some code in here. It would be much appreciated!')
+
+map = [
+    [0, 0, 2, 0, 0, 0, 0, 0],
+    [0, 0, 1, 1, 0, 0, 0, 0],
+    [0, 0, 0, 1, 0, 0, 0, 0],
+    [1, 1, 1, 1, 0, 0, 1, 3],
+    [1, 0, 0, 0, 0, 1, 1, 0],
+    [1, 1, 0, 1, 1, 1, 0, 0],
+    [0, 1, 0, 1, 0, 0, 0, 0],
+    [0, 1, 1, 1, 0, 0, 0, 0]
+]
+
+WIDTH = 1080
+HEIGHT = 720
+window = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption('Tower Defense')
+
+
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+    
+    
+    window.fill('#e3d9c4')
+    for row in range(len(map)):
+        for tile in range(len(map[row])):
+            if map[row][tile] == 0:
+                pygame.draw.rect(window, (0, 0, 0), (tile * 90, row * 90, 90, 90))
+            elif map[row][tile] == 1:
+                pygame.draw.rect(window, (0, 0, 255), (tile * 90, row * 90, 90, 90))
+            elif map[row][tile] == 2:
+                pygame.draw.rect(window, (0, 255, 0), (tile * 90, row * 90, 90, 90))
+            elif map[row][tile] == 3:
+                pygame.draw.rect(window, (255, 0, 0), (tile * 90, row * 90, 90, 90))
+    
+    pygame.display.update()
+
+pygame.quit()
