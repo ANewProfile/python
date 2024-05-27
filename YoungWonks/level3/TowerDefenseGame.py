@@ -39,9 +39,18 @@ intermediate_data = c.fetchone()
 c.execute("SELECT * FROM allies WHERE name = 'Advanced'")
 advanced_data = c.fetchone()
 
+c.execute("SELECT * FROM enemies WHERE name = 'Triangle'")
+triangle_data = c.fetchone()
+
+c.execute("SELECT * FROM enemies WHERE name = 'Square'")
+square_data = c.fetchone()
+
+c.execute("SELECT * FROM enemies WHERE name = 'Circle'")
+circle_data = c.fetchone()
+
 
 class Ally:
-    def __init__(self, power, cost, range, sell, location):
+    def __init__(self, power, range, cost, sell, location):
         self.power = power
         self.range = range
         self.cost = cost
@@ -54,6 +63,9 @@ class Ally:
     def sell_ally(self, game):
         game.deposit(self.sell)
         game.allies.remove(self)
+    
+    def draw(self):
+        pygame.draw.rect(window, '#ff690a', ((self.location[1]*90)+10, (self.location[0]*90)+10, 70, 70))
         
 class Enemy:
     def __init__(self, health, speed, points, location):
@@ -63,11 +75,11 @@ class Enemy:
         self.location = location
 
     def move(self, game):
-        print("location is",self.location[0],self.location[1])
+        # print("location is",self.location[0],self.location[1])
         current_tile = game.linked_map[(self.location[0], self.location[1])]
-        print("current tile", current_tile.type)
+        # print("current tile", current_tile.type)
         next_tile = game.linked_map[(self.location[0], self.location[1])].next
-        print(next_tile.location)
+        # print(next_tile.location)
         # print(next_tile.type)
         if next_tile.type == 3:
             game.lives -= 1
@@ -114,7 +126,7 @@ class Shop:
     def __init__(self):
         c.execute("SELECT * FROM allies")
         self.allies = c.fetchall()
-        print(self.allies)
+        # print(self.allies)
         self.basic = pygame.Rect(750, 50, 30, 70)
         self.intermediate = pygame.Rect(820, 50, 30, 70)
         self.advanced = pygame.Rect(890, 50, 30, 70)
@@ -153,36 +165,32 @@ class Game:
     def buy(self, ally):
         if self.points >= ally.cost:
             self.allies.append(ally)
-            self.spawn_ally(ally.location, ally)
+            self.spawn_ally(ally, ally.location)
             self.points -= ally.cost
         else:
+            print(self.points, ally.cost)
             raise Exception('Not enough money. PLEASE ADD SOMETHING TO THIS LINE THAT MAKES THIS LOOK BETTER THAN AN ERROR')
     
-    def spawn_enemy(self, type, location):  # TODO: Numbers update with database
+    def spawn_enemy(self, type, location):
         if type == 'triangle':
-            c.execute("SELECT * FROM enemies WHERE name = 'Triangle'")
-            triangle_data = c.fetchone()
             enemy = Enemy(triangle_data[0], triangle_data[1], triangle_data[2], location)
         elif type == 'square':
-            c.execute("SELECT * FROM enemies WHERE name = 'Square'")
-            square_data = c.fetchone()
             enemy = Enemy(square_data[0], square_data[1], square_data[2], location)
         elif type == 'circle':
-            c.execute("SELECT * FROM enemies WHERE name = 'Circle'")
-            circle_data = c.fetchone()
             enemy = Enemy(circle_data[0], circle_data[1], circle_data[2], location)
 
-        print(enemy.location)
+        # print(enemy.location)
         self.enemies.append(enemy)
         # raise Exception('Please put some code in here. It would be much appreciated!')
         
-    def spawn_ally(self, type, location):  # TODO: Numbers update with database
-        if type == 'basic':
-            ally = Ally(basic_data[1], basic_data[2], basic_data[3], basic_data[4], location)
-        elif type == 'intermediate':
-            ally = Ally(intermediate_data[1], intermediate_data[2], intermediate_data[3], intermediate_data[4], location)
-        elif type == 'advanced':
-            ally = Ally(advanced_data[1], advanced_data[2], advanced_data[3], advanced_data[4], location)
+    def spawn_ally(self, ally, location):
+        # print('ally type', type)
+        # if type == 'Basic':
+        #     ally = Ally(basic_data[1], basic_data[2], basic_data[3], basic_data[4], location)
+        # elif type == 'Intermediate':
+        #     ally = Ally(intermediate_data[1], intermediate_data[2], intermediate_data[3], intermediate_data[4], location)
+        # elif type == 'Advanced':
+        #     ally = Ally(advanced_data[1], advanced_data[2], advanced_data[3], advanced_data[4], location)
         
         self.allies.append(ally)
         # raise Exception('Please put some code in here. It would be much appreciated!')
@@ -258,16 +266,16 @@ for row_index, row in enumerate(set_map):
     for tile_index, tile in enumerate(row):
         if tile == 2:
             start_pos = (row_index, tile_index)
-            print(start_pos)
+            # print(start_pos)
         elif tile == 3:
             end_pos = (row_index, tile_index)
 
 linked_map = link_tiles(set_map, start_pos)
-for loc,tile in linked_map.items():
-    if tile is None:
-        print("map loc", loc, "has none tile")
-    else:
-        print("map loc", loc, "has tile", tile.type, "next is", tile.next, "previous is", tile.previous)
+# for loc,tile in linked_map.items():
+#     if tile is None:
+#         print("map loc", loc, "has none tile")
+#     else:
+#         print("map loc", loc, "has tile", tile.type, "next is", tile.next, "previous is", tile.previous)
     
 
 WIDTH = 1080
@@ -284,7 +292,7 @@ shop = Shop()
 
 next_enemy = 1
 spawn_enemy = False
-game.spawn_enemy('triangle', start_pos)
+spawning_ally = (False, None)
 clock = pygame.time.Clock()
 frames = 0
 running = True
@@ -300,11 +308,34 @@ while running:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = event.pos
             if shop.basic.collidepoint(mouse_pos):
-                game.buy(Ally(basic_data[1], basic_data[2], basic_data[3], basic_data[4], location))
+                spawning_ally = (True, 'Basic')
+                # game.buy(Ally(basic_data[1], basic_data[2], basic_data[3], basic_data[4], location))
+                # print("basic")
             elif shop.intermediate.collidepoint(mouse_pos):
-                game.buy(Ally(intermediate_data[1], intermediate_data[2], intermediate_data[3], intermediate_data[4], location))
+                spawning_ally = (True, 'Intermediate')
+                # game.buy(Ally(intermediate_data[1], intermediate_data[2], intermediate_data[3], intermediate_data[4], location))
+                # print("intermediate")
             elif shop.advanced.collidepoint(mouse_pos):
-                game.buy(Ally(advanced_data[1], advanced_data[2], advanced_data[3], advanced_data[4], location))
+                spawning_ally = (True, 'Advanced')
+                # game.buy(Ally(advanced_data[1], advanced_data[2], advanced_data[3], advanced_data[4], location))
+                # print("advanced")
+            else:
+                if spawning_ally[0]:
+                    print('spawning ally')
+                    ally_type = spawning_ally[1]
+                    spawning_ally = (False, None)
+                    if mouse_pos[0] < 720:
+                        loc_x = mouse_pos[0] // 90
+                        loc_y = mouse_pos[1] // 90
+                        location = (loc_y, loc_x)
+                        if ally_type == 'Basic':
+                            game.buy(Ally(basic_data[1], basic_data[2], basic_data[3], basic_data[4], location))
+                        elif ally_type == 'Intermediate':
+                            game.buy(Ally(intermediate_data[1], intermediate_data[2], intermediate_data[3], intermediate_data[4], location))
+                        elif ally_type == 'Advanced':
+                            game.buy(Ally(advanced_data[1], advanced_data[2], advanced_data[3], advanced_data[4], location))
+                        
+                    
             
     
     if (time.time() - start_time) >= 4:
@@ -343,6 +374,9 @@ while running:
     
     for enemy in game.enemies:
         enemy.draw()
+    
+    for ally in game.allies:
+        ally.draw()
     
     pygame.display.update()
     
