@@ -66,6 +66,7 @@ class Ally:
     
     def draw(self):
         pygame.draw.rect(window, '#ff690a', ((self.location[1]*90)+10, (self.location[0]*90)+10, 70, 70))
+        # self.location[0] is the y axis
         
 class Enemy:
     def __init__(self, health, speed, points, location):
@@ -151,9 +152,10 @@ class Shop:
                     pygame.draw.rect(window, (255, 0, 0), self.advanced, width=3)
 
 class Game:
-    def __init__(self, linked_map, set_map, points, allies, enemies, lives):
+    def __init__(self, linked_map, set_map, avail_locs, points, allies, enemies, lives):
         self.linked_map = linked_map
         self.set_map = set_map
+        self.avail_locs = avail_locs
         self.points = points
         self.allies = allies
         self.enemies = enemies
@@ -167,6 +169,7 @@ class Game:
             self.allies.append(ally)
             self.spawn_ally(ally, ally.location)
             self.points -= ally.cost
+            self.avail_locs.remove(ally.location)
         else:
             print(self.points, ally.cost)
             raise Exception('Not enough money. PLEASE ADD SOMETHING TO THIS LINE THAT MAKES THIS LOOK BETTER THAN AN ERROR')
@@ -225,7 +228,7 @@ def link_tiles(map, start_pos):
         current_pos = next_pos
         current_type = map[current_pos[0]][current_pos[1]]
     
-    return path_tiles    
+    return path_tiles
     
 
 # def link_tiles(map):
@@ -271,6 +274,12 @@ for row_index, row in enumerate(set_map):
             end_pos = (row_index, tile_index)
 
 linked_map = link_tiles(set_map, start_pos)
+avail_locs = []
+for row_index, row in enumerate(set_map):
+    for tile_index, tile in enumerate(row):
+        if tile == 0:
+            avail_locs.append((tile_index, row_index))
+print(avail_locs)
 # for loc,tile in linked_map.items():
 #     if tile is None:
 #         print("map loc", loc, "has none tile")
@@ -286,7 +295,7 @@ FPS = 20
 
 # clear_tables_data()
 # create_database()
-game = Game(linked_map, set_map, 9, [], [], 3)
+game = Game(linked_map, set_map, avail_locs, 9, [], [], 3)
 shop = Shop()
 
 
@@ -323,17 +332,19 @@ while running:
                 if spawning_ally[0]:
                     print('spawning ally')
                     ally_type = spawning_ally[1]
-                    spawning_ally = (False, None)
                     if mouse_pos[0] < 720:
                         loc_x = mouse_pos[0] // 90
                         loc_y = mouse_pos[1] // 90
                         location = (loc_y, loc_x)
-                        if ally_type == 'Basic':
-                            game.buy(Ally(basic_data[1], basic_data[2], basic_data[3], basic_data[4], location))
-                        elif ally_type == 'Intermediate':
-                            game.buy(Ally(intermediate_data[1], intermediate_data[2], intermediate_data[3], intermediate_data[4], location))
-                        elif ally_type == 'Advanced':
-                            game.buy(Ally(advanced_data[1], advanced_data[2], advanced_data[3], advanced_data[4], location))
+                        if spawning_ally[0] and location in game.avail_locs:
+                            if ally_type == 'Basic':
+                                game.buy(Ally(basic_data[1], basic_data[2], basic_data[3], basic_data[4], location))
+                            elif ally_type == 'Intermediate':
+                                game.buy(Ally(intermediate_data[1], intermediate_data[2], intermediate_data[3], intermediate_data[4], location))
+                            elif ally_type == 'Advanced':
+                                game.buy(Ally(advanced_data[1], advanced_data[2], advanced_data[3], advanced_data[4], location))
+                    
+                    spawning_ally = (False, None)
                         
                     
             
