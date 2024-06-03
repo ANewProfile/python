@@ -64,8 +64,15 @@ class Ally:
         game.deposit(self.sell)
         game.allies.remove(self)
     
-    def draw(self):
-        pygame.draw.rect(window, '#ff690a', ((self.location[1]*90)+10, (self.location[0]*90)+10, 70, 70))
+    def draw(self, type):
+        if type == 'Basic':
+            pygame.draw.rect(window, (0, 255, 0), ((self.location[1]*90)+20, (self.location[0]*90)+10, 50, 70))
+        elif type == 'Intermediate':
+            pygame.draw.rect(window, (0, 0, 255), ((self.location[1]*90)+20, (self.location[0]*90)+10, 50, 70))
+        elif type == 'Advanced':
+            pygame.draw.rect(window, (255, 0, 0), ((self.location[1]*90)+20, (self.location[0]*90)+10, 50, 70))
+
+        # pygame.draw.rect(window, '#ff690a', ((self.location[1]*90)+10, (self.location[0]*90)+10, 70, 70))
         # self.location[0] is the y axis
         
 class Enemy:
@@ -265,21 +272,20 @@ set_map = [
     [0, 1, 1, 1, 0, 0, 0, 0]
 ]
 
+avail_locs = []
 for row_index, row in enumerate(set_map):
     for tile_index, tile in enumerate(row):
-        if tile == 2:
+        if tile == 0:
+            print(f'appending ({tile_index}, {row_index}) to avail_locs')
+            avail_locs.append((tile_index, row_index))
+        elif tile == 2:
             start_pos = (row_index, tile_index)
             # print(start_pos)
         elif tile == 3:
             end_pos = (row_index, tile_index)
 
 linked_map = link_tiles(set_map, start_pos)
-avail_locs = []
-for row_index, row in enumerate(set_map):
-    for tile_index, tile in enumerate(row):
-        if tile == 0:
-            avail_locs.append((tile_index, row_index))
-print(avail_locs)
+# print(avail_locs)
 # for loc,tile in linked_map.items():
 #     if tile is None:
 #         print("map loc", loc, "has none tile")
@@ -330,7 +336,7 @@ while running:
                 # print("advanced")
             else:
                 if spawning_ally[0]:
-                    print('spawning ally')
+                    # print('spawning ally')
                     ally_type = spawning_ally[1]
                     if mouse_pos[0] < 720:
                         loc_x = mouse_pos[0] // 90
@@ -343,6 +349,9 @@ while running:
                                 game.buy(Ally(intermediate_data[1], intermediate_data[2], intermediate_data[3], intermediate_data[4], location))
                             elif ally_type == 'Advanced':
                                 game.buy(Ally(advanced_data[1], advanced_data[2], advanced_data[3], advanced_data[4], location))
+                        elif location not in game.avail_locs:
+                            print('location not in avail_locs')
+                            print('avail locs:', game.avail_locs)
                     
                     spawning_ally = (False, None)
                         
@@ -387,7 +396,12 @@ while running:
         enemy.draw()
     
     for ally in game.allies:
-        ally.draw()
+        if ally.power == basic_data[1]:
+            ally.draw('Basic')
+        elif ally.power == intermediate_data[1]:
+            ally.draw('Intermediate')
+        elif ally.power == advanced_data[1]:
+            ally.draw('Advanced')
     
     pygame.display.update()
     
