@@ -2,6 +2,8 @@ import sqlite3
 import pygame
 pygame.init()
 import time
+from math import dist
+from random import choice
 
 
 conn = sqlite3.connect('TowerDefense.db')
@@ -50,12 +52,43 @@ circle_data = c.fetchone()
 
 
 class Ally:
-    def __init__(self, power, range, cost, sell, location):
+    def __init__(self, power, range, cost, sell, location, attack_pattern = 1):
         self.power = power
         self.range = range
         self.cost = cost
         self.sell = sell
         self.location = location
+        self.attack_pattern = attack_pattern
+    
+    def get_target(self, avail_enemies):
+        num_avail_enemies = len(avail_enemies)
+        if num_avail_enemies == 1:
+            return avail_enemies[0]
+        else:
+            if self.attack_pattern == 1:
+                return avail_enemies[0]
+            elif self.attack_pattern == 2:
+                return choice(avail_enemies
+            elif self.attack_pattern == 3:
+                return avail_enemies[0]
+            elif self.attack_pattern == 4:
+                most_hp = None
+                for enemy in avail_enemies:
+                    if most_hp:
+                        if enemy.health > most_hp.health:
+                            most_hp = enemy
+                    else:
+                        most_hp = enemy
+                return most_hp
+            elif self.attack_pattern == 5:
+                least_hp = None
+                for enemy in avail_enemies:
+                    if least_hp:
+                        if enemy.health < least_hp.health:
+                            least_hp = enemy
+                    else:
+                        least_hp = enemy
+                return least_hp
     
     def attack(self, enemy):
         enemy.take_damage(self.power)
@@ -365,6 +398,7 @@ while running:
     if (time.time() - start_time) >= 4:
         spawn_enemy = True
         start_time = time.time()
+        attack_cycle = True
     
     for enemy in game.enemies:
         speed = enemy.speed
@@ -381,6 +415,11 @@ while running:
         
         spawn_enemy = False
         next_enemy += 1
+    
+    if attack_cycle:
+        for ally in game.allies:
+            avail_enemies = [enemy for enemy in game.enemies if dist(ally.location, enemy.location) <= ally.range]
+            target = ally.get_target
             
     
     window.fill('#e3d9c4')
