@@ -275,10 +275,14 @@ set_map = [
 avail_locs = []
 for row_index, row in enumerate(set_map):
     for tile_index, tile in enumerate(row):
+        # print(f'location ({tile_index}, {row_index}) is type {tile}')
         if tile == 0:
             print(f'appending ({tile_index}, {row_index}) to avail_locs')
-            avail_locs.append((tile_index, row_index))
-        elif tile == 2:
+            avail_locs.append((row_index, tile_index))
+        else:
+            print(f'({tile_index}, {row_index}) not appended because it is type {tile}')
+
+        if tile == 2:
             start_pos = (row_index, tile_index)
             # print(start_pos)
         elif tile == 3:
@@ -350,8 +354,8 @@ while running:
                             elif ally_type == 'Advanced':
                                 game.buy(Ally(advanced_data[1], advanced_data[2], advanced_data[3], advanced_data[4], location))
                         elif location not in game.avail_locs:
-                            print('location not in avail_locs')
-                            print('avail locs:', game.avail_locs)
+                            print(f'{location} not in avail_locs')
+                            # print('avail locs:', game.avail_locs)
                     
                     spawning_ally = (False, None)
                         
