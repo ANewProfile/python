@@ -17,9 +17,9 @@ def create_database():
     c.execute("INSERT INTO allies VALUES ('Intermediate', 3, 4, 5, 3)")
     c.execute("INSERT INTO allies VALUES ('Advanced', 6, 6, 10, 5)")
     
-    c.execute("INSERT INTO enemies VALUES ('Triangle', 1, 1, 1)")
-    c.execute("INSERT INTO enemies VALUES ('Square', 5, 1.5, 3)")
-    c.execute("INSERT INTO enemies VALUES ('Circle', 5, 1, 7)")
+    c.execute("INSERT INTO enemies VALUES ('Triangle', 8, 1, 1)")
+    c.execute("INSERT INTO enemies VALUES ('Square', 14, 1.5, 3)")
+    c.execute("INSERT INTO enemies VALUES ('Circle', 20, 1, 7)")
     
     conn.commit()
 
@@ -64,14 +64,30 @@ class Ally:
         num_avail_enemies = len(avail_enemies)
         if num_avail_enemies == 1:
             return avail_enemies[0]
+        elif num_avail_enemies == 0:
+            return None
         else:
-            if self.attack_pattern == 1:
-                return avail_enemies[0]
-            elif self.attack_pattern == 2:
-                return choice(avail_enemies
-            elif self.attack_pattern == 3:
-                return avail_enemies[0]
-            elif self.attack_pattern == 4:
+            if self.attack_pattern == 1:  # O(n)
+                closest_enemy = None
+                for enemy in avail_enemies:
+                    if closest_enemy:
+                        if dist(self.location, enemy.location) < dist(self.location, closest_enemy.location):
+                            closest_enemy = enemy
+                    else:
+                        closest_enemy = enemy
+                return closest_enemy
+            elif self.attack_pattern == 2:  # O(n)
+                farthest_enemy = None
+                for enemy in avail_enemies:
+                    if farthest_enemy:
+                        if dist(self.location, enemy.location) > dist(self.location, farthest_enemy.location):
+                            farthest_enemy = enemy
+                    else:
+                        farthest_enemy = enemy
+                return farthest_enemy
+            elif self.attack_pattern == 3:  # O(1)
+                return choice(avail_enemies)
+            elif self.attack_pattern == 4:  # O(n)
                 most_hp = None
                 for enemy in avail_enemies:
                     if most_hp:
@@ -80,7 +96,7 @@ class Ally:
                     else:
                         most_hp = enemy
                 return most_hp
-            elif self.attack_pattern == 5:
+            elif self.attack_pattern == 5:  # O(n)
                 least_hp = None
                 for enemy in avail_enemies:
                     if least_hp:
@@ -216,11 +232,11 @@ class Game:
     
     def spawn_enemy(self, type, location):
         if type == 'triangle':
-            enemy = Enemy(triangle_data[0], triangle_data[1], triangle_data[2], location)
+            enemy = Enemy(triangle_data[1], triangle_data[2], triangle_data[3], location)
         elif type == 'square':
-            enemy = Enemy(square_data[0], square_data[1], square_data[2], location)
+            enemy = Enemy(square_data[1], square_data[2], square_data[3], location)
         elif type == 'circle':
-            enemy = Enemy(circle_data[0], circle_data[1], circle_data[2], location)
+            enemy = Enemy(circle_data[1], circle_data[2], circle_data[3], location)
 
         # print(enemy.location)
         self.enemies.append(enemy)
@@ -341,10 +357,11 @@ FPS = 20
 game = Game(linked_map, set_map, avail_locs, 9, [], [], 3)
 shop = Shop()
 
-
 next_enemy = 1
 spawn_enemy = False
 spawning_ally = (False, None)
+attack_cycle = False
+
 clock = pygame.time.Clock()
 frames = 0
 running = True
@@ -395,20 +412,24 @@ while running:
                     
             
     
-    if (time.time() - start_time) >= 4:
+    if (time.time() - start_time) >= 2:
         spawn_enemy = True
         start_time = time.time()
         attack_cycle = True
     
     for enemy in game.enemies:
-        speed = enemy.speed
-        if frames % (speed * FPS) == 0:
-            enemy.move(game)
+        if enemy.health <= 0:
+            game.enemies.remove(enemy)
+            game.deposit(enemy.points)
+        else:
+            speed = enemy.speed
+            if frames % (speed * FPS) == 0:
+                enemy.move(game)
     
     if spawn_enemy:
-        if next_enemy // 20 == 0:
+        if next_enemy // 7 == 0:
             game.spawn_enemy('triangle', start_pos)
-        elif next_enemy // 20 == 1:
+        elif next_enemy // 10 == 1:
             game.spawn_enemy('square', start_pos)
         else:
             game.spawn_enemy('circle', start_pos)
@@ -417,12 +438,16 @@ while running:
         next_enemy += 1
     
     if attack_cycle:
-        for ally in game.allies:
+        for ally in game.allies:  # total time complexity: O(n^2)
             avail_enemies = [enemy for enemy in game.enemies if dist(ally.location, enemy.location) <= ally.range]
-            target = ally.get_target
+            target = ally.get_target(avail_enemies)
+            if target:
+                ally.attack(target)
+        attack_cycle = False
             
     
     window.fill('#e3d9c4')
+    
     for row in range(len(game.set_map)):
         for tile in range(len(game.set_map[row])):
             if game.set_map[row][tile] == 0:
