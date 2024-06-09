@@ -1,3 +1,4 @@
+# https://wiki.python.org/moin/TimeComplexity
 import sqlite3
 import pygame
 pygame.init()
@@ -27,6 +28,15 @@ def clear_tables_data():
     c.execute("DELETE FROM allies")
     c.execute("DELETE FROM enemies")
     conn.commit()
+
+def create_save(game):
+    c.execute("CREATE TABLE IF NOT EXISTS linkedMap (x INTEGER, y INTEGER, prevx INTEGER, prevy INTEGER, nextx INTEGER, nexty INTEGER)")
+    c.execute("CREATE TABLE IF NOT EXISTS setMap (row INTEGER, column INTEGER, type INTEGER")
+    c.execute("CREATE TABLE IF NOT EXISTS availLocs (x INTEGER, y INTEGER)")
+    c.execute("CREATE TABLE IF NOT EXISTS points (value INTEGER)")
+    c.execute("CREATE TABLE IF NOT EXISTS allies (x INTEGER, y INTEGER, type TEXT)")
+    c.execute("CREATE TABLE IF NOT EXISTS enemies (x INTEGER, y INTEGER, health INTEGER, type TEXT)")
+    # linked_map, set_map, avail_locs, points, allies, enemies
 
 def get_text(msg, size, color):
     fontobj = pygame.font.SysFont('freesans', size)
@@ -108,10 +118,6 @@ class Ally:
     
     def attack(self, enemy):
         enemy.take_damage(self.power)
-    
-    def sell_ally(self, game):
-        game.deposit(self.sell)
-        game.allies.remove(self)
     
     def draw(self, type):
         if type == 'Basic':
@@ -208,10 +214,11 @@ class Shop:
                     pygame.draw.rect(window, (255, 0, 0), self.advanced, width=3)
 
 class Game:
-    def __init__(self, linked_map, set_map, avail_locs, points, allies, enemies, lives):
+    def __init__(self, linked_map, set_map, avail_locs, points, allies, enemies, lives, occupied_locs=[]):
         self.linked_map = linked_map
         self.set_map = set_map
         self.avail_locs = avail_locs
+        self.occupied_locs = occupied_locs
         self.points = points
         self.allies = allies
         self.enemies = enemies
@@ -226,6 +233,7 @@ class Game:
             self.spawn_ally(ally, ally.location)
             self.points -= ally.cost
             self.avail_locs.remove(ally.location)
+            self.occupied_locs.append(ally.location)
         else:
             print(self.points, ally.cost)
             raise Exception('Not enough money. PLEASE ADD SOMETHING TO THIS LINE THAT MAKES THIS LOOK BETTER THAN AN ERROR')
@@ -253,6 +261,12 @@ class Game:
         
         self.allies.append(ally)
         # raise Exception('Please put some code in here. It would be much appreciated!')
+
+    def sell_ally(self, ally):
+        self.deposit(ally.sell)
+        self.allies.remove(ally)
+        self.occupied_locs.remove(ally.location)
+        self.avail_locs.append(ally.location)
 
 def link_tiles(map, start_pos):
     path_tiles = {}
@@ -375,40 +389,50 @@ while running:
             if event.key == pygame.K_SPACE:
                 spawn_enemy = True
         elif event.type == pygame.MOUSEBUTTONDOWN:
+            button = event.button
             mouse_pos = event.pos
-            if shop.basic.collidepoint(mouse_pos):
-                spawning_ally = (True, 'Basic')
-                # game.buy(Ally(basic_data[1], basic_data[2], basic_data[3], basic_data[4], location))
-                # print("basic")
-            elif shop.intermediate.collidepoint(mouse_pos):
-                spawning_ally = (True, 'Intermediate')
-                # game.buy(Ally(intermediate_data[1], intermediate_data[2], intermediate_data[3], intermediate_data[4], location))
-                # print("intermediate")
-            elif shop.advanced.collidepoint(mouse_pos):
-                spawning_ally = (True, 'Advanced')
-                # game.buy(Ally(advanced_data[1], advanced_data[2], advanced_data[3], advanced_data[4], location))
-                # print("advanced")
-            else:
-                if spawning_ally[0]:
-                    # print('spawning ally')
-                    ally_type = spawning_ally[1]
-                    if mouse_pos[0] < 720:
-                        loc_x = mouse_pos[0] // 90
-                        loc_y = mouse_pos[1] // 90
-                        location = (loc_y, loc_x)
-                        if spawning_ally[0] and location in game.avail_locs:
-                            if ally_type == 'Basic':
-                                game.buy(Ally(basic_data[1], basic_data[2], basic_data[3], basic_data[4], location))
-                            elif ally_type == 'Intermediate':
-                                game.buy(Ally(intermediate_data[1], intermediate_data[2], intermediate_data[3], intermediate_data[4], location))
-                            elif ally_type == 'Advanced':
-                                game.buy(Ally(advanced_data[1], advanced_data[2], advanced_data[3], advanced_data[4], location))
-                        elif location not in game.avail_locs:
-                            print(f'{location} not in avail_locs')
-                            # print('avail locs:', game.avail_locs)
-                    
-                    spawning_ally = (False, None)
+            if button == 1:
+                if shop.basic.collidepoint(mouse_pos):
+                    spawning_ally = (True, 'Basic')
+                    # game.buy(Ally(basic_data[1], basic_data[2], basic_data[3], basic_data[4], location))
+                    # print("basic")
+                elif shop.intermediate.collidepoint(mouse_pos):
+                    spawning_ally = (True, 'Intermediate')
+                    # game.buy(Ally(intermediate_data[1], intermediate_data[2], intermediate_data[3], intermediate_data[4], location))
+                    # print("intermediate")
+                elif shop.advanced.collidepoint(mouse_pos):
+                    spawning_ally = (True, 'Advanced')
+                    # game.buy(Ally(advanced_data[1], advanced_data[2], advanced_data[3], advanced_data[4], location))
+                    # print("advanced")
+                else:
+                    if spawning_ally[0]:
+                        # print('spawning ally')
+                        ally_type = spawning_ally[1]
+                        if mouse_pos[0] < 720:
+                            loc_x = mouse_pos[0] // 90
+                            loc_y = mouse_pos[1] // 90
+                            location = (loc_y, loc_x)
+                            if spawning_ally[0] and location in game.avail_locs:
+                                if ally_type == 'Basic':
+                                    game.buy(Ally(basic_data[1], basic_data[2], basic_data[3], basic_data[4], location))
+                                elif ally_type == 'Intermediate':
+                                    game.buy(Ally(intermediate_data[1], intermediate_data[2], intermediate_data[3], intermediate_data[4], location))
+                                elif ally_type == 'Advanced':
+                                    game.buy(Ally(advanced_data[1], advanced_data[2], advanced_data[3], advanced_data[4], location))
+                            elif location not in game.avail_locs:
+                                print(f'{location} not in avail_locs')
+                                # print('avail locs:', game.avail_locs)
                         
+                        spawning_ally = (False, None)
+            elif button == 3:
+                if mouse_pos[0] < 720:
+                    loc_x = mouse_pos[0] // 90
+                    loc_y = mouse_pos[1] // 90
+                    location = (loc_y, loc_x)
+                    if location in game.occupied_locs:
+                        for ally in game.allies:
+                            if ally.location == location:
+                                game.sell_ally(ally)
                     
             
     
