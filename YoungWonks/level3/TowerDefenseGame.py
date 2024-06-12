@@ -29,25 +29,6 @@ def clear_tables_data():
     c.execute("DELETE FROM enemies")
     conn.commit()
 
-def create_save(game):
-    c.execute("CREATE TABLE IF NOT EXISTS linkedMap (x INTEGER, y INTEGER, prevx INTEGER, prevy INTEGER, nextx INTEGER, nexty INTEGER)")
-    c.execute("CREATE TABLE IF NOT EXISTS setMap (row INTEGER, column INTEGER, type INTEGER")
-    c.execute("CREATE TABLE IF NOT EXISTS availLocs (x INTEGER, y INTEGER)")
-    c.execute("CREATE TABLE IF NOT EXISTS points (value INTEGER)")
-    c.execute("CREATE TABLE IF NOT EXISTS allies (x INTEGER, y INTEGER, type TEXT)")
-    c.execute("CREATE TABLE IF NOT EXISTS enemies (x INTEGER, y INTEGER, health INTEGER, type TEXT)")
-    
-    slinked_map: dict = game.linked_map
-    sset_map: list = game.set_map
-    savail_locs: list = game.avail_locs
-    spoints: int = game.points
-    sallies: list = game.allies
-    senemies: list = game.enemies
-    
-    for loc, tile_class in slinked_map.items():
-        c.execute("INSERT INTO linkedMap VALUES (?, ?, ?, ?, ?, ?)", (loc[0], loc[1], tile_class.previous.location[0], tile_class.previous.location[1], tile_class.next.location[0], tile_class.next.location[1]))
-    # linked_map, set_map, avail_locs, points, allies, enemies
-
 def get_text(msg, size, color):
     fontobj = pygame.font.SysFont('freesans', size)
     return fontobj.render(msg, False, color)
@@ -69,6 +50,48 @@ square_data = c.fetchone()
 
 c.execute("SELECT * FROM enemies WHERE name = 'Circle'")
 circle_data = c.fetchone()
+
+def create_save(game):
+    c.execute("CREATE TABLE IF NOT EXISTS linkedMap (x INTEGER, y INTEGER, prevx INTEGER, prevy INTEGER, nextx INTEGER, nexty INTEGER)")
+    c.execute("CREATE TABLE IF NOT EXISTS setMap (row INTEGER, column INTEGER, type INTEGER")
+    c.execute("CREATE TABLE IF NOT EXISTS availLocs (x INTEGER, y INTEGER)")
+    c.execute("CREATE TABLE IF NOT EXISTS points (value INTEGER)")
+    c.execute("CREATE TABLE IF NOT EXISTS allies (x INTEGER, y INTEGER, type TEXT)")
+    c.execute("CREATE TABLE IF NOT EXISTS enemies (x INTEGER, y INTEGER, health INTEGER, type TEXT)")
+    
+    slinked_map: dict = game.linked_map
+    sset_map: list = game.set_map
+    savail_locs: list = game.avail_locs
+    spoints: int = game.points
+    sallies: list = game.allies
+    senemies: list = game.enemies
+    
+    for loc, tile_class in slinked_map.items():
+        c.execute("INSERT INTO linkedMap VALUES (?, ?, ?, ?, ?, ?)", (loc[0], loc[1], tile_class.previous.location[0], tile_class.previous.location[1], tile_class.next.location[0], tile_class.next.location[1]))
+    
+    for row_index, row in enumerate(sset_map):
+        for tile_index, tile in enumerate(row):
+            c.execute("INSERT INTO setMap VALUES (?, ?, ?)", (tile_index, row_index, tile))
+    
+    for loc in savail_locs:
+        c.execute("INSERT INTO availLocs VALUES (?, ?)", (loc[0], [loc[1]]))
+    
+    c.execute("INSERT INTO points VALUES (?)", (spoints))
+    
+    for ally in sallies:
+        if ally.power == basic_data[1]:
+            type = 'basic'
+        else:
+            type = 'intermediate' if ally.power == intermediate_data[1] else 'advanced'
+        c.execute("INSERT INTO allies VALUES (?, ?, ?)", (ally.location[0], ally.location[1], type))
+    
+    for enemy in senemies:
+        if enemy.points == triangle_data[1]:
+            type = 'triangle'
+        else:
+            type = 'circle' if enemy.points == circle_data[1] else 'square'
+        c.execute("INSERT INTO enemies VALUES (?, ?, ?)", (enemy.location[0], enemy.location[1], enemy.health, type))
+    # linked_map, set_map, avail_locs, points, allies, enemies
 
 
 class Ally:
