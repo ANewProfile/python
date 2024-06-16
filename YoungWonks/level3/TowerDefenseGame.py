@@ -1,4 +1,10 @@
 # https://wiki.python.org/moin/TimeComplexity
+# https://stackoverflow.com/questions/1601151/how-do-i-check-in-sqlite-whether-a-table-exists
+
+# CREATING SAVE FOR CONTINUING GAMES
+# ALLIES NOT SPAWNING
+# ENEMIES NOT SPAWNING
+# AROUND LINE 400
 import sqlite3
 import pygame
 pygame.init()
@@ -13,6 +19,12 @@ c = conn.cursor()
 def create_database():
     c.execute("CREATE TABLE IF NOT EXISTS allies (name TEXT, power INTEGER, range INTEGER, cost INTEGER, sell INTEGER)")
     c.execute("CREATE TABLE IF NOT EXISTS enemies (name TEXT, health INTEGER, speed REAL, points INTEGER)")
+    # c.execute("CREATE TABLE IF NOT EXISTS linkedMap (x INTEGER, y INTEGER, prevx INTEGER, prevy INTEGER, nextx INTEGER, nexty INTEGER)")
+    c.execute("CREATE TABLE IF NOT EXISTS setMap (row INTEGER, column INTEGER, type INTEGER)")
+    c.execute("CREATE TABLE IF NOT EXISTS availLocs (x INTEGER, y INTEGER)")
+    c.execute("CREATE TABLE IF NOT EXISTS points (value INTEGER)")
+    c.execute("CREATE TABLE IF NOT EXISTS saveAllies (x INTEGER, y INTEGER, type TEXT)")
+    c.execute("CREATE TABLE IF NOT EXISTS saveEnemies (x INTEGER, y INTEGER, health INTEGER, type TEXT)")
     
     c.execute("INSERT INTO allies VALUES ('Basic', 1, 3, 2, 1)")
     c.execute("INSERT INTO allies VALUES ('Intermediate', 3, 4, 5, 3)")
@@ -28,6 +40,10 @@ def clear_tables_data():
     c.execute("DELETE FROM allies")
     c.execute("DELETE FROM enemies")
     conn.commit()
+
+# clear_tables_data()
+# create_database()
+
 
 def get_text(msg, size, color):
     fontobj = pygame.font.SysFont('freesans', size)
@@ -52,45 +68,47 @@ c.execute("SELECT * FROM enemies WHERE name = 'Circle'")
 circle_data = c.fetchone()
 
 def create_save(game):
-    c.execute("CREATE TABLE IF NOT EXISTS linkedMap (x INTEGER, y INTEGER, prevx INTEGER, prevy INTEGER, nextx INTEGER, nexty INTEGER)")
-    c.execute("CREATE TABLE IF NOT EXISTS setMap (row INTEGER, column INTEGER, type INTEGER")
-    c.execute("CREATE TABLE IF NOT EXISTS availLocs (x INTEGER, y INTEGER)")
-    c.execute("CREATE TABLE IF NOT EXISTS points (value INTEGER)")
-    c.execute("CREATE TABLE IF NOT EXISTS allies (x INTEGER, y INTEGER, type TEXT)")
-    c.execute("CREATE TABLE IF NOT EXISTS enemies (x INTEGER, y INTEGER, health INTEGER, type TEXT)")
+    # c.execute("DELETE FROM linkedMap")
+    c.execute("DELETE FROM setMap")
+    c.execute("DELETE FROM availLocs")
+    c.execute("DELETE FROM points")
+    c.execute("DELETE FROM saveAllies")
+    c.execute("DELETE FROM saveEnemies")
     
-    slinked_map: dict = game.linked_map
+    # slinked_map: dict = game.linked_map
     sset_map: list = game.set_map
     savail_locs: list = game.avail_locs
     spoints: int = game.points
     sallies: list = game.allies
     senemies: list = game.enemies
     
-    for loc, tile_class in slinked_map.items():
-        c.execute("INSERT INTO linkedMap VALUES (?, ?, ?, ?, ?, ?)", (loc[0], loc[1], tile_class.previous.location[0], tile_class.previous.location[1], tile_class.next.location[0], tile_class.next.location[1]))
+    # for loc, tile_class in slinked_map.items():
+    #     c.execute("INSERT INTO linkedMap VALUES (?, ?, ?, ?, ?, ?)", (loc[0], loc[1], tile_class.previous.location[0], tile_class.previous.location[1], tile_class.next.location[0], tile_class.next.location[1]))
     
     for row_index, row in enumerate(sset_map):
         for tile_index, tile in enumerate(row):
             c.execute("INSERT INTO setMap VALUES (?, ?, ?)", (tile_index, row_index, tile))
     
     for loc in savail_locs:
-        c.execute("INSERT INTO availLocs VALUES (?, ?)", (loc[0], [loc[1]]))
+        c.execute("INSERT INTO availLocs VALUES (?, ?)", (loc[0], loc[1]))
     
-    c.execute("INSERT INTO points VALUES (?)", (spoints))
+    c.execute("INSERT INTO points VALUES (?)", (spoints,))
     
     for ally in sallies:
         if ally.power == basic_data[1]:
             type = 'basic'
         else:
             type = 'intermediate' if ally.power == intermediate_data[1] else 'advanced'
-        c.execute("INSERT INTO allies VALUES (?, ?, ?)", (ally.location[0], ally.location[1], type))
+        c.execute("INSERT INTO saveAllies VALUES (?, ?, ?)", (ally.location[0], ally.location[1], type))
     
     for enemy in senemies:
         if enemy.points == triangle_data[1]:
             type = 'triangle'
         else:
             type = 'circle' if enemy.points == circle_data[1] else 'square'
-        c.execute("INSERT INTO enemies VALUES (?, ?, ?)", (enemy.location[0], enemy.location[1], enemy.health, type))
+        c.execute("INSERT INTO saveEnemies VALUES (?, ?, ?, ?)", (enemy.location[0], enemy.location[1], enemy.health, type))
+        
+    conn.commit()
     # linked_map, set_map, avail_locs, points, allies, enemies
 
 
@@ -247,7 +265,7 @@ class Shop:
                     pygame.draw.rect(window, (255, 0, 0), self.advanced, width=3)
 
 class Game:
-    def __init__(self, linked_map, set_map, avail_locs, points, allies, enemies, lives, occupied_locs=[]):
+    def __init__(self, linked_map, set_map, avail_locs, points, allies=[], enemies=[], occupied_locs=[]):
         self.linked_map = linked_map
         self.set_map = set_map
         self.avail_locs = avail_locs
@@ -255,7 +273,6 @@ class Game:
         self.points = points
         self.allies = allies
         self.enemies = enemies
-        self.lives = lives
     
     def deposit(self, amount):
         self.points += amount
@@ -357,6 +374,24 @@ def link_tiles(map, start_pos):
     
 #     return path_tiles
 
+
+c.execute("SELECT * FROM setMap")
+set_map_data = c.fetchall()
+print(set_map_data)
+# ((x INTEGER, y INTEGER, type INTEGER), ...)
+
+c.execute("SELECT * FROM availLocs")
+avail_locs_data = c.fetchall()
+
+c.execute("SELECT * FROM points")
+points = c.fetchone() or 9
+
+c.execute("SELECT * FROM saveAllies")
+allies_data = c.fetchall()
+
+c.execute("SELECT * FROM saveEnemies")
+enemies_data = c.fetchall()
+
 set_map = [
     [0, 0, 2, 0, 0, 0, 0, 0],
     [0, 0, 1, 1, 0, 0, 0, 0],
@@ -367,6 +402,22 @@ set_map = [
     [0, 1, 0, 1, 0, 0, 0, 0],
     [0, 1, 1, 1, 0, 0, 0, 0]
 ]
+
+if set_map_data:
+    set_map = [[0, 0, 0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0, 0, 0],
+                ]
+    for data in set_map_data:
+        print(data)
+        set_map[data[1]][data[0]] = data[2]
+    print(set_map)
+
 
 avail_locs = []
 for row_index, row in enumerate(set_map):
@@ -391,6 +442,24 @@ linked_map = link_tiles(set_map, start_pos)
 #         print("map loc", loc, "has none tile")
 #     else:
 #         print("map loc", loc, "has tile", tile.type, "next is", tile.next, "previous is", tile.previous)
+
+allies = []
+for ally_data in allies_data:
+    if ally_data[2] == "Basic":
+        allies.append(Ally(basic_data[1], basic_data[2], basic_data[3], basic_data[4], (ally_data[0], ally_data[1])))
+    if ally_data[2] == "Intermediate":
+        allies.append(Ally(intermediate_data[1], intermediate_data[2], intermediate_data[3], intermediate_data[4], (ally_data[0], ally_data[1])))
+    if ally_data[2] == "Advanced":
+        allies.append(Ally(advanced_data[1], advanced_data[2], advanced_data[3], advanced_data[4], (ally_data[0], ally_data[1])))
+        
+enemies = []
+for enemy_data in enemies_data:
+    if enemy_data[3] == "Triangle":
+        enemies.append(Enemy(enemy_data[2], triangle_data[2], triangle_data[3], (enemy_data[0], enemy_data[1])))
+    if enemy_data[3] == "Square":
+        enemies.append(Enemy(enemy_data[2], square_data[2], square_data[3], (enemy_data[0], enemy_data[1])))
+    if enemy_data[3] == "Circle":
+        enemies.append(Enemy(enemy_data[2], circle_data[2], circle_data[3], (enemy_data[0], enemy_data[1])))
     
 
 WIDTH = 1080
@@ -399,9 +468,7 @@ window = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Tower Defense')
 FPS = 20
 
-# clear_tables_data()
-# create_database()
-game = Game(linked_map, set_map, avail_locs, 9, [], [], 3)
+game = Game(linked_map, set_map, avail_locs, points[0], allies, enemies, [ally.location for ally in allies])
 shop = Shop()
 
 next_enemy = 1
@@ -417,6 +484,7 @@ while running:
     clock.tick(FPS)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
+            create_save(game)
             running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
