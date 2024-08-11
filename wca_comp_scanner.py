@@ -37,7 +37,8 @@ def get_opens(opens):
 
 urls = ['https://www.worldcubeassociation.org/competitions?region=all&search=Massachusetts&state=present&year=all+years&from_date=&to_date=&delegate=&show_registration_status=on&display=list',
         'https://www.worldcubeassociation.org/competitions?region=all&search=Rhode+Island&state=present&year=all+years&from_date=&to_date=&delegate=&show_registration_status=on&display=list',
-        'https://www.worldcubeassociation.org/competitions?region=all&search=New+Hampshire&state=present&year=all+years&from_date=&to_date=&delegate=&show_registration_status=on&display=list']
+        'https://www.worldcubeassociation.org/competitions?region=all&search=New+Hampshire&state=present&year=all+years&from_date=&to_date=&delegate=&show_registration_status=on&display=list',
+        'https://www.worldcubeassociation.org/competitions?region=all&search=Connecticut&state=present&year=all+years&from_date=&to_date=&delegate=&show_registration_status=on&display=list']
 
 comps_locs_list = []
 
