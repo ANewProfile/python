@@ -17,4 +17,3 @@ print(pdn_transformation(540670, 3, 9))
 print(pdn_transformation(7145042, 2, 8))
 print(pdn_transformation(124987, 2, 523))
 print(pdn_transformation(4386709, 1, 2))
-    
