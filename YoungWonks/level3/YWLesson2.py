@@ -69,8 +69,8 @@ def start_new_round(cards, turn, order, playing):
     if cards[turn] == []:
     # if cards[playing[turn-1]] == []:
         order.append(str(turn))
-        cards.pop(turn)
-        playing.remove(turn)
+        # cards.pop(turn)
+        # playing.remove(turn)
     
     return cards, order, playing, top
 
@@ -88,8 +88,8 @@ def play_next_move(cards, turn, order, playing, top):
             if cards[turn] == []:
             # if cards[playing[turn-1]] == []:
                 order.append(str(turn))
-                cards.pop(turn)
-                playing.remove(turn)
+                # cards.pop(turn)
+                # playing.remove(turn)
             
             break
     
@@ -98,6 +98,7 @@ def play_next_move(cards, turn, order, playing, top):
 
 def main(input):
     cards = parse(input)
+    print(cards)
     fake_turn = 0
     playing = list(range(1, len(cards)+1)) # list of all players with players removed as we play
     order = []
@@ -111,12 +112,20 @@ def main(input):
     new_round = True
     while True:
         # turn = (fake_turn%len(cards))+1
-        print("cards are", cards)
+        print("cards are", cards, playing)
         cur_player_name = playing[fake_turn%len(cards)] # current player
+        
+        if cards[cur_player_name] == []:
+            fake_turn += 1
+            continue
         
         old_top = top
         
-        if len(cards) <= 1:
+        still_in = 0
+        for hand in cards.values():
+            if hand != []:
+                still_in += 1
+        if still_in == 1:
             break
         
         if first_pass == cur_player_name and passing:
@@ -147,12 +156,32 @@ def main(input):
             passing = False
             first_pass = 0
     
+    still_in = 0
+    for player, hand in cards.items():
+        if hand != []:
+            still_in = player
     
-    return ' '.join(order) + ' ' + str(list(cards.keys())[0])
+    return ' '.join(order) + ' ' + str(still_in)
 
 answer = main('4 \n\
 6S 9C 9H QC 9S 5H KS TC 5C QH JS 5D JH \n\
 3C 7S 5S JD 8H QD TD 2C 6D TS 2D 3S 8D \n\
 TH AC 7H 6H 4D 4H 3D AD 7D 2H 8S 6C 4S \n\
 KC 2S 9D AS 7C KD KH 3H JC 4C QS 8C AH')  # desired: 1 2 3 4
+
+# 1 
+
+# answer = main('''5
+# 6C 8H 7C 5H 6H AD TC AC TD JH
+# 7D KD 4C 5D 9H 8D 9D KH 8C KC
+# 3D 5S QD JC 7S 4H JS 3S 8S 3C
+# JD 7H 2C 4D AH TS 2D 6D AS 3H
+# QC KS 2H 5C 6S QS TH 9C 2S 4S''')
+
 print(answer)
+
+# {1: [], first
+# 2: [], second
+# 3: [], 3
+# 4: []} 4
+
