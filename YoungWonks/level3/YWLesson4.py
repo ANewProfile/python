@@ -60,13 +60,12 @@ class Tree:
             next_print = []
             new_nodes = []
             for node in cur_nodes:
-                print('node value', node.value)
-                if node.value:
+                # print('node value', node.value)
+                if node:
                     next_print.append(str(node.value))
-                    if node.left:
-                        new_nodes.append(node.left)
-                    if node.right:
-                        new_nodes.append(node.right)
+                    # print(node.left, node.right)
+                    new_nodes.append(node.left)
+                    new_nodes.append(node.right)
                 else:
                     next_print.append('N')
             
@@ -111,6 +110,13 @@ class Tree:
 
 # print(queue.items)
 
-tree = Tree(Node(7, Node(3, None, None), Node(8, None, None)))
-tree.add(Node(5, None, None))
+tree = Tree(Node('r', None, None))
+tree.add(Node('a', None, None))
+tree.add(Node('s', None, None))
+tree.add(Node('p', None, None))
+tree.add(Node('b', None, None))
+tree.add(Node('e', None, None))
+tree.add(Node('r', None, None))
+tree.add(Node('r', None, None))
+tree.add(Node('y', None, None))
 tree.view()
