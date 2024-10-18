@@ -12,43 +12,33 @@ class CounterTree:
         self.root = root
     
     def add(self, node: Node):
-        last_node = None
-        current_node = self.root  # Node(a, None, None, 1)
-        go = False
-        go_left = False
-        while current_node:
-            print(current_node.value, node.value)
-            if current_node.value == node.value:
-                current_node.counter += 1
-                break
-            go = True
+        add_to = None
+        cur_node = self.root
+        
+        while True:
+            # print(cur_node.value)
             
-            # if current_node.left:
-            #     last_node = current_node
-            #     current_node = current_node.left
-            #     continue
-            # if current_node.right:
-            #     last_node = current_node
-            #     current_node = current_node.right
-            #     continue
-                
-            if current_node.value > node.value:
-                print('left')
-                last_node = current_node
-                go_left = True
-                current_node = current_node.left
-            else:
-                print('right')
-                last_node = current_node
-                go_left = False
-                print(current_node.value, current_node.left, current_node.right, current_node.counter)
-                current_node = current_node.right
-                print(current_node)
-        if go:
-            if go_left:
-                last_node.left = node
-            else:
-                last_node.right = node
+            if cur_node.value == node.value:
+                cur_node.counter += 1
+                # print(f'added to counter {cur_node.value} \n\n')
+                break
+            
+            add_to = cur_node
+            if cur_node.left:
+                cur_node = cur_node.left
+                # print('going left', cur_node.value)
+                continue
+            elif cur_node.right:
+                cur_node = cur_node.right
+                # print('going right', cur_node.value)
+                continue
+            
+            if add_to.value < node.value:
+                add_to.right = node
+            elif add_to.value > node.value:
+                add_to.left = node
+            # print(f'added {node.value} \n\n')
+            break
     
     def get_nodes_counters(self):
         nodes = []
@@ -63,7 +53,7 @@ class CounterTree:
             else:
                 break
         
-        print(nodes)
+        # print(nodes)
         return nodes
 
 def make_tree(letters):
@@ -84,3 +74,7 @@ def main(input):
     return output_from_tree(tree)
 
 print(main('abracadabracabob'))
+print(main('American Computer Science League'))
+print(main('Python and Java are programming languages'))
+print(main('Python and Java and java and python'))
+print(main('the quick brown fox jumped over the lazy river'))
