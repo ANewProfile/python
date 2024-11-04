@@ -27,7 +27,7 @@ class Queue:
         return Stack(self.items)
 
 class Node:
-    def __init__(self, value, left, right):
+    def __init__(self, value, left=None, right=None):
         self.value = value
         self.left = left
         self.right = right
@@ -60,18 +60,18 @@ class Tree:
             next_print = []
             new_nodes = []
             for node in cur_nodes:
-                # print('node value', node.value)
                 if node:
                     next_print.append(str(node.value))
-                    # print(node.left, node.right)
                     new_nodes.append(node.left)
                     new_nodes.append(node.right)
                 else:
-                    next_print.append('N')
+                    next_print.append('-')
+                    new_nodes.append(None)
+                    new_nodes.append(None)
             
             stop = True
             for item in next_print:
-                if item != 'N':
+                if item != '-':
                     stop = False
             
             if stop:
@@ -80,43 +80,48 @@ class Tree:
                 print(' '.join(next_print))
                 
             cur_nodes = new_nodes.copy()
-                
     
-# stack = Stack()
-# stack.push('a')
-# stack = stack.convert()
-# stack.push('b')
-# stack = stack.convert()
-# stack.push('c')
+    def get_internal_path_length(self):
+        depth_on = 0
+        total = 0
+        all_nodes = {0: [self.root], 1: []}
+        while True:
+            done = False
+            for node in all_nodes[depth_on]:
+                missing = True
+                if not node:
+                    continue
+                
+                if node.left or node.right:
+                    missing = False
 
-# print(stack.items)
+                all_nodes[depth_on+1].append(node.left)
+                all_nodes[depth_on+1].append(node.right)
+                # print(all_nodes)
+            
+            if missing:
+                done = True
+            
+            if not done:
+                depth_on += 1
+                all_nodes[depth_on+1] = []
+            else:
+                for depth, nodes in all_nodes.items():
+                    for node in nodes:
+                        if node:
+                            total += depth
+                            print(f'total {total}')
+                    
+                break
+    
+        return total
 
-
-# queue = Queue()
-# queue.push('a')
-# queue.push('b')
-# queue.push('c')
-# queue.push('d')
-# queue.push('e')
-# queue.push('f')
-# queue.push('g')
-# queue = queue.convert()  # stack
-# queue.pop()
-# queue = queue.convert()  # queue
-# queue.pop()
-# queue.pop()
-# queue = queue.convert()  # stack
-# queue.pop()
-
-# print(queue.items)
-
-tree = Tree(Node('r', None, None))
-tree.add(Node('a', None, None))
-tree.add(Node('s', None, None))
-tree.add(Node('p', None, None))
-tree.add(Node('b', None, None))
-tree.add(Node('e', None, None))
-tree.add(Node('r', None, None))
-tree.add(Node('r', None, None))
-tree.add(Node('y', None, None))
+tree = Tree(Node('P'))
+tree.add(Node('R'))
+tree.add(Node('O'))
+tree.add(Node('G'))
+tree.add(Node('R'))
+tree.add(Node('A'))
+tree.add(Node('M'))
 tree.view()
+print(tree.get_internal_path_length())
