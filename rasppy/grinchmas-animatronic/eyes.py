@@ -1,5 +1,5 @@
 import RPi.GPIO as GPIO
-from time import sleep_ms
+import time
 from stepper_control import StepperMotor
 
 # set board mode
@@ -18,43 +18,35 @@ for pin in right_eye:
 left_motor = StepperMotor(left_eye)
 right_motor = StepperMotor(right_eye)
 
-# functions
-def left_open():
-    left_motor.turn_90_degrees(clockwise=True)
+def blink():
+    # Close eyes (90 degrees counterclockwise)
+    left_motor.turn_90_degrees(clockwise=False, delay=0.002)
+    right_motor.turn_90_degrees(clockwise=False, delay=0.002)
+    time.sleep(0.2)  # Keep eyes closed briefly
+    
+    # Open eyes (90 degrees clockwise)
+    left_motor.turn_90_degrees(clockwise=True, delay=0.002)
+    right_motor.turn_90_degrees(clockwise=True, delay=0.002)
 
-def left_close():
-    left_motor.turn_90_degrees(clockwise=False)
-
-def right_open():
-    right_motor.turn_90_degrees(clockwise=True)
-
-def right_close():
-    right_motor.turn_90_degrees(clockwise=False)
-
-# variables
-running = True
-i = 0
-between_blinks = 5
-
-# main loop
-try:
-    while running:
-        # check to stop
-        if i >= 300*between_blinks:  # temporary condition
-            running = False
+def main():
+    try:
+        start_time = time.time()
+        end_time = start_time + 18  # Run for 18 seconds total
         
-        # check if ready to blnk
-        if i % (10*between_blinks) == 0:
-            if (i / (10*between_blinks)) % (20*between_blinks) == 0:
-                left_open()
-                right_open()
-            else:
-                left_close()
-                right_close()
-        else:
-            i += 1
-            sleep_ms(100)
-finally:
-    # Cleanup GPIO
-    left_motor.cleanup()
-    right_motor.cleanup()
+        while time.time() < end_time:
+            blink()  # Perform one blink
+            
+            # Wait for remainder of 3-second interval
+            # (unless we've reached the end time)
+            time_remaining = end_time - time.time()
+            if time_remaining > 0:
+                time.sleep(min(5, time_remaining))
+    
+    except KeyboardInterrupt:
+        print("\nProgram stopped by user")
+    finally:
+        left_motor.cleanup()
+        right_motor.cleanup()
+
+if __name__ == "__main__":
+    main()

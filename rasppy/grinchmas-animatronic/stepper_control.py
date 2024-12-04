@@ -12,20 +12,20 @@ class StepperMotor:
         
         # Stepper motor sequence (clockwise)
         self.sequence = [
-            [1,0,0,1],
             [1,0,0,0],
             [1,1,0,0],
             [0,1,0,0],
             [0,1,1,0],
             [0,0,1,0],
             [0,0,1,1],
-            [0,0,0,1]
+            [0,0,0,1],
+            [1,0,0,1]
         ]
         
     def cleanup(self):
         GPIO.cleanup()
         
-    def turn_90_degrees(self, clockwise=True):
+    def turn_90_degrees(self, delay=0.001, clockwise=True):
         # 28BYJ-48 motor has 512 steps for a full rotation (8 sequences × 64 gear reduction)
         # So for 90 degrees we need 512/4 = 128 steps
         steps = 128
@@ -37,13 +37,15 @@ class StepperMotor:
             for step in self.sequence:
                 for i in range(4):
                     GPIO.output(self.pins[i], step[i])
-                time.sleep(0.001)  # Small delay between steps
+                time.sleep(delay)  # Small delay between steps
                 
         if not clockwise:
             self.sequence.reverse()  # Reset sequence to original order
 
 def main():
     try:
+        GPIO.setmode(GPIO.BCM)
+        
         # Define the GPIO pins connected to the ULN2003 driver
         # Change these pin numbers according to your wiring
         motor_pins = [14, 15, 18, 23]
