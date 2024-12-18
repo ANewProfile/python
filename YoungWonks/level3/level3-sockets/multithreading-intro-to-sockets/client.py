@@ -1,54 +1,52 @@
 from tkinter import *
+from tkinter import messagebox
 import socket
 from threading import Thread
 
-running = True
 
 def send():
-    global running
     message = input_box.get()
     if not message:
         return
 
     if message.lower() == 'exit':
-        running = False
+        on_exit(close_s=True, exit_sent=False)
 
     if len(message) > 1024:
         send_message = message[:1024]
     else:
-        send_message = message + '0'*(1024-len(message))
+        send_message = message + ' '*(1024-len(message))
 
     message_box['state'] = 'normal'
-    message_box.insert(END, send_message + '\n')
+    message_box.insert(END, send_message.strip() + '\n')
     message_box['state'] = 'disabled'
 
     s.sendall(send_message.encode())
     
     input_box.delete(0, END)
 
-    if not running:
-        s.close()
-
 def listen():
-    global running
-    while running:
-        message = s.recv(1024).decode().strip()
+    try:
+        message = s.recv(1024).decode()
+    except:
+        message = 'exit'
 
-        if message.lower() != 'exit':
-            message_box['state'] = 'normal'
-            message_box.insert(END, message + '\n')
-            message_box['state'] = 'disabled'
-        else:
-            running = False
-    
-    if not running:
-        s.close()
+    if message.lower().strip() != 'exit':
+        message_box['state'] = 'normal'
+        message_box.insert(END, message.strip() + '\n')
+        message_box['state'] = 'disabled'
+    else:
+        response = messagebox.askyesno('Close?', 'The other person left, would you like to close the window?')
+        if response:
+            on_exit(close_s=False, exit_sent=True)
 
-def on_exit():
-    exit_message = 'exit' + ' ' * 1020
-    s.sendall(exit_message.encode())
-    s.close()
+def on_exit(close_s=True, exit_sent=False):
     root.destroy()
+    if not exit_sent:
+        exit_message = 'exit' + ' ' * 1020
+        s.sendall(exit_message.encode())
+    if close_s:
+        s.close()
 
 root = Tk()
 root.title('Messaging App')
@@ -56,7 +54,7 @@ root.protocol("WM_DELETE_WINDOW", on_exit)
 
 s = socket.socket()
 host = 'localhost'
-port = 12345
+port = 12346
 
 s.connect((host, port))
 
