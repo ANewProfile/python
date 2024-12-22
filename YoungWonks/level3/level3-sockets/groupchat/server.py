@@ -34,7 +34,7 @@ def listen(conn, addr):
         try:
             message = conn.recv(1024)
         except:
-            message = 'exit'.encode()
+            message = ('exit' + ' ' * 1020).encode()
         
         if message.decode().strip().lower() == 'exit':
             conn.close()
