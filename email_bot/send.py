@@ -15,11 +15,12 @@ def send_email(sender, password, to, subject, body):
     server.send_message(msg)
     server.quit()
 
-# send an email!
-send_email(
-    keys.sender_email,
-    keys.app_password,
-    'cheo.door@gmail.com',
-    'hey there!',
-    'this is the email body 🌟'
-)
+if __name__ == '__main__':
+    # send an email!
+    send_email(
+        keys.sender_email,
+        keys.app_password,
+        'cheo.door@gmail.com',
+        'hey there!',
+        'this is the email body 🌟'
+    )
