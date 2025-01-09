@@ -14,8 +14,8 @@ EXIT_SENT = False
 SQL_OPEN = False
 
 # setup socket
-host = 'localhost'
-port = 00000
+host = '192.168.4.151'
+port = 98273
 
 s = socket.socket()
 s.connect((host, port))

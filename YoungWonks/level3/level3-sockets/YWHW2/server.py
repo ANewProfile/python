@@ -1,4 +1,3 @@
-from turtle import width
 import pygame
 import socket
 from threading import Thread

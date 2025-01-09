@@ -1,9 +1,11 @@
+# imports
 import socket
 import threading
 from tkinter import *
 
-host = 'localhost'
-port = 00000
+# setting up the variables for socket
+host = '192.168.4.151'
+port = 98273
 
 users = {}
 MAX_USERS = 10
@@ -17,7 +19,7 @@ def listen_for_new_users():
     global users
     
     while True:
-        conn, addr = s.accept()
+        conn, addr = s.accept() 
         users[addr] = conn
 
         listen_thread = threading.Thread(target=listen, args=(conn, addr))
@@ -49,6 +51,7 @@ def on_exit():
 
     if APP_OPEN:
         root.destroy()
+        APP_OPEN = False
     
     for _, conn in users.items():
         conn.close()
