@@ -1,4 +1,3 @@
-import time
 import random
 
 list_items = 1_000
@@ -15,10 +14,9 @@ left_side = 0
 right_side = list_items - 1
 middle = (right_side + left_side) // 2
 
-iterations = 0
 while True:
     if numbers[middle] == target:
-        print(f'{target} is at index: {middle}')
+        print(middle)
         break
     
     if target > numbers[middle]:
@@ -28,13 +26,9 @@ while True:
     
     middle = (right_side + left_side) // 2
     if right_side == left_side and numbers[right_side] != target:
-        print(f'{target} is not in the list')
+        print(-1)
         break
 
-    print(f'left: {left_side}, right: {right_side}, iterations: {iterations}')
-    print(f'left: {numbers[left_side]}, right: {numbers[right_side]}, target: {target}')
-    
-    iterations += 1
-    time.sleep(0.25)
-
-print(numbers)
+    if (right_side - left_side) == 1 and numbers[right_side] != target:
+        print(-1)
+        break
