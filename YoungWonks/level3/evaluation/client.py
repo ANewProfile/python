@@ -39,7 +39,8 @@ def send():
             msg = msg + ' ' * (1024 - len(msg))
 
         s.sendall(msg.encode())
-        c.execute('INSERT INTO messages VALUES (?,?,?)', (time.time(), 'client', readable))
+        c.execute('INSERT INTO messages VALUES (?,?,?)', (str(time.time()), 'client', readable))
+        sql_conn.commit()
 
         message_box['state'] = 'normal'
         message_box.insert(END, msg.strip() + '\n')
@@ -71,7 +72,6 @@ def on_exit():
         APP_OPEN = False
     
     if SQL_OPEN:
-        sql_conn.commit()
         sql_conn.close()
         SQL_OPEN = False
     
