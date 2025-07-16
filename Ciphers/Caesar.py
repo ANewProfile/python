@@ -1,69 +1,29 @@
-import string
+def preprocess_text(text):
+    return ''.join(filter(str.isalpha, text.upper()))
 
-LOWERCASE = [letter for letter in string.ascii_lowercase]
-UPPERCASE = [letter for letter in string.ascii_uppercase]
-
+def shift_char(c, shift, encode=True):
+    base = ord('A')
+    offset = shift if encode else -shift
+    return chr((ord(c) - base + offset) % 26 + base)
 
 def encode(plaintext, shift):
-    cipher = []
-    for letter in plaintext:
-        if letter == " ":
-            cipher.append(letter)
-        elif letter not in LOWERCASE and letter not in UPPERCASE:
-            return "!letter"
-        else:
-            if letter in LOWERCASE:
-                key_of_letter = LOWERCASE.index(letter)
-                key_of_letter += shift
-                key_of_letter %= 26
-                cipher.append(LOWERCASE[key_of_letter])
-            elif letter in UPPERCASE:
-                key_of_letter = UPPERCASE.index(letter)
-                key_of_letter += shift
-                key_of_letter %= 26
-                cipher.append(UPPERCASE[key_of_letter])
+    text = preprocess_text(plaintext)
+    return ''.join(shift_char(c, shift, encode=True) for c in text)
 
-    return "".join(cipher)
-
-def decode(cipher, shift):
-    plaintext = []
-    for letter in cipher:
-        if letter == " ":
-            plaintext.append(letter)
-        elif letter not in LOWERCASE and letter not in UPPERCASE:
-            return "!letter"
-        else:
-            if letter in LOWERCASE:
-                key_of_letter = LOWERCASE.index(letter)
-                key_of_letter -= shift
-                key_of_letter += 26
-                key_of_letter %= 26
-                plaintext.append(LOWERCASE[key_of_letter])
-            elif letter in UPPERCASE:
-                key_of_letter = UPPERCASE.index(letter)
-                key_of_letter -= shift
-                key_of_letter += 26
-                key_of_letter %= 26
-                plaintext.append(UPPERCASE[key_of_letter])
-
-    return "".join(plaintext)
+def decode(ciphertext, shift):
+    text = preprocess_text(ciphertext)
+    return ''.join(shift_char(c, shift, encode=False) for c in text)
 
 def main():
-    encode_decode = input("Would you like to [e]ncode or [d]ecode? ")
-    text = input("What would you like to encode/decode? ")
-    shift = input("What is the shift? ")
-    try:
-        shift = int(shift)
-    except ValueError:
-        raise Exception("You did not enter an integer for shift")
+    plaintext = "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG"
+    shift = 3
 
-    if encode_decode.lower() not in ("e", "d"):
-        print("NOT CORRECT INPUT. PLEASE ENTER 'E' or 'D'")
-    elif encode_decode.lower() == "e":
-        print(encode(text, shift))
-    elif encode_decode.lower() == "d":
-        print(decode(text, shift))
+    encoded = encode(plaintext, shift)
+    decoded = decode(encoded, shift)
 
+    print("Shift:", shift)
+    print("Encoded:", encoded)
+    print("Decoded:", decoded)
 
 if __name__ == "__main__":
     main()
