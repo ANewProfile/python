@@ -15,15 +15,20 @@ def decode(ciphertext, shift):
     return ''.join(shift_char(c, shift, encode=False) for c in text)
 
 def main():
-    plaintext = "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG"
-    shift = 3
+    encode_decode = input("Would you like to [e]ncode or [d]ecode? ")
+    if encode_decode.lower() not in ("e", "d"): raise Exception("Please press either 'e' or 'd'!")
+    text = input("What would you like to encode/decode? ")
+    shift = input("What is the shift? ")
+    if encode_decode.lower() == "e":
+        pt = text
+        ct = encode(text, shift)
+    else:
+        pt = decode(text, shift)
+        ct = text
 
-    encoded = encode(plaintext, shift)
-    decoded = decode(encoded, shift)
+    print(`Encoded: {pt}`)
+    print(`Decoded: {ct}`)
 
-    print("Shift:", shift)
-    print("Encoded:", encoded)
-    print("Decoded:", decoded)
 
 if __name__ == "__main__":
     main()

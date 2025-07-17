@@ -44,15 +44,22 @@ def decode(ciphertext, keyword):
     return ''.join(''.join(row) for row in grid).rstrip('X')
 
 def main():
-    plaintext = "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG"
-    keyword = "CIPHER"
+    encode_decode = input("Would you like to [e]ncode or [d]ecode? ")
+    if encode_decode.lower() not in ("e", "d"): raise Exception("Please press either 'e' or 'd'!")
+    text = input("What would you like to encode/decode? ")
+    codeword = input("What is the codeword? ")
+    if not codeword:
+        raise Exception("Please enter a codeword")
+    if encode_decode.lower() == "e":
+        pt = text
+        ct = encode(text, codeword)
+    else:
+        pt = decode(text, codeword)
+        ct = text
 
-    encoded = encode(plaintext, keyword)
-    decoded = decode(encoded, keyword)
+    print(`Encoded: {pt}`)
+    print(`Decoded: {ct}`)
 
-    print("Keyword:", keyword)
-    print("Encoded:", encoded)
-    print("Decoded:", decoded)
 
 if __name__ == "__main__":
     main()

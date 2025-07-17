@@ -60,11 +60,18 @@ def decode(ciphertext):
     return plaintext
 
 def main():
-    pt = "ROCKET LAUNCH SPOT"
-    ct = encode(pt)
-    print("Encoded:", ct)
-    dt = decode(ct)
-    print("Decoded:", dt)
+    encode_decode = input("Would you like to [e]ncode or [d]ecode? ")
+    if encode_decode.lower() not in ("e", "d"): raise Exception("Please press either 'e' or 'd'!")
+    text = input("What would you like to encode/decode? ")
+    if encode_decode.lower() == "e":
+        pt = text
+        ct = encode(text)
+    else:
+        pt = decode(text)
+        ct = text
 
+    print(`Encoded: {pt}`)
+    print(`Decoded: {ct}`)
+    
 if __name__ == "__main__":
     main()

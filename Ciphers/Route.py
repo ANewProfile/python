@@ -82,17 +82,21 @@ def decode(ciphertext, route_type):
     return ''.join(''.join(row) for row in grid).rstrip()
 
 def main():
-    message = "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG"
-    for rtype in [
-        "spiral_tl_cw", "spiral_tr_ccw", "spiral_bl_cw", "spiral_br_ccw",
-        "cols_lr", "cols_rl", "rows_tb", "rows_bt"
-    ]:
-        encoded = encode(message, rtype)
-        decoded = decode(encoded, rtype)
-        print(f"[{rtype}]")
-        print("Encoded:", encoded)
-        print("Decoded:", decoded)
-        print()
+    encode_decode = input("Would you like to [e]ncode or [d]ecode? ")
+    if encode_decode.lower() not in ("e", "d"): raise Exception("Please press either 'e' or 'd'!")
+    text = input("What would you like to encode/decode? ")
+    type = input("What type of route will you use? ")
+    if type not in ("spiral_tl_cw", "spiral_tr_ccw", "spiral_bl_cw", "spiral_br_ccw", "cols_lr", "cols_rl", "rows_tb", "rows_bt")
+    if encode_decode.lower() == "e":
+        pt = text
+        ct = encode(text, type)
+    else:
+        pt = decode(text, type)
+        ct = text
+
+    print(`Encoded: {pt}`)
+    print(`Decoded: {ct}`)
+
 
 if __name__ == "__main__":
     main()

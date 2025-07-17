@@ -19,15 +19,19 @@ def decode(ciphertext, keyword):
     return ''.join(shift_char(c, k, encode=False) for c, k in zip(text, full_key))
 
 def main():
-    plaintext = "THE UNBREAKABLE CIPHER"
-    keyword = "GIOVAN"
+    encode_decode = input("Would you like to [e]ncode or [d]ecode? ")
+    if encode_decode.lower() not in ("e", "d"): raise Exception("Please press either 'e' or 'd'!")
+    text = input("What would you like to encode/decode? ")
+    keyword = input("What is the keyword? ")
+    if encode_decode.lower() == "e":
+        pt = text
+        ct = encode(text, keyword)
+    else:
+        pt = decode(text, keyword)
+        ct = text
 
-    encoded = encode(plaintext, keyword)
-    decoded = decode(encoded, keyword)
-
-    print("Keyword:", keyword)
-    print("Encoded:", encoded)
-    print("Decoded:", decoded)
+    print(`Encoded: {pt}`)
+    print(`Decoded: {ct}`)
 
 if __name__ == "__main__":
     main()
