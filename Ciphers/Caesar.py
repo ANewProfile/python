@@ -18,7 +18,7 @@ def main():
     encode_decode = input("Would you like to [e]ncode or [d]ecode? ")
     if encode_decode.lower() not in ("e", "d"): raise Exception("Please press either 'e' or 'd'!")
     text = input("What would you like to encode/decode? ")
-    shift = input("What is the shift? ")
+    shift = int(input("What is the shift? "))
     if encode_decode.lower() == "e":
         pt = text
         ct = encode(text, shift)
