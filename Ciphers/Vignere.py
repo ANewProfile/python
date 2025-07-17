@@ -30,8 +30,8 @@ def main():
         pt = decode(text, keyword)
         ct = text
 
-    print(`Encoded: {pt}`)
-    print(`Decoded: {ct}`)
+    print(f"Encoded: {pt}")
+    print(f"Decoded: {ct}")
 
 if __name__ == "__main__":
     main()

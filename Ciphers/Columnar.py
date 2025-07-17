@@ -57,8 +57,9 @@ def main():
         pt = decode(text, codeword)
         ct = text
 
-    print(`Encoded: {pt}`)
-    print(`Decoded: {ct}`)
+    print(f"Encoded: {pt}")
+    print(f"Decoded: {ct}")
+
 
 
 if __name__ == "__main__":
