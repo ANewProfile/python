@@ -3,3 +3,4 @@ venv
 .DS_Store
 .*.swp
 YoungWonks/platformer_game/save.txt
+AI/RAG/persistent_first_RAG_LLM/
