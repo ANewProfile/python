@@ -14,7 +14,7 @@ def op_to_output(guess, target):
     if guess_op["gender"] == target_op["gender"]:
         output.append(2)
     else:
-        output.append(1)
+        output.append(0)
 
     # Role
     roles_correct = 0
@@ -24,8 +24,7 @@ def op_to_output(guess, target):
 
     if roles_correct == 0:
         output.append(0)
-
-    if len(target_op["role"]) == 2:
+    elif len(target_op["role"]) == 2:
         output.append(roles_correct)
     elif len(target_op["role"]) == 1:
         if len(guess_op["role"]) == 1:  # roles_correct can only be 1 if this if statement is executed
@@ -46,3 +45,33 @@ def op_to_output(guess, target):
         output.append(2)
     else:
         output.append(0)
+    
+    # Country
+    if guess_op["country"] == target_op["country"]:
+        output.append(2)
+    elif guess_op["continent"] == target_op["continent"]:
+        output.append(1)
+    else:
+        output.append(0)
+    
+    # Org
+    if guess_op["org"] == target_op["org"]:
+        output.append(2)
+    else:
+        output.append(0)
+    
+    # Squad
+    if guess_op["squad"] == target_op["squad"]:
+        output.append(2)
+    else:
+        output.append(0)
+    
+    # Year
+    if int(guess_op["year"]) < int(target_op["year"]):
+        output.append(2)
+    elif int(guess_op["year"]) == int(target_op["year"]):
+        output.append(1)
+    else:
+        output.append(0)
+    
+    return output

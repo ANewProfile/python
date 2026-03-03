@@ -1,7 +1,7 @@
 DEFENDERS = {
     "Denari": {
         "gender": "male",
-        "role": ("anti-entry", "crowd-control"),
+        "role": ["anti-entry", "crowd-control"],
         "side": "defender",
         "speed": 3,
         "country": "switzerland",
@@ -12,7 +12,7 @@ DEFENDERS = {
     },
     "Skopos": {
         "gender": "female",
-        "role": ("intel", "support"),
+        "role": ["intel", "support"],
         "side": "defender",
         "speed": 2,
         "country": "greece",
@@ -23,7 +23,7 @@ DEFENDERS = {
     },
     "Sentry": {
         "gender": "male",
-        "role": ("support"),
+        "role": ["support"],
         "side": "defender",
         "speed": 2,
         "country": "undefined",
@@ -34,7 +34,7 @@ DEFENDERS = {
     },
     "Tubarao": {
         "gender": "male",
-        "role": ("anti-gadget", "crowd-control"),
+        "role": ["anti-gadget", "crowd-control"],
         "side": "defender",
         "speed": 2,
         "country": "portugal",
@@ -45,7 +45,7 @@ DEFENDERS = {
     },
     "Fenrir": {
         "gender": "male",
-        "role": ("trapper", "crowd-control"),
+        "role": ["trapper", "crowd-control"],
         "side": "defender",
         "speed": 2,
         "country": "sweden",
@@ -56,7 +56,7 @@ DEFENDERS = {
     },
     "Solis": {
         "gender": "female",
-        "role": ("intel", "support"),
+        "role": ["intel", "support"],
         "side": "defender",
         "speed": 2,
         "country": "colombia",
@@ -67,7 +67,7 @@ DEFENDERS = {
     },
     "Azami": {
         "gender": "female",
-        "role": ("anti-entry", "support"),
+        "role": ["anti-entry", "support"],
         "side": "defender",
         "speed": 2,
         "country": "japan",
@@ -78,7 +78,7 @@ DEFENDERS = {
     },
     "Thorn": {
         "gender": "female",
-        "role": ("anti-entry", "trapper"),
+        "role": ["anti-entry", "trapper"],
         "side": "defender",
         "speed": 2,
         "country": "ireland",
@@ -89,7 +89,7 @@ DEFENDERS = {
     },
     "Thunderbird": {
         "gender": "female",
-        "role": ("support"),
+        "role": ["support"],
         "side": "defender",
         "speed": 2,
         "country": "canada",
@@ -100,7 +100,7 @@ DEFENDERS = {
     },
     "Aruni": {
         "gender": "female",
-        "role": ("anti-entry", "anti-gadget"),
+        "role": ["anti-entry", "anti-gadget"],
         "side": "defender",
         "speed": 1,
         "country": "thailand",
@@ -111,7 +111,7 @@ DEFENDERS = {
     },
     "Melusi": {
         "gender": "female",
-        "role": ("intel", "crowd-control"),
+        "role": ["intel", "crowd-control"],
         "side": "defender",
         "speed": 1,
         "country": "south africa",
@@ -122,7 +122,7 @@ DEFENDERS = {
     },
     "Oryx": {
         "gender": "male",
-        "role": ("support"),
+        "role": ["support"],
         "side": "defender",
         "speed": 2,
         "country": "jordan",
@@ -133,7 +133,7 @@ DEFENDERS = {
     },
     "Wamai": {
         "gender": "male",
-        "role": ("anti-gadget", "trapper"),
+        "role": ["anti-gadget", "trapper"],
         "side": "defender",
         "speed": 2,
         "country": "kenya",
@@ -144,7 +144,7 @@ DEFENDERS = {
     },
     "Goyo": {
         "gender": "male",
-        "role": ("anti-entry", "trapper"),
+        "role": ["anti-entry", "trapper"],
         "side": "defender",
         "speed": 2,
         "country": "mexico",
@@ -155,7 +155,7 @@ DEFENDERS = {
     },
     "Warden": {
         "gender": "male",
-        "role": ("anti-gadget", "intel"),
+        "role": ["anti-gadget", "intel"],
         "side": "defender",
         "speed": 1,
         "country": "usa",
@@ -166,7 +166,7 @@ DEFENDERS = {
     },
     "Mozzie": {
         "gender": "male",
-        "role": ("anti-gadget", "intel"),
+        "role": ["anti-gadget", "intel"],
         "side": "defender",
         "speed": 2,
         "country": "australia",
@@ -177,7 +177,7 @@ DEFENDERS = {
     },
     "Kaid": {
         "gender": "male",
-        "role": ("anti-entry", "anti-gadget"),
+        "role": ["anti-entry", "anti-gadget"],
         "side": "defender",
         "speed": 1,
         "country": "morocco",
@@ -188,7 +188,7 @@ DEFENDERS = {
     },
     "Clash": {
         "gender": "female",
-        "role": ("intel", "crowd-control"),
+        "role": ["intel", "crowd-control"],
         "side": "defender",
         "speed": 1,
         "country": "england",
@@ -199,7 +199,7 @@ DEFENDERS = {
     },
     "Maestro": {
         "gender": "male",
-        "role": ("anti-gadget", "intel"),
+        "role": ["anti-gadget", "intel"],
         "side": "defender",
         "speed": 1,
         "country": "italy",
@@ -210,7 +210,7 @@ DEFENDERS = {
     },
     "Alibi": {
         "gender": "female",
-        "role": ("trapper", "intel"),
+        "role": ["trapper", "intel"],
         "side": "defender",
         "speed": 3,
         "country": "libya",
@@ -221,7 +221,7 @@ DEFENDERS = {
     },
     "Vigil": {
         "gender": "male",
-        "role": ("anti-gadget", "crowd-control"),
+        "role": ["anti-gadget", "crowd-control"],
         "side": "defender",
         "speed": 3,
         "country": "redacted",
@@ -232,7 +232,7 @@ DEFENDERS = {
     },
     "Ela": {
         "gender": "female",
-        "role": ("trapper", "crowd-control"),
+        "role": ["trapper", "crowd-control"],
         "side": "defender",
         "speed": 2,
         "country": "poland",
@@ -243,7 +243,7 @@ DEFENDERS = {
     },
     "Lesion": {
         "gender": "male",
-        "role": ("anti-entry", "trapper"),
+        "role": ["anti-entry", "trapper"],
         "side": "defender",
         "speed": 2,
         "country": "hong kong",
@@ -254,7 +254,7 @@ DEFENDERS = {
     },
     "Mira": {
         "gender": "female",
-        "role": ("intel", "support"),
+        "role": ["intel", "support"],
         "side": "defender",
         "speed": 1,
         "country": "spain",
@@ -265,7 +265,7 @@ DEFENDERS = {
     },
     "Echo": {
         "gender": "male",
-        "role": ("intel", "crowd-control"),
+        "role": ["intel", "crowd-control"],
         "side": "defender",
         "speed": 2,
         "country": "japan",
@@ -276,7 +276,7 @@ DEFENDERS = {
     },
     "Caveira": {
         "gender": "female",
-        "role": ("intel", "crowd-control"),
+        "role": ["intel", "crowd-control"],
         "side": "defender",
         "speed": 3,
         "country": "brazil",
@@ -287,7 +287,7 @@ DEFENDERS = {
     },
     "Valkyrie": {
         "gender": "female",
-        "role": ("intel", "support"),
+        "role": ["intel", "support"],
         "side": "defender",
         "speed": 2,
         "country": "usa",
@@ -298,7 +298,7 @@ DEFENDERS = {
     },
     "Frost": {
         "gender": "female",
-        "role": ("anti-entry", "trapper"),
+        "role": ["anti-entry", "trapper"],
         "side": "defender",
         "speed": 2,
         "country": "canada",
@@ -309,7 +309,7 @@ DEFENDERS = {
     },
     "Mute": {
         "gender": "male",
-        "role": ("anti-gadget", "crowd-control"),
+        "role": ["anti-gadget", "crowd-control"],
         "side": "defender",
         "speed": 2,
         "country": "england",
@@ -320,7 +320,7 @@ DEFENDERS = {
     },
     "Smoke": {
         "gender": "male",
-        "role": ("anti-entry", "trapper"),
+        "role": ["anti-entry", "trapper"],
         "side": "defender",
         "speed": 2,
         "country": "england",
@@ -331,7 +331,7 @@ DEFENDERS = {
     },
     "Castle": {
         "gender": "male",
-        "role": ("anti-entry", "support"),
+        "role": ["anti-entry", "support"],
         "side": "defender",
         "speed": 2,
         "country": "usa",
@@ -342,7 +342,7 @@ DEFENDERS = {
     },
     "Pulse": {
         "gender": "male",
-        "role": ("intel", "support"),
+        "role": ["intel", "support"],
         "side": "defender",
         "speed": 3,
         "country": "usa",
@@ -353,7 +353,7 @@ DEFENDERS = {
     },
     "Doc": {
         "gender": "male",
-        "role": ("support"),
+        "role": ["support"],
         "side": "defender",
         "speed": 1,
         "country": "france",
@@ -364,7 +364,7 @@ DEFENDERS = {
     },
     "Rook": {
         "gender": "male",
-        "role": ("support"),
+        "role": ["support"],
         "side": "defender",
         "speed": 1,
         "country": "france",
@@ -375,7 +375,7 @@ DEFENDERS = {
     },
     "Jager": {
         "gender": "male",
-        "role": ("anti-gadget", "support"),
+        "role": ["anti-gadget", "support"],
         "side": "defender",
         "speed": 2,
         "country": "germany",
@@ -386,7 +386,7 @@ DEFENDERS = {
     },
     "Bandit": {
         "gender": "male",
-        "role": ("anti-entry", "anti-gadget"),
+        "role": ["anti-entry", "anti-gadget"],
         "side": "defender",
         "speed": 3,
         "country": "germany",
@@ -397,7 +397,7 @@ DEFENDERS = {
     },
     "Tachanka": {
         "gender": "male",
-        "role": ("anti-entry", "crowd-control"),
+        "role": ["anti-entry", "crowd-control"],
         "side": "defender",
         "speed": 1,
         "country": "russia",
@@ -408,7 +408,7 @@ DEFENDERS = {
     },
     "Kapkan": {
         "gender": "male",
-        "role": ("anti-entry", "trapper"),
+        "role": ["anti-entry", "trapper"],
         "side": "defender",
         "speed": 2,
         "country": "russia",
@@ -422,7 +422,7 @@ DEFENDERS = {
 ATTACKERS = {
     "Rauora": {
         "gender": "female",
-        "role": ("support", "map-control"),
+        "role": ["support", "map-control"],
         "side": "attacker",
         "speed": 2,
         "country": "new zealand",
@@ -433,7 +433,7 @@ ATTACKERS = {
     },
     "Striker": {
         "gender": "female",
-        "role": ("support"),
+        "role": ["support"],
         "side": "attacker",
         "speed": 2,
         "country": "undefined",
@@ -444,7 +444,7 @@ ATTACKERS = {
     },
     "Deimos": {
         "gender": "male",
-        "role": ("intel", "map-control"),
+        "role": ["intel", "map-control"],
         "side": "attacker",
         "speed": 2,
         "country": "usa",
@@ -455,7 +455,7 @@ ATTACKERS = {
     },
     "Ram": {
         "gender": "female",
-        "role": ("anti-gadget", "breach"),
+        "role": ["anti-gadget", "breach"],
         "side": "attacker",
         "speed": 1,
         "country": "south korea",
@@ -466,7 +466,7 @@ ATTACKERS = {
     },
     "Brava": {
         "gender": "female",
-        "role": ("anti-gadget", "intel"),
+        "role": ["anti-gadget", "intel"],
         "side": "attacker",
         "speed": 3,
         "country": "brazil",
@@ -477,7 +477,7 @@ ATTACKERS = {
     },
     "Grim": {
         "gender": "male",
-        "role": ("front-line", "map-control"),
+        "role": ["front-line", "map-control"],
         "side": "attacker",
         "speed": 3,
         "country": "singapore",
@@ -488,7 +488,7 @@ ATTACKERS = {
     },
     "Sens": {
         "gender": "undefined",
-        "role": ("support", "map-control"),
+        "role": ["support", "map-control"],
         "side": "attacker",
         "speed": 3,
         "country": "belgium",
@@ -499,7 +499,7 @@ ATTACKERS = {
     },
     "Osa": {
         "gender": "female",
-        "role": ("intel", "support"),
+        "role": ["intel", "support"],
         "side": "attacker",
         "speed": 1,
         "country": "croatia",
@@ -510,7 +510,7 @@ ATTACKERS = {
     },
     "Flores": {
         "gender": "male",
-        "role": ("anti-gadget", "intel"),
+        "role": ["anti-gadget", "intel"],
         "side": "attacker",
         "speed": 2,
         "country": "argentina",
@@ -521,18 +521,18 @@ ATTACKERS = {
     },
     "Zero": {
         "gender": "male",
-        "role": ("anti-gadget", "intel"),
+        "role": ["anti-gadget", "intel"],
         "side": "attacker",
         "speed": 3,
         "country": "usa",
-        "continent": "norht america",
+        "continent": "north america",
         "org": "ros",
         "squad": "ghosteyes",
         "year": "2020",
     },
     "Ace": {
         "gender": "male",
-        "role": ("anti-gadget", "breach"),
+        "role": ["anti-gadget", "breach"],
         "side": "attacker",
         "speed": 1,
         "country": "norway",
@@ -543,7 +543,7 @@ ATTACKERS = {
     },
     "Iana": {
         "gender": "female",
-        "role": ("intel", "front-line"),
+        "role": ["intel", "front-line"],
         "side": "attacker",
         "speed": 2,
         "country": "netherlands",
@@ -554,7 +554,7 @@ ATTACKERS = {
     },
     "Kali": {
         "gender": "female",
-        "role": ("anti-gadget", "support"),
+        "role": ["anti-gadget", "support"],
         "side": "attacker",
         "speed": 2,
         "country": "india",
@@ -565,7 +565,7 @@ ATTACKERS = {
     },
     "Amaru": {
         "gender": "male",
-        "role": ("front-line", "map-control"),
+        "role": ["front-line", "map-control"],
         "side": "attacker",
         "speed": 2,
         "country": "peru",
@@ -576,7 +576,7 @@ ATTACKERS = {
     },
     "Nokk": {
         "gender": "female",
-        "role": ("front-line", "map-control"),
+        "role": ["front-line", "map-control"],
         "side": "attacker",
         "speed": 2,
         "country": "redacted",
@@ -587,7 +587,7 @@ ATTACKERS = {
     },
     "Gridlock": {
         "gender": "female",
-        "role": ("support", "map-control"),
+        "role": ["support", "map-control"],
         "side": "attacker",
         "speed": 1,
         "country": "australia",
@@ -598,7 +598,7 @@ ATTACKERS = {
     },
     "Nomad": {
         "gender": "female",
-        "role": ("front-line", "map-control"),
+        "role": ["front-line", "map-control"],
         "side": "attacker",
         "speed": 2,
         "country": "morocco",
@@ -609,7 +609,7 @@ ATTACKERS = {
     },
     "Maverick": {
         "gender": "male",
-        "role": ("breach", "front-line"),
+        "role": ["breach", "front-line"],
         "side": "attacker",
         "speed": 3,
         "country": "usa",
@@ -620,7 +620,7 @@ ATTACKERS = {
     },
     "Lion": {
         "gender": "male",
-        "role": ("intel", "map-control"),
+        "role": ["intel", "map-control"],
         "side": "attacker",
         "speed": 2,
         "country": "france",
@@ -631,7 +631,7 @@ ATTACKERS = {
     },
     "Finka": {
         "gender": "female",
-        "role": ("front-line", "support"),
+        "role": ["front-line", "support"],
         "side": "attacker",
         "speed": 2,
         "country": "belarus",
@@ -642,7 +642,7 @@ ATTACKERS = {
     },
     "Dokkaebi": {
         "gender": "female",
-        "role": ("intel", "map-control"),
+        "role": ["intel", "map-control"],
         "side": "attacker",
         "speed": 3,
         "country": "south korea",
@@ -653,7 +653,7 @@ ATTACKERS = {
     },
     "Zofia": {
         "gender": "female",
-        "role": ("anti-gadget", "breach"),
+        "role": ["anti-gadget", "breach"],
         "side": "attacker",
         "speed": 1,
         "country": "poland",
@@ -664,7 +664,7 @@ ATTACKERS = {
     },
     "Ying": {
         "gender": "female",
-        "role": ("front-line", "map-control"),
+        "role": ["front-line", "map-control"],
         "side": "attacker",
         "speed": 2,
         "country": "hong kong",
@@ -675,7 +675,7 @@ ATTACKERS = {
     },
     "Jackal": {
         "gender": "male",
-        "role": ("intel", "map-control"),
+        "role": ["intel", "map-control"],
         "side": "attacker",
         "speed": 2,
         "country": "spain",
@@ -686,7 +686,7 @@ ATTACKERS = {
     },
     "Hibana": {
         "gender": "female",
-        "role": ("breach", "front-line"),
+        "role": ["breach", "front-line"],
         "side": "attacker",
         "speed": 3,
         "country": "japan",
@@ -697,7 +697,7 @@ ATTACKERS = {
     },
     "Capitao": {
         "gender": "male",
-        "role": ("front-line", "map-control"),
+        "role": ["front-line", "map-control"],
         "side": "attacker",
         "speed": 3,
         "country": "brazil",
@@ -708,7 +708,7 @@ ATTACKERS = {
     },
     "Blackbeard": {
         "gender": "male",
-        "role": ("breach", "front-line"),
+        "role": ["breach", "front-line"],
         "side": "attacker",
         "speed": 1,
         "country": "usa",
@@ -719,7 +719,7 @@ ATTACKERS = {
     },
     "Buck": {
         "gender": "male",
-        "role": ("breach", "support"),
+        "role": ["breach", "support"],
         "side": "attacker",
         "speed": 2,
         "country": "canada",
@@ -730,7 +730,7 @@ ATTACKERS = {
     },
     "Sledge": {
         "gender": "male",
-        "role": ("breach", "anti-gadget"),
+        "role": ["breach", "anti-gadget"],
         "side": "attacker",
         "speed": 2,
         "country": "scotland",
@@ -741,7 +741,7 @@ ATTACKERS = {
     },
     "Thatcher": {
         "gender": "male",
-        "role": ("anti-gadget", "support"),
+        "role": ["anti-gadget", "support"],
         "side": "attacker",
         "speed": 1,
         "country": "england",
@@ -752,7 +752,7 @@ ATTACKERS = {
     },
     "Ash": {
         "gender": "female",
-        "role": ("breach", "front-line"),
+        "role": ["breach", "front-line"],
         "side": "attacker",
         "speed": 3,
         "country": "israel",
@@ -763,7 +763,7 @@ ATTACKERS = {
     },
     "Thermite": {
         "gender": "male",
-        "role": ("breach", "support"),
+        "role": ["breach", "support"],
         "side": "attacker",
         "speed": 2,
         "country": "usa",
@@ -774,7 +774,7 @@ ATTACKERS = {
     },
     "Montagne": {
         "gender": "male",
-        "role": ("intel", "support"),
+        "role": ["intel", "support"],
         "side": "attacker",
         "speed": 1,
         "country": "france",
@@ -785,7 +785,7 @@ ATTACKERS = {
     },
     "Twitch": {
         "gender": "female",
-        "role": ("intel", "anti-gadget"),
+        "role": ["intel", "anti-gadget"],
         "side": "attacker",
         "speed": 2,
         "country": "france",
@@ -796,7 +796,7 @@ ATTACKERS = {
     },
     "Blitz": {
         "gender": "male",
-        "role": ("front-line", "map-control"),
+        "role": ["front-line", "map-control"],
         "side": "attacker",
         "speed": 2,
         "country": "germany",
@@ -807,7 +807,7 @@ ATTACKERS = {
     },
     "IQ": {
         "gender": "female",
-        "role": ("intel", "support"),
+        "role": ["intel", "support"],
         "side": "attacker",
         "speed": 3,
         "country": "germany",
@@ -818,7 +818,7 @@ ATTACKERS = {
     },
     "Fuze": {
         "gender": "male",
-        "role": ("anti-gadget"),
+        "role": ["anti-gadget"],
         "side": "attacker",
         "speed": 1,
         "country": "uzbekistan",
@@ -829,7 +829,7 @@ ATTACKERS = {
     },
     "Glaz": {
         "gender": "male",
-        "role": ("intel", "support"),
+        "role": ["intel", "support"],
         "side": "attacker",
         "speed": 3,
         "country": "russia",
@@ -842,6 +842,10 @@ ATTACKERS = {
 
 OPERATORS = ATTACKERS | DEFENDERS
 
-for op in OPERATORS.keys():
-    if OPERATORS[op]["continent"]:
-        continue
+if __name__ == "__main__":
+    continents_seen = []
+    for op in OPERATORS.keys():
+        if (len(OPERATORS[op]["role"])) not in continents_seen:
+            continents_seen.append(len(OPERATORS[op]["role"]))
+
+    print(continents_seen)
