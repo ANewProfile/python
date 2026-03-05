@@ -4,5 +4,6 @@ venv
 .*.swp
 YoungWonks/platformer_game/save.txt
 AI/RAG/persistent_first_RAG_LLM/
-shallowgreen/__PYCACHE__
-r6dle/__PYCACHE__
+shallowgreen/__PYCACHE__/
+r6dle/__PYCACHE__/
+r6dle/__pycache__/
