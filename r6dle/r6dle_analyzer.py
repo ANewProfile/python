@@ -48,5 +48,5 @@ def get_operators_remaining(guess):
     
     print(possible_operators)
 
-get_operators_remaining("Lion")
+get_operators_remaining(input("Which operator did you guess? "))
 

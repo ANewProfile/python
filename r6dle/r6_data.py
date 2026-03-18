@@ -126,7 +126,7 @@ DEFENDERS = {
         "side": "defender",
         "speed": 2,
         "country": "jordan",
-        "continent": "africa",
+        "continent": "asia",
         "org": "unaffiliated",
         "squad": "redhammer",
         "year": "2020",
